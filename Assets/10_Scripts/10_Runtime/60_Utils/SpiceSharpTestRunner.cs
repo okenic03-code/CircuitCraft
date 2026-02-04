@@ -292,6 +292,7 @@ namespace CircuitCraft.Utils
             Debug.Log("");
             
             RunRCTransientTest();
+            Debug.Log($"Last test passed: {_lastTestPassed}");
             
             Debug.Log("\n=== All Tests Complete ===");
         }

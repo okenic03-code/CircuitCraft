@@ -122,6 +122,13 @@ namespace CircuitCraft.Simulation.SpiceSharp
         private Dictionary<string, IExport<double>> CreateExports(ISimulation simulation, CircuitNetlist netlist)
         {
             var exports = new Dictionary<string, IExport<double>>();
+            var biasingSimulation = simulation as IBiasingSimulation;
+            var eventfulSimulation = simulation as IEventfulSimulation;
+
+            if (biasingSimulation == null)
+            {
+                throw new InvalidOperationException("Simulation does not support biasing exports.");
+            }
 
             foreach (var probe in netlist.Probes)
             {
@@ -133,22 +140,26 @@ namespace CircuitCraft.Simulation.SpiceSharp
                         var refNode = probe.ReferenceNode ?? "0";
                         if (refNode == "0" || refNode == netlist.GroundNode)
                         {
-                            export = new RealVoltageExport(simulation, probe.Target);
+                            export = new RealVoltageExport(biasingSimulation, probe.Target);
                         }
                         else
                         {
-                            export = new RealVoltageExport(simulation, probe.Target, refNode);
+                            export = new RealVoltageExport(biasingSimulation, probe.Target, refNode);
                         }
                         break;
 
                     case ProbeType.Current:
-                        export = new RealCurrentExport(simulation, probe.Target);
+                        export = new RealCurrentExport(biasingSimulation, probe.Target);
                         break;
 
                     case ProbeType.Power:
                         // Power requires separate voltage and current exports
                         // For now, use the property export if available
-                        export = new RealPropertyExport(simulation, probe.Target, "p");
+                        if (eventfulSimulation == null)
+                        {
+                            throw new InvalidOperationException("Simulation does not support property exports.");
+                        }
+                        export = new RealPropertyExport(eventfulSimulation, probe.Target, "p");
                         break;
                 }
 
