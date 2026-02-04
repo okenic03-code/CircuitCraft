@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using SpiceSharp;
 using SpiceSharp.Components;
+using SpiceSharp.Entities;
 
 namespace CircuitCraft.Simulation.SpiceSharp
 {
@@ -141,11 +142,12 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// <summary>Creates a BJT transistor.</summary>
         private BipolarJunctionTransistor CreateBJT(string id, string collector, string basee, string emitter, string modelName)
         {
-            return new BipolarJunctionTransistor(id, collector, basee, emitter, modelName ?? "2N2222");
+            // SpiceSharp BJT requires a substrate node parameter
+            return new BipolarJunctionTransistor(id, collector, basee, emitter, "0", modelName ?? "2N2222");
         }
 
         /// <summary>Creates a MOSFET transistor.</summary>
-        private Mosfet CreateMOSFET(string id, string drain, string gate, string source, string bulk, string modelName)
+        private Mosfet1 CreateMOSFET(string id, string drain, string gate, string source, string bulk, string modelName)
         {
             // SpiceSharp uses Mosfet1, Mosfet2, or Mosfet3 for different model levels
             // Default to Mosfet1 (Level 1 model)
