@@ -1,0 +1,14 @@
+{
+    "name": "CircuitCraft.Systems",
+    "rootNamespace": "CircuitCraft.Systems",
+    "references": ["CircuitCraft.Core", "CircuitCraft.Data", "CircuitCraft.Components"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
