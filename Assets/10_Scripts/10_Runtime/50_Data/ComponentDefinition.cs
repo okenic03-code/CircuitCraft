@@ -37,6 +37,28 @@ namespace CircuitCraft.Data
         [Tooltip("The visual prefab used when this component is placed.")]
         private GameObject prefab;
 
+        // Electrical value fields for simulation
+        [Header("Electrical Values")]
+        [SerializeField]
+        [Tooltip("Resistance in Ohms (for Resistor components).")]
+        private float resistanceOhms;
+
+        [SerializeField]
+        [Tooltip("Voltage in Volts (for VoltageSource components).")]
+        private float voltageVolts;
+
+        [SerializeField]
+        [Tooltip("Capacitance in Farads (for Capacitor components).")]
+        private float capacitanceFarads;
+
+        [SerializeField]
+        [Tooltip("Inductance in Henrys (for Inductor components).")]
+        private float inductanceHenrys;
+
+        [SerializeField]
+        [Tooltip("Current in Amperes (for CurrentSource components).")]
+        private float currentAmps;
+
         /// <summary>Unique internal identifier for the component.</summary>
         public string Id => id;
 
@@ -57,5 +79,21 @@ namespace CircuitCraft.Data
 
         /// <summary>The visual prefab used when this component is placed.</summary>
         public GameObject Prefab => prefab;
+
+        // Electrical value properties for simulation
+        /// <summary>Resistance in Ohms (for Resistor components).</summary>
+        public float ResistanceOhms => resistanceOhms;
+
+        /// <summary>Voltage in Volts (for VoltageSource components).</summary>
+        public float VoltageVolts => voltageVolts;
+
+        /// <summary>Capacitance in Farads (for Capacitor components).</summary>
+        public float CapacitanceFarads => capacitanceFarads;
+
+        /// <summary>Inductance in Henrys (for Inductor components).</summary>
+        public float InductanceHenrys => inductanceHenrys;
+
+        /// <summary>Current in Amperes (for CurrentSource components).</summary>
+        public float CurrentAmps => currentAmps;
     }
 }
