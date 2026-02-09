@@ -1,0 +1,14 @@
+{
+    "name": "CircuitCraft.Managers",
+    "rootNamespace": "CircuitCraft.Managers",
+    "references": ["CircuitCraft.Core"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
