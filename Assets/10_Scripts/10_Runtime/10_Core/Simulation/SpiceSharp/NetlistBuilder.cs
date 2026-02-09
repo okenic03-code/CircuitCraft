@@ -28,10 +28,13 @@ namespace CircuitCraft.Simulation.SpiceSharp
 
             foreach (var element in netlist.Elements)
             {
-                var component = CreateComponent(element);
-                if (component != null)
+                var entities = CreateEntities(element);
+                foreach (var entity in entities)
                 {
-                    circuit.Add(component);
+                    if (entity != null)
+                    {
+                        circuit.Add(entity);
+                    }
                 }
             }
 
@@ -39,12 +42,13 @@ namespace CircuitCraft.Simulation.SpiceSharp
         }
 
         /// <summary>
-        /// Creates a SpiceSharp component from a domain element definition.
+        /// Creates SpiceSharp entities from a domain element definition.
+        /// For semiconductors, may return both component and model.
         /// </summary>
-        private IEntity CreateComponent(NetlistElement element)
+        private IEnumerable<IEntity> CreateEntities(NetlistElement element)
         {
             if (element == null || string.IsNullOrEmpty(element.Id))
-                return null;
+                yield break;
 
             // Validate we have enough nodes
             if (element.Nodes == null || element.Nodes.Count < 2)
@@ -59,38 +63,57 @@ namespace CircuitCraft.Simulation.SpiceSharp
             switch (element.Type)
             {
                 case ElementType.Resistor:
-                    return CreateResistor(element.Id, nodeA, nodeB, element.Value);
+                    yield return CreateResistor(element.Id, nodeA, nodeB, element.Value);
+                    break;
 
                 case ElementType.Capacitor:
-                    return CreateCapacitor(element.Id, nodeA, nodeB, element.Value);
+                    yield return CreateCapacitor(element.Id, nodeA, nodeB, element.Value);
+                    break;
 
                 case ElementType.Inductor:
-                    return CreateInductor(element.Id, nodeA, nodeB, element.Value);
+                    yield return CreateInductor(element.Id, nodeA, nodeB, element.Value);
+                    break;
 
                 case ElementType.VoltageSource:
-                    return CreateVoltageSource(element.Id, nodeA, nodeB, element.Value);
+                    yield return CreateVoltageSource(element.Id, nodeA, nodeB, element.Value);
+                    break;
 
                 case ElementType.CurrentSource:
-                    return CreateCurrentSource(element.Id, nodeA, nodeB, element.Value);
+                    yield return CreateCurrentSource(element.Id, nodeA, nodeB, element.Value);
+                    break;
 
                 case ElementType.Diode:
-                    return CreateDiode(element.Id, nodeA, nodeB, element.ModelName);
+                    foreach (var entity in CreateDiode(element))
+                        yield return entity;
+                    break;
 
                 case ElementType.BJT:
                     if (element.Nodes.Count < 3)
                         throw new InvalidOperationException($"BJT '{element.Id}' requires 3 nodes (C, B, E)");
-                    return CreateBJT(element.Id, element.Nodes[0], element.Nodes[1], element.Nodes[2], element.ModelName);
+                    foreach (var entity in CreateBJT(element))
+                        yield return entity;
+                    break;
 
                 case ElementType.MOSFET:
                     if (element.Nodes.Count < 4)
                         throw new InvalidOperationException($"MOSFET '{element.Id}' requires 4 nodes (D, G, S, B)");
-                    return CreateMOSFET(element.Id, element.Nodes[0], element.Nodes[1], 
-                        element.Nodes[2], element.Nodes[3], element.ModelName);
+                    foreach (var entity in CreateMOSFET(element))
+                        yield return entity;
+                    break;
 
                 default:
                     throw new NotSupportedException(
                         $"Element type '{element.Type}' is not supported");
             }
+        }
+
+        /// <summary>
+        /// Legacy method for backward compatibility.
+        /// </summary>
+        private IEntity CreateComponent(NetlistElement element)
+        {
+            var entities = new List<IEntity>(CreateEntities(element));
+            return entities.Count > 0 ? entities[0] : null;
         }
 
         /// <summary>Creates a resistor component.</summary>
@@ -132,27 +155,84 @@ namespace CircuitCraft.Simulation.SpiceSharp
             return new CurrentSource(id, nodePositive, nodeNegative, amps);
         }
 
-        /// <summary>Creates a diode component with a default model.</summary>
-        private Diode CreateDiode(string id, string anode, string cathode, string modelName)
+        /// <summary>Creates a diode component with optional model parameters.</summary>
+        private IEnumerable<IEntity> CreateDiode(NetlistElement element)
         {
-            var diode = new Diode(id, anode, cathode, modelName ?? "D1N4148");
-            return diode;
+            var modelName = !string.IsNullOrEmpty(element.ModelName) ? element.ModelName : "D1N4148";
+            var diode = new Diode(element.Id, element.Nodes[0], element.Nodes[1], modelName);
+            yield return diode;
+
+            // Create model with parameters if any are specified
+            if (element.Parameters.Count > 0)
+            {
+                var model = new DiodeModel(modelName);
+                
+                if (element.Parameters.TryGetValue("Is", out var satCurrent))
+                    model.Parameters.SaturationCurrent = satCurrent;
+                if (element.Parameters.TryGetValue("N", out var emissionCoeff))
+                    model.Parameters.EmissionCoefficient = emissionCoeff;
+                
+                yield return model;
+            }
         }
 
-        /// <summary>Creates a BJT transistor.</summary>
-        private BipolarJunctionTransistor CreateBJT(string id, string collector, string basee, string emitter, string modelName)
+        /// <summary>Creates a BJT transistor with optional model parameters.</summary>
+        private IEnumerable<IEntity> CreateBJT(NetlistElement element)
         {
+            var modelName = !string.IsNullOrEmpty(element.ModelName) ? element.ModelName : "2N2222";
             // SpiceSharp BJT requires a substrate node parameter
-            return new BipolarJunctionTransistor(id, collector, basee, emitter, "0", modelName ?? "2N2222");
+            var bjt = new BipolarJunctionTransistor(element.Id, 
+                element.Nodes[0], element.Nodes[1], element.Nodes[2], "0", modelName);
+            yield return bjt;
+
+            // Create model with parameters if any are specified
+            if (element.Parameters.Count > 0)
+            {
+                // Determine NPN vs PNP from Value (1 = NPN, -1 = PNP)
+                bool isNPN = element.Value >= 0;
+                var model = new BipolarJunctionTransistorModel(modelName);
+                if (isNPN)
+                    model.Parameters.SetNpn(true);
+                else
+                    model.Parameters.SetPnp(true);
+                
+                if (element.Parameters.TryGetValue("Bf", out var beta))
+                    model.Parameters.BetaF = beta;
+                if (element.Parameters.TryGetValue("Vaf", out var earlyVoltage))
+                    model.Parameters.EarlyVoltageForward = earlyVoltage;
+                
+                yield return model;
+            }
         }
 
-        /// <summary>Creates a MOSFET transistor.</summary>
-        private Mosfet1 CreateMOSFET(string id, string drain, string gate, string source, string bulk, string modelName)
+        /// <summary>Creates a MOSFET transistor with optional model parameters.</summary>
+        private IEnumerable<IEntity> CreateMOSFET(NetlistElement element)
         {
+            var modelName = !string.IsNullOrEmpty(element.ModelName) ? element.ModelName : "NMOS";
             // SpiceSharp uses Mosfet1, Mosfet2, or Mosfet3 for different model levels
             // Default to Mosfet1 (Level 1 model)
-            var mosfet = new Mosfet1(id, drain, gate, source, bulk, modelName ?? "NMOS");
-            return mosfet;
+            var mosfet = new Mosfet1(element.Id, 
+                element.Nodes[0], element.Nodes[1], element.Nodes[2], element.Nodes[3], modelName);
+            yield return mosfet;
+
+            // Create model with parameters if any are specified
+            if (element.Parameters.Count > 0)
+            {
+                // Determine NMOS vs PMOS from Value (1 = NMOS, -1 = PMOS)
+                bool isNChannel = element.Value >= 0;
+                var model = new Mosfet1Model(modelName);
+                if (isNChannel)
+                    model.Parameters.SetNmos(true);
+                else
+                    model.Parameters.SetPmos(true);
+                
+                if (element.Parameters.TryGetValue("Vto", out var thresholdVoltage))
+                    model.Parameters.Vt0 = thresholdVoltage;
+                if (element.Parameters.TryGetValue("Kp", out var transconductance))
+                    model.Parameters.Transconductance = transconductance;
+                
+                yield return model;
+            }
         }
 
         /// <summary>

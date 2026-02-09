@@ -107,6 +107,100 @@ namespace CircuitCraft.Simulation
                 Nodes = new List<string> { nodePositive, nodeNegative }
             };
         }
+
+        /// <summary>Creates a diode element with optional model parameters.</summary>
+        /// <param name="id">Element identifier (e.g., "D1").</param>
+        /// <param name="anode">Anode node name.</param>
+        /// <param name="cathode">Cathode node name.</param>
+        /// <param name="modelName">Model name (default: "D1N4148").</param>
+        /// <param name="saturationCurrent">Is parameter - saturation current in amps.</param>
+        /// <param name="emissionCoefficient">N parameter - emission coefficient.</param>
+        public static NetlistElement Diode(string id, string anode, string cathode,
+            string modelName = "D1N4148",
+            double? saturationCurrent = null,
+            double? emissionCoefficient = null)
+        {
+            var element = new NetlistElement
+            {
+                Id = id,
+                Type = ElementType.Diode,
+                Value = 0, // Diode uses model, not value
+                ModelName = modelName,
+                Nodes = new List<string> { anode, cathode }
+            };
+
+            if (saturationCurrent.HasValue)
+                element.Parameters["Is"] = saturationCurrent.Value;
+            if (emissionCoefficient.HasValue)
+                element.Parameters["N"] = emissionCoefficient.Value;
+
+            return element;
+        }
+
+        /// <summary>Creates a BJT element with optional model parameters.</summary>
+        /// <param name="id">Element identifier (e.g., "Q1").</param>
+        /// <param name="collector">Collector node name.</param>
+        /// <param name="base_">Base node name.</param>
+        /// <param name="emitter">Emitter node name.</param>
+        /// <param name="modelName">Model name (default: "2N2222").</param>
+        /// <param name="isNPN">True for NPN, false for PNP transistor.</param>
+        /// <param name="beta">Bf parameter - forward current gain.</param>
+        /// <param name="earlyVoltage">Vaf parameter - forward Early voltage.</param>
+        public static NetlistElement BJT(string id, string collector, string base_, string emitter,
+            string modelName = "2N2222",
+            bool isNPN = true,
+            double? beta = null,
+            double? earlyVoltage = null)
+        {
+            var element = new NetlistElement
+            {
+                Id = id,
+                Type = ElementType.BJT,
+                Value = isNPN ? 1 : -1, // Use value to store polarity
+                ModelName = modelName,
+                Nodes = new List<string> { collector, base_, emitter }
+            };
+
+            if (beta.HasValue)
+                element.Parameters["Bf"] = beta.Value;
+            if (earlyVoltage.HasValue)
+                element.Parameters["Vaf"] = earlyVoltage.Value;
+
+            return element;
+        }
+
+        /// <summary>Creates a MOSFET element with optional model parameters.</summary>
+        /// <param name="id">Element identifier (e.g., "M1").</param>
+        /// <param name="drain">Drain node name.</param>
+        /// <param name="gate">Gate node name.</param>
+        /// <param name="source">Source node name.</param>
+        /// <param name="bulk">Bulk/substrate node name.</param>
+        /// <param name="modelName">Model name (default: "NMOS").</param>
+        /// <param name="isNChannel">True for N-channel, false for P-channel MOSFET.</param>
+        /// <param name="thresholdVoltage">Vto parameter - threshold voltage.</param>
+        /// <param name="transconductance">Kp parameter - transconductance parameter.</param>
+        public static NetlistElement MOSFET(string id, string drain, string gate, string source, string bulk,
+            string modelName = "NMOS",
+            bool isNChannel = true,
+            double? thresholdVoltage = null,
+            double? transconductance = null)
+        {
+            var element = new NetlistElement
+            {
+                Id = id,
+                Type = ElementType.MOSFET,
+                Value = isNChannel ? 1 : -1, // Use value to store polarity
+                ModelName = modelName,
+                Nodes = new List<string> { drain, gate, source, bulk }
+            };
+
+            if (thresholdVoltage.HasValue)
+                element.Parameters["Vto"] = thresholdVoltage.Value;
+            if (transconductance.HasValue)
+                element.Parameters["Kp"] = transconductance.Value;
+
+            return element;
+        }
     }
 
     /// <summary>

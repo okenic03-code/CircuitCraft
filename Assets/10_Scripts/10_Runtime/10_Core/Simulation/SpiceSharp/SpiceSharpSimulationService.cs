@@ -80,6 +80,15 @@ namespace CircuitCraft.Simulation.SpiceSharp
                         result = _simulationRunner.RunTransient(circuit, request.Netlist, request.TransientConfig);
                         break;
 
+                    case SimulationType.DCSweep:
+                        if (request.DCSweepConfig == null)
+                        {
+                            return SimulationResult.Failure(SimulationType.DCSweep,
+                                SimulationStatus.InvalidCircuit, "DC Sweep config is required");
+                        }
+                        result = _simulationRunner.RunDCSweep(circuit, request.Netlist, request.DCSweepConfig);
+                        break;
+
                     default:
                         return SimulationResult.Failure(request.SimulationType,
                             SimulationStatus.InvalidCircuit, $"Simulation type '{request.SimulationType}' not yet supported");

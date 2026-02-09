@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using SpiceSharp;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
@@ -108,6 +109,75 @@ namespace CircuitCraft.Simulation.SpiceSharp
             {
                 stopwatch.Stop();
                 result = SimulationResult.Failure(SimulationType.Transient, 
+                    SimulationStatus.Error, $"Simulation error: {ex.Message}");
+                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Runs a DC sweep simulation.
+        /// </summary>
+        /// <param name="circuit">The SpiceSharp circuit to simulate.</param>
+        /// <param name="netlist">The domain netlist (for probe definitions).</param>
+        /// <param name="config">DC sweep configuration.</param>
+        /// <returns>Simulation result with probe measurements at each sweep point.</returns>
+        public SimulationResult RunDCSweep(Circuit circuit, CircuitNetlist netlist, DCSweepConfig config)
+        {
+            var stopwatch = Stopwatch.StartNew();
+            var result = SimulationResult.Success(SimulationType.DCSweep, 0);
+
+            try
+            {
+                var dc = new DC("dc", config.SourceId, config.StartValue, config.StopValue, config.StepValue);
+                var exports = CreateExports(dc, netlist);
+
+                // Create temporary storage for sweep data
+                var probeData = new Dictionary<string, List<double>>();
+                var sweepPoints = new List<double>();
+                
+                foreach (var probe in netlist.Probes)
+                {
+                    probeData[probe.Id] = new List<double>();
+                }
+
+                dc.ExportSimulationData += (sender, args) =>
+                {
+                    sweepPoints.Add(dc.GetCurrentSweepValue().ToArray()[0]);
+                    CollectTransientPoint(exports, netlist.Probes, probeData);
+                };
+
+                dc.Run(circuit);
+
+                // Build final results
+                foreach (var probe in netlist.Probes)
+                {
+                    if (!probeData.TryGetValue(probe.Id, out var data)) continue;
+
+                    result.ProbeResults.Add(new ProbeResult
+                    {
+                        ProbeId = probe.Id,
+                        Type = probe.Type,
+                        Target = probe.Target,
+                        MinValue = data.Count > 0 ? data.Min() : 0,
+                        MaxValue = data.Count > 0 ? data.Max() : 0,
+                        AverageValue = data.Count > 0 ? data.Average() : 0,
+                        Value = data.Count > 0 ? data[data.Count - 1] : 0,
+                        TimePoints = new List<double>(sweepPoints),
+                        Values = new List<double>(data)
+                    });
+                }
+
+                stopwatch.Stop();
+                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                result.StatusMessage = $"DC sweep completed in {result.ElapsedMilliseconds:F1}ms ({sweepPoints.Count} points)";
+            }
+            catch (Exception ex)
+            {
+                stopwatch.Stop();
+                result = SimulationResult.Failure(SimulationType.DCSweep, 
                     SimulationStatus.Error, $"Simulation error: {ex.Message}");
                 result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
                 result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
