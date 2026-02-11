@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
 
@@ -11,7 +12,8 @@ namespace CircuitCraft.Utils
     public class SpiceSharpTestRunner : MonoBehaviour
     {
         [Header("Test Results")]
-        [SerializeField] private bool _lastTestPassed;
+        [FormerlySerializedAs("_lastTestPassed")]
+        [SerializeField] private bool _isLastTestPassed;
         [SerializeField] private string _lastTestMessage;
         [SerializeField] private double _lastVoutValue;
         [SerializeField] private double _lastElapsedMs;
@@ -52,7 +54,7 @@ namespace CircuitCraft.Utils
 
             // Create request
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            request.EnableSafetyChecks = true;
+            request.IsSafetyChecksEnabled = true;
 
             // Run simulation
             if (_simulationService == null)
@@ -87,19 +89,19 @@ namespace CircuitCraft.Utils
                     if (error < 0.001)
                     {
                         Debug.Log($"<color=green>TEST PASSED!</color> Vout = {vOut.Value:F4}V (expected {expected:F4}V)");
-                        _lastTestPassed = true;
+                        _isLastTestPassed = true;
                     }
                     else
                     {
                         Debug.LogError($"TEST FAILED! Vout = {vOut.Value:F4}V (expected {expected:F4}V, error = {error:F4}V)");
-                        _lastTestPassed = false;
+                        _isLastTestPassed = false;
                     }
                 }
             }
             else
             {
                 Debug.LogError($"Simulation failed: {result.StatusMessage}");
-                _lastTestPassed = false;
+                _isLastTestPassed = false;
 
                 foreach (var issue in result.Issues)
                 {
@@ -138,7 +140,7 @@ namespace CircuitCraft.Utils
 
             // Create request with safety checks
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            request.EnableSafetyChecks = true;
+            request.IsSafetyChecksEnabled = true;
 
             if (_simulationService == null)
             {
@@ -171,12 +173,12 @@ namespace CircuitCraft.Utils
                     if (errorMa < 0.1)
                     {
                         Debug.Log($"<color=green>TEST PASSED!</color> LED current = {currentMa:F2}mA (expected {expectedMa:F2}mA)");
-                        _lastTestPassed = true;
+                        _isLastTestPassed = true;
                     }
                     else
                     {
                         Debug.LogError($"TEST FAILED! LED current = {currentMa:F2}mA (expected {expectedMa:F2}mA)");
-                        _lastTestPassed = false;
+                        _isLastTestPassed = false;
                     }
                 }
 
@@ -193,7 +195,7 @@ namespace CircuitCraft.Utils
             else
             {
                 Debug.LogError($"Simulation failed: {result.StatusMessage}");
-                _lastTestPassed = false;
+                _isLastTestPassed = false;
             }
         }
 
@@ -256,19 +258,19 @@ namespace CircuitCraft.Utils
                     if (error < 0.1)
                     {
                         Debug.Log($"<color=green>TEST PASSED!</color> Final V_cap = {vCapProbe.Value:F3}V (expected ~{expected:F3}V)");
-                        _lastTestPassed = true;
+                        _isLastTestPassed = true;
                     }
                     else
                     {
                         Debug.LogError($"TEST FAILED! Final V_cap = {vCapProbe.Value:F3}V (expected ~{expected:F3}V)");
-                        _lastTestPassed = false;
+                        _isLastTestPassed = false;
                     }
                 }
             }
             else
             {
                 Debug.LogError($"Simulation failed: {result.StatusMessage}");
-                _lastTestPassed = false;
+                _isLastTestPassed = false;
 
                 foreach (var issue in result.Issues)
                 {
@@ -292,7 +294,7 @@ namespace CircuitCraft.Utils
             Debug.Log("");
             
             RunRCTransientTest();
-            Debug.Log($"Last test passed: {_lastTestPassed}");
+            Debug.Log($"Last test passed: {_isLastTestPassed}");
             
             Debug.Log("\n=== All Tests Complete ===");
         }
