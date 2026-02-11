@@ -95,7 +95,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                 }
 
                 // Check safety limits if enabled
-                if (request.EnableSafetyChecks)
+                if (request.IsSafetyChecksEnabled)
                 {
                     _simulationRunner.CheckSafetyLimits(request.Netlist, result);
                 }
@@ -131,7 +131,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
             
             var result = new SimulationResult
             {
-                Ran = false,
+                HasRun = false,
                 SimulationType = SimulationType.DCOperatingPoint
             };
 

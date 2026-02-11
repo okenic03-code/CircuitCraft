@@ -36,7 +36,7 @@ namespace CircuitCraft.Simulation
         public double InitialStep { get; set; } = 0;
 
         /// <summary>Use initial conditions from DC operating point.</summary>
-        public bool UseInitialConditions { get; set; } = true;
+        public bool IsUsingInitialConditions { get; set; } = true;
 
         public TransientConfig() { }
 
@@ -111,7 +111,7 @@ namespace CircuitCraft.Simulation
         /// <summary>
         /// Whether to check for overcurrent/overpower conditions.
         /// </summary>
-        public bool EnableSafetyChecks { get; set; } = true;
+        public bool IsSafetyChecksEnabled { get; set; } = true;
 
         /// <summary>
         /// Optional tag/identifier for this simulation request.
