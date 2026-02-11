@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60c684b44d897ec448ff093554857a02, type: 3}
+  m_Name: Resistor_10k
+  m_EditorClassIdentifier: 
+  _id: resistor_10k
+  _displayName: 10k Resistor
+  _kind: 0
+  _pins: []
+  _footprint:
+    _size: {x: 0, y: 0}
+  _baseCost: 1.5
+  _prefab: {fileID: 0}
+  _resistanceOhms: 10000
+  _voltageVolts: 0
+  _capacitanceFarads: 0
+  _inductanceHenrys: 0
+  _currentAmps: 0
