@@ -95,11 +95,11 @@ namespace CircuitCraft.Views
         /// <summary>
         /// Shows or hides the cursor sprite.
         /// </summary>
-        private void SetCursorVisible(bool visible)
+        private void SetCursorVisible(bool isVisible)
         {
             if (_cursorSprite != null)
             {
-                _cursorSprite.enabled = visible;
+                _cursorSprite.enabled = isVisible;
             }
         }
         
@@ -133,11 +133,11 @@ namespace CircuitCraft.Views
         /// <summary>
         /// Sets cursor to invalid state (for preview of blocked placement).
         /// </summary>
-        public void SetInvalid(bool invalid)
+        public void SetInvalid(bool isInvalid)
         {
             if (_cursorSprite != null)
             {
-                _cursorSprite.color = invalid ? _invalidColor : _validColor;
+                _cursorSprite.color = isInvalid ? _invalidColor : _validColor;
             }
         }
     }

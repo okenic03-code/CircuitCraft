@@ -123,20 +123,20 @@ namespace CircuitCraft.Components
         /// <summary>
         /// Set hover state for visual feedback.
         /// </summary>
-        /// <param name="hovered">True if hovered, false otherwise.</param>
-        public void SetHovered(bool hovered)
+        /// <param name="isHovered">True if hovered, false otherwise.</param>
+        public void SetHovered(bool isHovered)
         {
-            _isHovered = hovered;
+            _isHovered = isHovered;
             UpdateVisualState();
         }
         
         /// <summary>
         /// Set selection state for visual feedback.
         /// </summary>
-        /// <param name="selected">True if selected, false otherwise.</param>
-        public void SetSelected(bool selected)
+        /// <param name="isSelected">True if selected, false otherwise.</param>
+        public void SetSelected(bool isSelected)
         {
-            _isSelected = selected;
+            _isSelected = isSelected;
             UpdateVisualState();
         }
         

@@ -168,9 +168,9 @@ namespace CircuitCraft.Controllers
                 int instanceId = placedComponent.InstanceId;
                 
                 // Remove from BoardState
-                bool removed = _boardState.RemoveComponent(instanceId);
+                bool isRemoved = _boardState.RemoveComponent(instanceId);
                 
-                if (removed)
+                if (isRemoved)
                 {
                     // Destroy the GameObject
                     GameObject componentObject = _selectedComponent.gameObject;
