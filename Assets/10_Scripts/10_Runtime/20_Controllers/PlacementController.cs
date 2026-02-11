@@ -6,7 +6,6 @@ using CircuitCraft.Managers;
 using CircuitCraft.Components;
 using CircuitCraft.Commands;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CircuitCraft.Controllers
 {

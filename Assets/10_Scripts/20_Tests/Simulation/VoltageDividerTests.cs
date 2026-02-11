@@ -2,7 +2,6 @@ using NUnit.Framework;
 using System.Threading.Tasks;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
-using UnityEngine;
 
 namespace CircuitCraft.Tests.Simulation
 {
