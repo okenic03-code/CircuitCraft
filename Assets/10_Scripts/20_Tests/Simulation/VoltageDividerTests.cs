@@ -48,7 +48,7 @@ namespace CircuitCraft.Tests.Simulation
             netlist.AddProbe(ProbeDefinition.Voltage("V_out", "out"));
 
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            request.EnableSafetyChecks = true;
+            request.IsSafetyChecksEnabled = true;
 
             // Act
             var result = _simulationService.Run(request);

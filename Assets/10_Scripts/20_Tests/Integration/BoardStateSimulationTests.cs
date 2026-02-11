@@ -116,7 +116,7 @@ namespace CircuitCraft.Tests.Integration
 
             // Create simulation request
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            request.EnableSafetyChecks = true;
+            request.IsSafetyChecksEnabled = true;
 
             // Act: Run simulation
             var result = _simulationService.Run(request);
@@ -243,10 +243,10 @@ namespace CircuitCraft.Tests.Integration
             
             // Use SerializedObject to set private fields
             var serializedObject = new SerializedObject(asset);
-            serializedObject.FindProperty("id").stringValue = assetName;
-            serializedObject.FindProperty("displayName").stringValue = $"Test Voltage Source {voltage}V";
-            serializedObject.FindProperty("kind").enumValueIndex = (int)ComponentKind.VoltageSource;
-            serializedObject.FindProperty("voltageVolts").floatValue = voltage;
+            serializedObject.FindProperty("_id").stringValue = assetName;
+            serializedObject.FindProperty("_displayName").stringValue = $"Test Voltage Source {voltage}V";
+            serializedObject.FindProperty("_kind").enumValueIndex = (int)ComponentKind.VoltageSource;
+            serializedObject.FindProperty("_voltageVolts").floatValue = voltage;
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             
             EditorUtility.SetDirty(asset);
@@ -270,10 +270,10 @@ namespace CircuitCraft.Tests.Integration
             
             // Use SerializedObject to set private fields
             var serializedObject = new SerializedObject(asset);
-            serializedObject.FindProperty("id").stringValue = assetName;
-            serializedObject.FindProperty("displayName").stringValue = $"Test Resistor {resistance}Ohm";
-            serializedObject.FindProperty("kind").enumValueIndex = (int)ComponentKind.Resistor;
-            serializedObject.FindProperty("resistanceOhms").floatValue = resistance;
+            serializedObject.FindProperty("_id").stringValue = assetName;
+            serializedObject.FindProperty("_displayName").stringValue = $"Test Resistor {resistance}Ohm";
+            serializedObject.FindProperty("_kind").enumValueIndex = (int)ComponentKind.Resistor;
+            serializedObject.FindProperty("_resistanceOhms").floatValue = resistance;
             serializedObject.ApplyModifiedPropertiesWithoutUndo();
             
             EditorUtility.SetDirty(asset);
