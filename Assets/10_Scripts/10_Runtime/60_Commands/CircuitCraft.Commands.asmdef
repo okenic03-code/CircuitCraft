@@ -1,0 +1,8 @@
+{
+    "name": "CircuitCraft.Commands",
+    "rootNamespace": "CircuitCraft.Commands",
+    "references": ["CircuitCraft.Core"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}
