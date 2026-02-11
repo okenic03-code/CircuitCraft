@@ -1,0 +1,30 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <!-- Component Palette (Left Side) -->
+    <ui:VisualElement name="component-palette" class="palette-container">
+        <ui:Label text="Components" class="palette-title" />
+        <ui:Button name="btn-resistor-1k" text="Resistor 1kΩ" class="component-btn" />
+        <ui:Button name="btn-resistor-10k" text="Resistor 10kΩ" class="component-btn" />
+        <ui:Button name="btn-capacitor-1uf" text="Capacitor 1µF" class="component-btn" />
+        <ui:Button name="btn-capacitor-10uf" text="Capacitor 10µF" class="component-btn" />
+        <ui:Button name="btn-voltagesource-5v" text="Voltage 5V" class="component-btn" />
+        <ui:Button name="btn-ground" text="Ground" class="component-btn" />
+    </ui:VisualElement>
+
+    <!-- Simulation Controls (Top Right) -->
+    <ui:VisualElement name="simulation-controls" class="controls-container">
+        <ui:Button name="simulate-button" text="Simulate" class="btn-simulate" />
+        <ui:Label name="simulation-status" text="" class="status-label" />
+    </ui:VisualElement>
+
+    <!-- Results Panel (Bottom Right) -->
+    <ui:VisualElement name="results-panel" class="panel">
+        <ui:Label text="Simulation Results" class="panel-title" />
+        <ui:ScrollView class="results-scroll">
+            <ui:Label name="results-text" class="results-label" />
+        </ui:ScrollView>
+        <ui:VisualElement class="panel-buttons">
+            <ui:Button name="btn-clear-results" text="Clear" class="panel-btn" />
+            <ui:Button name="btn-toggle-results" text="Hide" class="panel-btn" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
