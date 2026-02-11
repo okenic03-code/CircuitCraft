@@ -28,11 +28,14 @@ namespace CircuitCraft.Tests.Simulation
             // Current limiting resistor: 470Ω
             netlist.AddElement(NetlistElement.Resistor("R1", "vcc", "led_anode", 470.0));
 
-            // LED modeled as 2V voltage source
-            netlist.AddElement(NetlistElement.VoltageSource("Vled", "led_anode", "0", 2.0));
+            // LED: Is=1e-12A, N=2.0 yields Vf≈2V at ~15mA
+            netlist.AddElement(NetlistElement.Diode("Dled", "led_anode", "0", 
+                modelName: "LED_RED", 
+                saturationCurrent: 1e-12, 
+                emissionCoefficient: 2.0));
 
             // Add probes
-            netlist.AddProbe(ProbeDefinition.Current("I_led", "Vled"));
+            netlist.AddProbe(ProbeDefinition.Current("I_led", "Dled"));
 
             // Act
             var request = SimulationRequest.DCOperatingPoint(netlist);
@@ -41,8 +44,8 @@ namespace CircuitCraft.Tests.Simulation
             // Assert
             Assert.IsTrue(result.IsSuccess, $"Simulation failed: {result.StatusMessage}");
             
-            var iLed = result.GetCurrent("Vled");
-            Assert.IsNotNull(iLed, "Could not find current probe for Vled");
+            var iLed = result.GetCurrent("Dled");
+            Assert.IsNotNull(iLed, "Could not find current probe for Dled");
 
             double currentAmps = Math.Abs(iLed.Value);
             double expectedAmps = (9.0 - 2.0) / 470.0; // ≈ 0.0148936 Amps

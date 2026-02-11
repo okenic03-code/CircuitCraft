@@ -79,21 +79,37 @@ namespace CircuitCraft.Core
             if (component == null)
                 return false;
 
-            // Remove component's pins from all nets
-            foreach (var net in _nets)
+        // Remove component's pins from all nets
+        var netsToCheck = new List<Net>();
+        foreach (var net in _nets)
+        {
+            var pinsToRemove = net.ConnectedPins
+                .Where(p => p.ComponentInstanceId == instanceId)
+                .ToList();
+            foreach (var pin in pinsToRemove)
             {
-                var pinsToRemove = net.ConnectedPins
-                    .Where(p => p.ComponentInstanceId == instanceId)
-                    .ToList();
-                foreach (var pin in pinsToRemove)
-                {
-                    net.RemovePin(pin);
-                }
+                net.RemovePin(pin);
             }
+            
+            // Track nets that might now be empty
+            if (pinsToRemove.Count > 0)
+            {
+                netsToCheck.Add(net);
+            }
+        }
+        
+        // Remove empty nets
+        foreach (var net in netsToCheck)
+        {
+            if (net.ConnectedPins.Count == 0)
+            {
+                _nets.Remove(net);
+            }
+        }
 
-            _components.Remove(component);
-            OnComponentRemoved?.Invoke(instanceId);
-            return true;
+        _components.Remove(component);
+        OnComponentRemoved?.Invoke(instanceId);
+        return true;
         }
 
         /// <summary>
