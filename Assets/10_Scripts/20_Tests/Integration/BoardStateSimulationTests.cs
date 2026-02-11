@@ -86,25 +86,25 @@ namespace CircuitCraft.Tests.Integration
             
             // Connect voltage source pins to nets
             // Pin 0 (positive) -> VIN
-            board.ConnectPinToNet(netVin.NetId, new PinReference(vsource.InstanceId, 0));
+            board.ConnectPinToNet(netVin.NetId, new PinReference(vsource.InstanceId, 0, vsource.GetPinWorldPosition(0)));
             // Pin 1 (negative) -> GND
-            board.ConnectPinToNet(netGnd.NetId, new PinReference(vsource.InstanceId, 1));
+            board.ConnectPinToNet(netGnd.NetId, new PinReference(vsource.InstanceId, 1, vsource.GetPinWorldPosition(1)));
 
             // Place R1 (1k) at (2, 0) - between VIN and VOUT
             var r1Pins = CreateResistorPins();
             var r1 = board.PlaceComponent(Resistor1kAssetName, new GridPosition(2, 0), 0, r1Pins);
             
             // Connect R1: terminal1 -> VIN, terminal2 -> VOUT
-            board.ConnectPinToNet(netVin.NetId, new PinReference(r1.InstanceId, 0));
-            board.ConnectPinToNet(netVout.NetId, new PinReference(r1.InstanceId, 1));
+            board.ConnectPinToNet(netVin.NetId, new PinReference(r1.InstanceId, 0, r1.GetPinWorldPosition(0)));
+            board.ConnectPinToNet(netVout.NetId, new PinReference(r1.InstanceId, 1, r1.GetPinWorldPosition(1)));
 
             // Place R2 (2k) at (4, 0) - between VOUT and GND
             var r2Pins = CreateResistorPins();
             var r2 = board.PlaceComponent(Resistor2kAssetName, new GridPosition(4, 0), 0, r2Pins);
             
             // Connect R2: terminal1 -> VOUT, terminal2 -> GND
-            board.ConnectPinToNet(netVout.NetId, new PinReference(r2.InstanceId, 0));
-            board.ConnectPinToNet(netGnd.NetId, new PinReference(r2.InstanceId, 1));
+            board.ConnectPinToNet(netVout.NetId, new PinReference(r2.InstanceId, 0, r2.GetPinWorldPosition(0)));
+            board.ConnectPinToNet(netGnd.NetId, new PinReference(r2.InstanceId, 1, r2.GetPinWorldPosition(1)));
 
             // Create component provider that loads our test assets
             var componentProvider = new TestComponentProvider();
@@ -169,8 +169,8 @@ namespace CircuitCraft.Tests.Integration
             var vsourcePins = CreateVSourcePins();
             var vsource = board.PlaceComponent(VSourceAssetName, new GridPosition(0, 0), 0, vsourcePins);
             
-            board.ConnectPinToNet(netVin.NetId, new PinReference(vsource.InstanceId, 0));
-            board.ConnectPinToNet(netGnd.NetId, new PinReference(vsource.InstanceId, 1));
+            board.ConnectPinToNet(netVin.NetId, new PinReference(vsource.InstanceId, 0, vsource.GetPinWorldPosition(0)));
+            board.ConnectPinToNet(netGnd.NetId, new PinReference(vsource.InstanceId, 1, vsource.GetPinWorldPosition(1)));
 
             var componentProvider = new TestComponentProvider();
             var converter = new BoardToNetlistConverter(componentProvider);
