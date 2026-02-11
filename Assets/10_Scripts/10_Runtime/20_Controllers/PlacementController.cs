@@ -4,6 +4,7 @@ using CircuitCraft.Core;
 using CircuitCraft.Utils;
 using CircuitCraft.Managers;
 using CircuitCraft.Components;
+using CircuitCraft.Commands;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -33,6 +34,11 @@ namespace CircuitCraft.Controllers
         [SerializeField]
         [Tooltip("Grid configuration settings (cell size, origin, dimensions).")]
         private GridSettings _gridSettings;
+
+        [Header("Command History")]
+        [SerializeField]
+        [Tooltip("Tracks placement commands for undo and redo.")]
+        private CommandHistory _commandHistory = new CommandHistory();
         
         // State
         private ComponentDefinition _selectedComponent;
@@ -275,12 +281,14 @@ namespace CircuitCraft.Controllers
             
             // Place component in BoardState
             GridPosition position = new GridPosition(gridPos.x, gridPos.y);
-            PlacedComponent placedComponent = _gameManager.BoardState.PlaceComponent(
-                componentDefId: _selectedComponent.Id,
-                position: position,
-                rotation: 0, // Default rotation
-                pins: pinInstances
+            var placeCommand = new PlaceComponentCommand(
+                _gameManager.BoardState,
+                _selectedComponent.Id,
+                position,
+                0,
+                pinInstances
             );
+            _commandHistory.ExecuteCommand(placeCommand);
             
             Debug.Log($"PlacementController: Placed {_selectedComponent.DisplayName} at {position}");
             
@@ -328,6 +336,32 @@ namespace CircuitCraft.Controllers
                 Debug.Log("PlacementController: Deselected component");
             }
         }
+
+        /// <summary>
+        /// Undoes the last executed placement command.
+        /// </summary>
+        public void UndoLastAction()
+        {
+            _commandHistory.Undo();
+        }
+
+        /// <summary>
+        /// Redoes the most recently undone placement command.
+        /// </summary>
+        public void RedoLastAction()
+        {
+            _commandHistory.Redo();
+        }
+
+        /// <summary>
+        /// Gets whether there is at least one command available to undo.
+        /// </summary>
+        public bool CanUndo => _commandHistory.CanUndo;
+
+        /// <summary>
+        /// Gets whether there is at least one command available to redo.
+        /// </summary>
+        public bool CanRedo => _commandHistory.CanRedo;
         
         /// <summary>
         /// Gets the currently selected component definition.
