@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CircuitCraft.Data
 {
@@ -11,16 +12,18 @@ namespace CircuitCraft.Data
     {
         [SerializeField]
         [Tooltip("Unique name for this pin within the component.")]
-        private string pinName;
+        [FormerlySerializedAs("pinName")]
+        private string _pinName;
 
         [SerializeField]
         [Tooltip("Grid-aligned local position of the pin relative to component origin.")]
-        private Vector2Int localPosition;
+        [FormerlySerializedAs("localPosition")]
+        private Vector2Int _localPosition;
 
         /// <summary>Unique name for this pin within the component.</summary>
-        public string PinName => pinName;
+        public string PinName => _pinName;
 
         /// <summary>Grid-aligned local position of the pin relative to component origin.</summary>
-        public Vector2Int LocalPosition => localPosition;
+        public Vector2Int LocalPosition => _localPosition;
     }
 }

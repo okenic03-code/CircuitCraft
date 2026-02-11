@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CircuitCraft.Data
 {
@@ -11,10 +12,11 @@ namespace CircuitCraft.Data
     {
         [SerializeField]
         [Tooltip("Maximum number of components allowed on the board. 0 means no limit.")]
-        private int maxComponentCount;
+        [FormerlySerializedAs("maxComponentCount")]
+        private int _maxComponentCount;
 
         /// <summary>Maximum number of components allowed on the board. 0 means no limit.</summary>
-        public int MaxComponentCount => maxComponentCount;
+        public int MaxComponentCount => _maxComponentCount;
 
         // Note: Future constraints like forbidden zones or specific component type limits 
         // can be added here as the system evolves.
