@@ -1,6 +1,6 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using SpiceSharp;
 
 namespace CircuitCraft.Simulation.SpiceSharp
@@ -35,17 +35,19 @@ namespace CircuitCraft.Simulation.SpiceSharp
         }
 
         /// <inheritdoc/>
-        public SimulationResult Run(SimulationRequest request)
+        public async UniTask<SimulationResult> RunAsync(SimulationRequest request, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (request == null)
             {
-                return SimulationResult.Failure(SimulationType.DCOperatingPoint, 
+                return SimulationResult.Failure(SimulationType.DCOperatingPoint,
                     SimulationStatus.InvalidCircuit, "Request is null");
             }
 
             if (request.Netlist == null)
             {
-                return SimulationResult.Failure(request.SimulationType, 
+                return SimulationResult.Failure(request.SimulationType,
                     SimulationStatus.InvalidCircuit, "Netlist is null");
             }
 
@@ -68,7 +70,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                 switch (request.SimulationType)
                 {
                     case SimulationType.DCOperatingPoint:
-                        result = _simulationRunner.RunDCOperatingPoint(circuit, request.Netlist);
+                        result = await _simulationRunner.RunDCOperatingPointAsync(circuit, request.Netlist, cancellationToken);
                         break;
 
                     case SimulationType.Transient:
@@ -77,7 +79,11 @@ namespace CircuitCraft.Simulation.SpiceSharp
                             return SimulationResult.Failure(SimulationType.Transient,
                                 SimulationStatus.InvalidCircuit, "Transient config is required for transient analysis");
                         }
-                        result = _simulationRunner.RunTransient(circuit, request.Netlist, request.TransientConfig);
+                        result = await _simulationRunner.RunTransientAsync(
+                            circuit,
+                            request.Netlist,
+                            request.TransientConfig,
+                            cancellationToken);
                         break;
 
                     case SimulationType.DCSweep:
@@ -86,13 +92,19 @@ namespace CircuitCraft.Simulation.SpiceSharp
                             return SimulationResult.Failure(SimulationType.DCSweep,
                                 SimulationStatus.InvalidCircuit, "DC Sweep config is required");
                         }
-                        result = _simulationRunner.RunDCSweep(circuit, request.Netlist, request.DCSweepConfig);
+                        result = await _simulationRunner.RunDCSweepAsync(
+                            circuit,
+                            request.Netlist,
+                            request.DCSweepConfig,
+                            cancellationToken);
                         break;
 
                     default:
                         return SimulationResult.Failure(request.SimulationType,
                             SimulationStatus.InvalidCircuit, $"Simulation type '{request.SimulationType}' not yet supported");
                 }
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 // Check safety limits if enabled
                 if (request.IsSafetyChecksEnabled)
@@ -103,6 +115,10 @@ namespace CircuitCraft.Simulation.SpiceSharp
                 result.Tag = request.Tag;
                 return result;
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var result = SimulationResult.Failure(request.SimulationType,
@@ -111,17 +127,6 @@ namespace CircuitCraft.Simulation.SpiceSharp
                 result.Issues.Add(new SimulationIssue(IssueSeverity.Error, IssueCategory.General, ex.Message));
                 return result;
             }
-        }
-
-        /// <inheritdoc/>
-        public async Task<SimulationResult> RunAsync(SimulationRequest request, CancellationToken cancellationToken = default)
-        {
-            // Run simulation on thread pool to avoid blocking Unity main thread
-            return await Task.Run(() =>
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                return Run(request);
-            }, cancellationToken);
         }
 
         /// <inheritdoc/>

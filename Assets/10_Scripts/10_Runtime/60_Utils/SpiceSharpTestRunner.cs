@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
 
@@ -33,6 +35,11 @@ namespace CircuitCraft.Utils
         [ContextMenu("Run Voltage Divider Test")]
         public void RunVoltageDividerTest()
         {
+            RunVoltageDividerTestAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTask RunVoltageDividerTestAsync(CancellationToken cancellationToken)
+        {
             Debug.Log("=== SpiceSharp Voltage Divider Test ===");
 
             // Create netlist
@@ -62,7 +69,7 @@ namespace CircuitCraft.Utils
                 _simulationService = new SpiceSharpSimulationService();
             }
 
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request, cancellationToken);
 
             // Log results
             Debug.Log($"Status: {result.Status} - {result.StatusMessage}");
@@ -118,6 +125,11 @@ namespace CircuitCraft.Utils
         [ContextMenu("Run LED Circuit Test")]
         public void RunLEDCircuitTest()
         {
+            RunLEDCircuitTestAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTask RunLEDCircuitTestAsync(CancellationToken cancellationToken)
+        {
             Debug.Log("=== SpiceSharp LED Circuit Test ===");
 
             // Create netlist - simplified LED model using voltage source for forward drop
@@ -147,7 +159,7 @@ namespace CircuitCraft.Utils
                 _simulationService = new SpiceSharpSimulationService();
             }
 
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request, cancellationToken);
 
             Debug.Log($"Status: {result.Status} - {result.StatusMessage}");
             Debug.Log($"Elapsed: {result.ElapsedMilliseconds:F2}ms");
@@ -207,6 +219,11 @@ namespace CircuitCraft.Utils
         [ContextMenu("Run RC Transient Test")]
         public void RunRCTransientTest()
         {
+            RunRCTransientTestAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTask RunRCTransientTestAsync(CancellationToken cancellationToken)
+        {
             Debug.Log("=== SpiceSharp RC Transient Test ===");
 
             var netlist = new CircuitNetlist { Title = "RC Transient Test" };
@@ -233,7 +250,7 @@ namespace CircuitCraft.Utils
                 _simulationService = new SpiceSharpSimulationService();
             }
 
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request, cancellationToken);
 
             Debug.Log($"Status: {result.Status} - {result.StatusMessage}");
             Debug.Log($"Elapsed: {result.ElapsedMilliseconds:F2}ms");
@@ -285,18 +302,30 @@ namespace CircuitCraft.Utils
         [ContextMenu("Run All Tests")]
         public void RunAllTests()
         {
+            RunAllTestsAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTaskVoid RunAllTestsAsync(CancellationToken cancellationToken)
+        {
             Debug.Log("=== Running All SpiceSharp Tests ===\n");
-            
-            RunVoltageDividerTest();
-            Debug.Log("");
-            
-            RunLEDCircuitTest();
-            Debug.Log("");
-            
-            RunRCTransientTest();
-            Debug.Log($"Last test passed: {_isLastTestPassed}");
-            
-            Debug.Log("\n=== All Tests Complete ===");
+
+            try
+            {
+                await RunVoltageDividerTestAsync(cancellationToken);
+                Debug.Log("");
+
+                await RunLEDCircuitTestAsync(cancellationToken);
+                Debug.Log("");
+
+                await RunRCTransientTestAsync(cancellationToken);
+                Debug.Log($"Last test passed: {_isLastTestPassed}");
+
+                Debug.Log("\n=== All Tests Complete ===");
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("SpiceSharp tests cancelled.");
+            }
         }
     }
 }

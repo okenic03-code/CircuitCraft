@@ -2,6 +2,7 @@ using NUnit.Framework;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
 using System;
+using System.Threading.Tasks;
 
 namespace CircuitCraft.Tests.Simulation
 {
@@ -17,7 +18,7 @@ namespace CircuitCraft.Tests.Simulation
         }
 
         [Test]
-        public void LEDCircuit_9VSource_470OhmResistor_2VLED_HasCorrectCurrent()
+        public async Task LEDCircuit_9VSource_470OhmResistor_2VLED_HasCorrectCurrent()
         {
             // Arrange
             var netlist = new CircuitNetlist { Title = "LED Current Limiter Test" };
@@ -39,7 +40,7 @@ namespace CircuitCraft.Tests.Simulation
 
             // Act
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request);
 
             // Assert
             Assert.IsTrue(result.IsSuccess, $"Simulation failed: {result.StatusMessage}");

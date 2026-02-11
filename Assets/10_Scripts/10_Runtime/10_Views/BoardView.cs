@@ -23,8 +23,7 @@ namespace CircuitCraft.Views
         private GameObject _componentViewPrefab;
 
         [Header("Grid Configuration")]
-        [SerializeField] private float _gridCellSize = 1.0f;
-        [SerializeField] private Vector3 _gridOrigin = Vector3.zero;
+        [SerializeField] private GridSettings _gridSettings;
 
         private BoardState _boardState;
 
@@ -62,6 +61,11 @@ namespace CircuitCraft.Views
             else
             {
                 Debug.LogError("BoardView: No GameManager assigned!");
+            }
+            
+            if (_gridSettings == null)
+            {
+                Debug.LogError("BoardView: GridSettings reference is missing!");
             }
         }
 
@@ -138,10 +142,16 @@ namespace CircuitCraft.Views
                 Debug.LogWarning("BoardView: No ComponentView prefab assigned. Cannot spawn visual.");
                 return;
             }
+            
+            if (_gridSettings == null)
+            {
+                Debug.LogWarning("BoardView: GridSettings is missing. Cannot spawn visual.");
+                return;
+            }
 
             // Convert grid position to world position using GridUtility
             Vector2Int gridPos = new Vector2Int(component.Position.X, component.Position.Y);
-            Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridCellSize, _gridOrigin);
+            Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
 
             // Instantiate prefab at world position with rotation, parented to BoardView
             Quaternion rotation = Quaternion.Euler(0f, component.Rotation, 0f);
@@ -200,7 +210,10 @@ namespace CircuitCraft.Views
         /// <returns>World position at the center of the grid cell.</returns>
         public Vector3 GridToWorldPosition(int x, int y)
         {
-            return GridUtility.GridToWorldPosition(new Vector2Int(x, y), _gridCellSize, _gridOrigin);
+            if (_gridSettings == null)
+                return Vector3.zero;
+            
+            return GridUtility.GridToWorldPosition(new Vector2Int(x, y), _gridSettings.CellSize, _gridSettings.GridOrigin);
         }
     }
 }

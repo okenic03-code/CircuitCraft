@@ -1,7 +1,9 @@
 {
     "name": "CircuitCraft.Core",
     "rootNamespace": "CircuitCraft.Core",
-    "references": [],
+    "references": [
+        "UniTask"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

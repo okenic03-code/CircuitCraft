@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using Cysharp.Threading.Tasks;
 using CircuitCraft.Managers;
 using CircuitCraft.Simulation;
 using System;
@@ -84,6 +85,11 @@ namespace CircuitCraft.UI
         
         private void OnSimulateClicked()
         {
+            OnSimulateClickedAsync().Forget();
+        }
+
+        private async UniTaskVoid OnSimulateClickedAsync()
+        {
             if (_gameManager == null) return;
 
             if (_statusLabel != null)
@@ -97,10 +103,21 @@ namespace CircuitCraft.UI
                 _simulateButton.SetEnabled(false);
             }
 
-            _gameManager.RunSimulation();
-            
-            // In case RunSimulation is synchronous or returns immediately without firing event (though it should fire event)
-            UpdateButtonState();
+            try
+            {
+                await _gameManager.RunSimulationAsync(this.GetCancellationTokenOnDestroy());
+            }
+            catch (OperationCanceledException)
+            {
+                if (_statusLabel != null)
+                {
+                    _statusLabel.text = "Simulation Cancelled";
+                }
+            }
+            finally
+            {
+                UpdateButtonState();
+            }
         }
         
         private void OnSimulationCompleted(SimulationResult result)

@@ -13,10 +13,7 @@ namespace CircuitCraft.Views
         [SerializeField] private Camera _camera;
         
         [Header("Grid Settings")]
-        [SerializeField] private float _cellSize = 1.0f;
-        [SerializeField] private Vector3 _gridOrigin = Vector3.zero;
-        [SerializeField] private int _gridWidth = 20;
-        [SerializeField] private int _gridHeight = 20;
+        [SerializeField] private GridSettings _gridSettings;
         
         [Header("Visual Settings")]
         [SerializeField] private SpriteRenderer _cursorSprite;
@@ -40,6 +37,12 @@ namespace CircuitCraft.Views
                 _cursorSprite = GetComponentInChildren<SpriteRenderer>();
             }
             
+            // Validate GridSettings
+            if (_gridSettings == null)
+            {
+                Debug.LogError("GridCursor: GridSettings reference is missing!");
+            }
+            
             // Hide cursor initially
             if (_cursorSprite != null)
             {
@@ -57,7 +60,7 @@ namespace CircuitCraft.Views
         /// </summary>
         private void UpdateCursorPosition()
         {
-            if (_camera == null)
+            if (_camera == null || _gridSettings == null)
             {
                 SetCursorVisible(false);
                 return;
@@ -67,12 +70,12 @@ namespace CircuitCraft.Views
             Vector2Int gridPos = GridUtility.ScreenToGridPosition(
                 Input.mousePosition, 
                 _camera, 
-                _cellSize, 
-                _gridOrigin
+                _gridSettings.CellSize, 
+                _gridSettings.GridOrigin
             );
             
             // Check if position is valid
-            bool isValid = GridUtility.IsValidGridPosition(gridPos, _gridWidth, _gridHeight);
+            bool isValid = GridUtility.IsValidGridPosition(gridPos, _gridSettings.BoardWidth, _gridSettings.BoardHeight);
             
             // Update current position
             _currentGridPosition = gridPos;
@@ -81,7 +84,7 @@ namespace CircuitCraft.Views
             // Update visual position
             if (isValid)
             {
-                Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _cellSize, _gridOrigin);
+                Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
                 transform.position = worldPos;
                 SetCursorVisible(true);
                 SetCursorColor(_validColor);

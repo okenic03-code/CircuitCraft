@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
@@ -89,6 +91,14 @@ namespace CircuitCraft.Managers
         /// </summary>
         public void RunSimulation()
         {
+            RunSimulationAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        /// <summary>
+        /// Runs a DC operating point simulation on the current BoardState asynchronously.
+        /// </summary>
+        public async UniTask RunSimulationAsync(CancellationToken cancellationToken = default)
+        {
             if (_isSimulating)
             {
                 Debug.LogWarning("GameManager: Simulation already in progress.");
@@ -118,6 +128,8 @@ namespace CircuitCraft.Managers
 
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 // 2. Convert BoardState to netlist
                 CircuitNetlist netlist = _netlistConverter.Convert(_boardState);
 
@@ -149,11 +161,21 @@ namespace CircuitCraft.Managers
                 }
 
                 // 4. Run DC operating point simulation
+                cancellationToken.ThrowIfCancellationRequested();
                 var request = SimulationRequest.DCOperatingPoint(netlist);
-                _lastSimulationResult = _simulationService.Run(request);
+                _lastSimulationResult = await _simulationService.RunAsync(request, cancellationToken);
 
                 // 5. Handle results
                 HandleSimulationResult(_lastSimulationResult);
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("GameManager: Simulation cancelled.");
+                _lastSimulationResult = SimulationResult.Failure(
+                    SimulationType.DCOperatingPoint,
+                    SimulationStatus.Error,
+                    "Simulation cancelled.");
+                OnSimulationCompleted?.Invoke(_lastSimulationResult);
             }
             catch (InvalidOperationException ex)
             {

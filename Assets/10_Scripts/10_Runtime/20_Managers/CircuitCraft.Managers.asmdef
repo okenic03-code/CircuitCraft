@@ -1,7 +1,7 @@
 {
     "name": "CircuitCraft.Managers",
     "rootNamespace": "CircuitCraft.Managers",
-    "references": ["CircuitCraft.Core", "CircuitCraft.Data", "CircuitCraft.Systems"],
+    "references": ["CircuitCraft.Core", "CircuitCraft.Data", "CircuitCraft.Systems", "UniTask"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

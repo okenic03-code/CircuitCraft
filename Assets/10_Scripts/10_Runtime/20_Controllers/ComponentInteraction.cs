@@ -153,15 +153,8 @@ namespace CircuitCraft.Controllers
             Vector2Int gridPos = _selectedComponent.GridPosition;
             
             // Search for component at this grid position
-            PlacedComponent placedComponent = null;
-            foreach (var component in _boardState.Components)
-            {
-                if (component.Position.X == gridPos.x && component.Position.Y == gridPos.y)
-                {
-                    placedComponent = component;
-                    break;
-                }
-            }
+            var boardPosition = new GridPosition(gridPos.x, gridPos.y);
+            PlacedComponent placedComponent = _boardState.GetComponentAt(boardPosition);
             
             if (placedComponent != null)
             {

@@ -31,24 +31,16 @@ namespace CircuitCraft.Controllers
         
         [Header("Grid Settings")]
         [SerializeField]
-        [Tooltip("Size of each grid cell in world units.")]
-        private float _cellSize = 1.0f;
-        
-        [SerializeField]
-        [Tooltip("World position of the grid's origin (0,0).")]
-        private Vector3 _gridOrigin = Vector3.zero;
-        
-        [SerializeField]
-        [Tooltip("Width of the grid (number of cells).")]
-        private int _gridWidth = 20;
-        
-        [SerializeField]
-        [Tooltip("Height of the grid (number of cells).")]
-        private int _gridHeight = 20;
+        [Tooltip("Grid configuration settings (cell size, origin, dimensions).")]
+        private GridSettings _gridSettings;
         
         // State
         private ComponentDefinition _selectedComponent;
         private GameObject _previewInstance;
+        
+        // Cached preview component references
+        private ComponentView _cachedPreviewView;
+        private SpriteRenderer _cachedPreviewSprite;
         
         private void Awake()
         {
@@ -71,6 +63,11 @@ namespace CircuitCraft.Controllers
             if (_componentViewPrefab == null)
             {
                 Debug.LogWarning("PlacementController: ComponentView prefab is not assigned!");
+            }
+            
+            if (_gridSettings == null)
+            {
+                Debug.LogError("PlacementController: GridSettings reference is missing!");
             }
         }
         
@@ -108,29 +105,28 @@ namespace CircuitCraft.Controllers
         /// </summary>
         private void UpdatePreview()
         {
-            if (_selectedComponent == null || _previewInstance == null)
+            if (_selectedComponent == null || _previewInstance == null || _gridSettings == null)
                 return;
             
             // Get cursor grid position
             Vector2Int gridPos = GridUtility.ScreenToGridPosition(
                 Input.mousePosition,
                 _camera,
-                _cellSize,
-                _gridOrigin
+                _gridSettings.CellSize,
+                _gridSettings.GridOrigin
             );
             
             // Check if position is valid
             bool isValid = IsValidPlacement(gridPos);
             
             // Update preview world position
-            Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _cellSize, _gridOrigin);
+            Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
             _previewInstance.transform.position = worldPos;
             
-            // Update preview color (use hover color for invalid state)
-            ComponentView previewView = _previewInstance.GetComponent<ComponentView>();
-            if (previewView != null)
+            // Update preview color (use hover color for invalid state) - using cached reference
+            if (_cachedPreviewView != null)
             {
-                previewView.SetHovered(!isValid);
+                _cachedPreviewView.SetHovered(!isValid);
             }
         }
         
@@ -146,20 +142,20 @@ namespace CircuitCraft.Controllers
             // Instantiate preview at origin (will be positioned in UpdatePreview)
             _previewInstance = Instantiate(_componentViewPrefab, Vector3.zero, Quaternion.identity);
             
-            // Initialize ComponentView with definition
-            ComponentView view = _previewInstance.GetComponent<ComponentView>();
-            if (view != null)
+            // Cache ComponentView reference
+            _cachedPreviewView = _previewInstance.GetComponent<ComponentView>();
+            if (_cachedPreviewView != null)
             {
-                view.Initialize(_selectedComponent);
+                _cachedPreviewView.Initialize(_selectedComponent);
             }
             
-            // Make semi-transparent
-            SpriteRenderer sr = _previewInstance.GetComponent<SpriteRenderer>();
-            if (sr != null)
+            // Cache SpriteRenderer reference and make semi-transparent
+            _cachedPreviewSprite = _previewInstance.GetComponent<SpriteRenderer>();
+            if (_cachedPreviewSprite != null)
             {
-                Color c = sr.color;
+                Color c = _cachedPreviewSprite.color;
                 c.a = 0.5f; // Semi-transparent
-                sr.color = c;
+                _cachedPreviewSprite.color = c;
             }
         }
         
@@ -172,6 +168,10 @@ namespace CircuitCraft.Controllers
             {
                 Destroy(_previewInstance);
                 _previewInstance = null;
+                
+                // Clear cached references
+                _cachedPreviewView = null;
+                _cachedPreviewSprite = null;
             }
         }
         
@@ -182,7 +182,7 @@ namespace CircuitCraft.Controllers
         private void HandlePlacement()
         {
             // Only process input if we have a component selected
-            if (_selectedComponent == null)
+            if (_selectedComponent == null || _gridSettings == null)
                 return;
             
             // Check for left mouse button down
@@ -192,8 +192,8 @@ namespace CircuitCraft.Controllers
                 Vector2Int gridPos = GridUtility.ScreenToGridPosition(
                     Input.mousePosition,
                     _camera,
-                    _cellSize,
-                    _gridOrigin
+                    _gridSettings.CellSize,
+                    _gridSettings.GridOrigin
                 );
                 
                 // Validate and place component
@@ -216,8 +216,11 @@ namespace CircuitCraft.Controllers
         /// <returns>True if placement is valid, false otherwise.</returns>
         private bool IsValidPlacement(Vector2Int gridPos)
         {
+            if (_gridSettings == null)
+                return false;
+            
             // Check grid bounds
-            if (!GridUtility.IsValidGridPosition(gridPos, _gridWidth, _gridHeight))
+            if (!GridUtility.IsValidGridPosition(gridPos, _gridSettings.BoardWidth, _gridSettings.BoardHeight))
             {
                 return false;
             }
@@ -282,9 +285,9 @@ namespace CircuitCraft.Controllers
             Debug.Log($"PlacementController: Placed {_selectedComponent.DisplayName} at {position}");
             
             // Instantiate ComponentView prefab at world position
-            if (_componentViewPrefab != null)
+            if (_componentViewPrefab != null && _gridSettings != null)
             {
-                Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _cellSize, _gridOrigin);
+                Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
                 GameObject viewObject = Instantiate(_componentViewPrefab, worldPos, Quaternion.identity);
                 
                 // Initialize ComponentView with definition
