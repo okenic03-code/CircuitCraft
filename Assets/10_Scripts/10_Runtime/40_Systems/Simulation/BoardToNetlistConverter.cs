@@ -125,6 +125,16 @@ namespace CircuitCraft.Systems
                         return NetlistElement.Diode(elementId, nodes[0], nodes[1]);
                     break;
 
+                case ComponentKind.BJT:
+                    if (nodes.Length >= 3)
+                        return NetlistElement.BJT(elementId, nodes[0], nodes[1], nodes[2]);
+                    break;
+
+                case ComponentKind.MOSFET:
+                    if (nodes.Length >= 4)
+                        return NetlistElement.MOSFET(elementId, nodes[0], nodes[1], nodes[2], nodes[3]);
+                    break;
+
                 case ComponentKind.Ground:
                     // Ground is handled via net names, not as a component
                     return null;
@@ -206,6 +216,10 @@ namespace CircuitCraft.Systems
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
                     return ElementType.Diode;
+                case ComponentKind.BJT:
+                    return ElementType.BJT;
+                case ComponentKind.MOSFET:
+                    return ElementType.MOSFET;
                 default:
                     throw new NotSupportedException($"Component kind '{kind}' not mapped to ElementType.");
             }
@@ -231,6 +245,10 @@ namespace CircuitCraft.Systems
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
                     return "D";
+                case ComponentKind.BJT:
+                    return "Q";
+                case ComponentKind.MOSFET:
+                    return "M";
                 default:
                     return "X";
             }

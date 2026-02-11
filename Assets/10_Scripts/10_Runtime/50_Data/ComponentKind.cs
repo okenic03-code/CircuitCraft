@@ -10,6 +10,8 @@ namespace CircuitCraft.Data
         Inductor,
         Diode,
         LED,
+        BJT,
+        MOSFET,
         VoltageSource,
         CurrentSource,
         Ground,

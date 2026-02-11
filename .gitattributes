@@ -1,0 +1,20 @@
+# Unity-specific line ending configuration
+* text=auto
+
+# C# files should use LF
+*.cs text eol=lf
+*.asmdef text eol=lf
+
+# Unity-specific files
+*.meta text eol=lf
+*.unity text eol=lf
+*.prefab text eol=lf
+*.asset text eol=lf
+
+# JSON files
+*.json text eol=lf
+
+# Ensure these are treated as binary
+*.dll binary
+*.so binary
+*.dylib binary
