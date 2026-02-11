@@ -1,4 +1,5 @@
 using UnityEngine;
+using CircuitCraft.Data;
 using CircuitCraft.Utils;
 
 namespace CircuitCraft.Views

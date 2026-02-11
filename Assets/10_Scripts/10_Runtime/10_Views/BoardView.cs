@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using CircuitCraft.Core;
 using CircuitCraft.Components;
+using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using CircuitCraft.Utils;
 
