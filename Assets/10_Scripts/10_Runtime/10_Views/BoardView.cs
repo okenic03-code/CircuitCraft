@@ -39,7 +39,11 @@ namespace CircuitCraft.Views
         /// </summary>
         public IReadOnlyDictionary<int, ComponentView> ComponentViews => _componentViews;
 
-        private void Awake()
+        /// <summary>
+        /// Uses Start() instead of Awake() to ensure GameManager.Awake() has already
+        /// initialized BoardState before we attempt to subscribe to its events.
+        /// </summary>
+        private void Start()
         {
             if (_gameManager != null)
             {
