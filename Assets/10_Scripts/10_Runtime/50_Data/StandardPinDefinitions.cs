@@ -13,8 +13,8 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] TwoPin => new[]
         {
-            new PinDefinition { Name = "A", LocalPosition = new Vector2Int(0, 0) },
-            new PinDefinition { Name = "B", LocalPosition = new Vector2Int(1, 0) }
+            new PinDefinition("A", new Vector2Int(0, 0)),
+            new PinDefinition("B", new Vector2Int(1, 0))
         };
         
         /// <summary>
@@ -23,9 +23,9 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] BJT => new[]
         {
-            new PinDefinition { Name = "C", LocalPosition = new Vector2Int(0, 1) },
-            new PinDefinition { Name = "B", LocalPosition = new Vector2Int(0, 0) },
-            new PinDefinition { Name = "E", LocalPosition = new Vector2Int(0, -1) }
+            new PinDefinition("C", new Vector2Int(0, 1)),
+            new PinDefinition("B", new Vector2Int(0, 0)),
+            new PinDefinition("E", new Vector2Int(0, -1))
         };
         
         /// <summary>
@@ -35,9 +35,9 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] MOSFET => new[]
         {
-            new PinDefinition { Name = "D", LocalPosition = new Vector2Int(1, 1) },
-            new PinDefinition { Name = "G", LocalPosition = new Vector2Int(0, 0) },
-            new PinDefinition { Name = "S", LocalPosition = new Vector2Int(1, -1) }
+            new PinDefinition("D", new Vector2Int(1, 1)),
+            new PinDefinition("G", new Vector2Int(0, 0)),
+            new PinDefinition("S", new Vector2Int(1, -1))
         };
         
         /// <summary>
@@ -46,8 +46,8 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] Diode => new[]
         {
-            new PinDefinition { Name = "Anode", LocalPosition = new Vector2Int(0, 0) },
-            new PinDefinition { Name = "Cathode", LocalPosition = new Vector2Int(1, 0) }
+            new PinDefinition("Anode", new Vector2Int(0, 0)),
+            new PinDefinition("Cathode", new Vector2Int(1, 0))
         };
     }
 }

@@ -25,5 +25,11 @@ namespace CircuitCraft.Data
 
         /// <summary>Grid-aligned local position of the pin relative to component origin.</summary>
         public Vector2Int LocalPosition => _localPosition;
+
+        public PinDefinition(string pinName, Vector2Int localPosition)
+        {
+            _pinName = pinName;
+            _localPosition = localPosition;
+        }
     }
 }
