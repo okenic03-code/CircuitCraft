@@ -122,17 +122,29 @@ namespace CircuitCraft.Systems
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
                     if (nodes.Length >= 2)
-                        return NetlistElement.Diode(elementId, nodes[0], nodes[1]);
+                        return NetlistElement.Diode(elementId, nodes[0], nodes[1],
+                            GetDiodeModelName(definition),
+                            definition.SaturationCurrent,
+                            definition.EmissionCoefficient);
                     break;
 
                 case ComponentKind.BJT:
                     if (nodes.Length >= 3)
-                        return NetlistElement.BJT(elementId, nodes[0], nodes[1], nodes[2]);
+                        return NetlistElement.BJT(elementId, nodes[0], nodes[1], nodes[2],
+                            GetBJTModelName(definition),
+                            definition.BJTPolarity == BJTPolarity.NPN,
+                            definition.Beta,
+                            definition.EarlyVoltage);
                     break;
 
                 case ComponentKind.MOSFET:
-                    if (nodes.Length >= 4)
-                        return NetlistElement.MOSFET(elementId, nodes[0], nodes[1], nodes[2], nodes[3]);
+                    if (nodes.Length >= 3)
+                        // Pass nodes[2] (Source) as Bulk to auto-connect
+                        return NetlistElement.MOSFET(elementId, nodes[0], nodes[1], nodes[2], nodes[2],
+                            GetMOSFETModelName(definition),
+                            definition.FETPolarity == FETPolarity.NChannel,
+                            definition.ThresholdVoltage,
+                            definition.Transconductance);
                     break;
 
                 case ComponentKind.Ground:
@@ -260,5 +272,61 @@ namespace CircuitCraft.Systems
         private double GetInductance(ComponentDefinition def) => def.InductanceHenrys > 0 ? def.InductanceHenrys : 1e-3;
         private double GetVoltage(ComponentDefinition def) => def.VoltageVolts != 0 ? def.VoltageVolts : 5.0;
         private double GetCurrent(ComponentDefinition def) => def.CurrentAmps > 0 ? def.CurrentAmps : 0.001;
+
+        /// <summary>
+        /// Gets the SPICE model name from BJT model enum.
+        /// </summary>
+        private static string GetBJTModelName(ComponentDefinition definition)
+        {
+            switch (definition.BJTModel)
+            {
+                case BJTModel._2N2222: return "2N2222";
+                case BJTModel._2N3904: return "2N3904";
+                case BJTModel._2N3906: return "2N3906";
+                case BJTModel.BC547: return "BC547";
+                case BJTModel.BC557: return "BC557";
+                case BJTModel.Generic_NPN: return "Generic_NPN";
+                case BJTModel.Generic_PNP: return "Generic_PNP";
+                case BJTModel.Custom: return "Custom_BJT";
+                default: return "2N2222";
+            }
+        }
+
+        /// <summary>
+        /// Gets the SPICE model name from MOSFET model enum.
+        /// </summary>
+        private static string GetMOSFETModelName(ComponentDefinition definition)
+        {
+            switch (definition.MOSFETModel)
+            {
+                case MOSFETModel._2N7000: return "2N7000";
+                case MOSFETModel.BS170: return "BS170";
+                case MOSFETModel.IRF540: return "IRF540";
+                case MOSFETModel.IRF9540: return "IRF9540";
+                case MOSFETModel.Generic_NMOS: return "Generic_NMOS";
+                case MOSFETModel.Generic_PMOS: return "Generic_PMOS";
+                case MOSFETModel.Custom: return "Custom_MOSFET";
+                default: return "NMOS";
+            }
+        }
+
+        /// <summary>
+        /// Gets the SPICE model name from Diode model enum.
+        /// </summary>
+        private static string GetDiodeModelName(ComponentDefinition definition)
+        {
+            switch (definition.DiodeModel)
+            {
+                case DiodeModel._1N4148: return "1N4148";
+                case DiodeModel._1N4001: return "1N4001";
+                case DiodeModel._1N5819: return "1N5819";
+                case DiodeModel.LED_Red: return "LED_Red";
+                case DiodeModel.LED_Green: return "LED_Green";
+                case DiodeModel.LED_Blue: return "LED_Blue";
+                case DiodeModel.Generic: return "Generic_Diode";
+                case DiodeModel.Custom: return "Custom_Diode";
+                default: return "1N4148";
+            }
+        }
     }
 }
