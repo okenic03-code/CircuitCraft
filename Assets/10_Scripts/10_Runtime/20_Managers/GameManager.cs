@@ -58,6 +58,20 @@ namespace CircuitCraft.Managers
         public BoardState BoardState => _boardState;
 
         /// <summary>
+        /// Resets the board to a new empty state with the specified dimensions.
+        /// Used by StageManager when loading a new stage.
+        /// </summary>
+        /// <param name="width">Board width in grid cells.</param>
+        /// <param name="height">Board height in grid cells.</param>
+        public void ResetBoard(int width, int height)
+        {
+            _boardWidth = width;
+            _boardHeight = height;
+            _boardState = new BoardState(width, height);
+            Debug.Log($"GameManager: Board reset ({width}x{height})");
+        }
+
+        /// <summary>
         /// Whether a simulation is currently in progress.
         /// </summary>
         public bool IsSimulating => _simulationManager != null && _simulationManager.IsSimulating;
