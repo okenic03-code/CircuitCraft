@@ -115,13 +115,15 @@ namespace CircuitCraft.Components
                 return;
             }
             
-            // Set sprite from definition prefab (if available)
-            // Note: Prefab field contains the full prefab - we'll assume it has a SpriteRenderer
-            // For now, we'll log and wait for proper sprite asset integration
+            // Set sprite from definition
             if (_spriteRenderer != null)
             {
-                // TODO: Extract sprite from definition.Prefab or add Sprite field to ComponentDefinition
-                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})");
+                if (_definition.Icon != null)
+                {
+                    _spriteRenderer.sprite = _definition.Icon;
+                }
+                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + 
+                    (_definition.Icon == null ? " - Warning: Icon is null" : ""));
             }
             
             // Set label text

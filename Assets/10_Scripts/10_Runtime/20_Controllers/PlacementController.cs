@@ -42,6 +42,7 @@ namespace CircuitCraft.Controllers
         // State
         private ComponentDefinition _selectedComponent;
         private GameObject _previewInstance;
+        private int _currentRotation = 0;
         
         // Cached preview component references
         private ComponentView _cachedPreviewView;
@@ -94,6 +95,7 @@ namespace CircuitCraft.Controllers
         private void Update()
         {
             HandleCancellation();
+            HandleRotation();
             UpdatePreview();
             HandlePlacement();
         }
@@ -109,6 +111,29 @@ namespace CircuitCraft.Controllers
                 if (_selectedComponent != null)
                 {
                     SetSelectedComponent(null);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Handles R key input to rotate component preview by 90° clockwise.
+        /// </summary>
+        private void HandleRotation()
+        {
+            // R key to rotate component preview
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                if (_selectedComponent != null)
+                {
+                    // Cycle rotation: 0 → 90 → 180 → 270 → 0
+                    _currentRotation = (_currentRotation + 90) % 360;
+                    
+                    // Apply rotation to preview instance
+                    if (_previewInstance != null)
+                    {
+                        // Negative because Unity Z-rotation is counter-clockwise, we want clockwise visual
+                        _previewInstance.transform.rotation = Quaternion.Euler(0, 0, -_currentRotation);
+                    }
                 }
             }
         }
@@ -274,12 +299,11 @@ namespace CircuitCraft.Controllers
                     var pinDef = _selectedComponent.Pins[i];
                     
                     // Convert PinDefinition local position to GridPosition
-                    // Assuming PinDefinition has a LocalPosition field - if not, use default (0,0)
-                    GridPosition pinLocalPos = new GridPosition(0, 0); // TODO: Get from pinDef.LocalPosition when available
+                    GridPosition pinLocalPos = new GridPosition(pinDef.LocalPosition.x, pinDef.LocalPosition.y);
                     
                     PinInstance pinInstance = new PinInstance(
                         pinIndex: i,
-                        pinName: pinDef.ToString(), // TODO: Get actual pin name from PinDefinition
+                        pinName: pinDef.PinName,
                         localPosition: pinLocalPos
                     );
                     
@@ -293,7 +317,7 @@ namespace CircuitCraft.Controllers
                 _gameManager.BoardState,
                 _selectedComponent.Id,
                 position,
-                0,
+                _currentRotation,
                 pinInstances
             );
             _commandHistory.ExecuteCommand(placeCommand);
@@ -304,7 +328,7 @@ namespace CircuitCraft.Controllers
             if (_componentViewPrefab != null && _gridSettings != null)
             {
                 Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
-                GameObject viewObject = Instantiate(_componentViewPrefab, worldPos, Quaternion.identity);
+                GameObject viewObject = Instantiate(_componentViewPrefab, worldPos, Quaternion.Euler(0, 0, -_currentRotation));
                 
                 // Initialize ComponentView with definition
                 ComponentView componentView = viewObject.GetComponent<ComponentView>();
@@ -328,6 +352,9 @@ namespace CircuitCraft.Controllers
         public void SetSelectedComponent(ComponentDefinition definition)
         {
             _selectedComponent = definition;
+            
+            // Reset rotation when selecting a new component
+            _currentRotation = 0;
             
             // Destroy old preview
             DestroyPreview();

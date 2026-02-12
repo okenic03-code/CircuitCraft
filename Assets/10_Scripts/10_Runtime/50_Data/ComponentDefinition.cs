@@ -45,6 +45,11 @@ namespace CircuitCraft.Data
         [FormerlySerializedAs("prefab")]
         private GameObject _prefab;
 
+        [SerializeField]
+        [Tooltip("Icon sprite displayed in the game world and UI palette.")]
+        [FormerlySerializedAs("icon")]
+        private Sprite _icon;
+
         // Electrical value fields for simulation
         [Header("Electrical Values")]
         [SerializeField]
@@ -138,6 +143,9 @@ namespace CircuitCraft.Data
 
         /// <summary>The visual prefab used when this component is placed.</summary>
         public GameObject Prefab => _prefab;
+
+        /// <summary>Icon sprite displayed in the game world and UI palette.</summary>
+        public Sprite Icon => _icon;
 
         // Electrical value properties for simulation
         /// <summary>Resistance in Ohms (for Resistor components).</summary>
