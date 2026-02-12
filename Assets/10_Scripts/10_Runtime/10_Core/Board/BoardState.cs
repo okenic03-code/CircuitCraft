@@ -13,9 +13,12 @@ namespace CircuitCraft.Core
         private readonly List<PlacedComponent> _components = new List<PlacedComponent>();
         private readonly Dictionary<GridPosition, PlacedComponent> _componentsByPosition = new Dictionary<GridPosition, PlacedComponent>();
         private readonly List<Net> _nets = new List<Net>();
+        private readonly List<TraceSegment> _traces = new List<TraceSegment>();
         private readonly IReadOnlyList<PlacedComponent> _readOnlyComponents;
+        private readonly IReadOnlyList<TraceSegment> _readOnlyTraces;
         private int _nextComponentId = 1;
         private int _nextNetId = 1;
+        private int _nextTraceId = 1;
 
         /// <summary>Gets the board boundaries.</summary>
         public BoardBounds Bounds { get; }
@@ -25,6 +28,9 @@ namespace CircuitCraft.Core
 
         /// <summary>Gets the read-only list of nets.</summary>
         public IReadOnlyList<Net> Nets => _nets.AsReadOnly();
+
+        /// <summary>Gets the read-only list of traces.</summary>
+        public IReadOnlyList<TraceSegment> Traces => _readOnlyTraces;
 
         /// <summary>Event raised when a component is placed on the board.</summary>
         public event Action<PlacedComponent> OnComponentPlaced;
@@ -38,6 +44,12 @@ namespace CircuitCraft.Core
         /// <summary>Event raised when two pins are connected via a net.</summary>
         public event Action<int, PinReference, PinReference> OnPinsConnected;
 
+        /// <summary>Event raised when a trace is added to the board.</summary>
+        public event Action<TraceSegment> OnTraceAdded;
+
+        /// <summary>Event raised when a trace is removed from the board.</summary>
+        public event Action<int> OnTraceRemoved;
+
         /// <summary>
         /// Creates a new board state.
         /// </summary>
@@ -47,6 +59,7 @@ namespace CircuitCraft.Core
         {
             Bounds = new BoardBounds(width, height);
             _readOnlyComponents = _components.AsReadOnly();
+            _readOnlyTraces = _traces.AsReadOnly();
         }
 
         /// <summary>
@@ -86,6 +99,12 @@ namespace CircuitCraft.Core
             if (component == null)
                 return false;
 
+            var removedPinPositions = new HashSet<GridPosition>();
+            foreach (var pin in component.Pins)
+            {
+                removedPinPositions.Add(component.GetPinWorldPosition(pin.PinIndex));
+            }
+
             // Remove component's pins from all nets
             var netsToCheck = new List<Net>();
             foreach (var net in _nets)
@@ -114,10 +133,90 @@ namespace CircuitCraft.Core
                 }
             }
 
+            // Remove any traces that start or end on removed component pins.
+            for (int i = _traces.Count - 1; i >= 0; i--)
+            {
+                var trace = _traces[i];
+                if (removedPinPositions.Contains(trace.Start) || removedPinPositions.Contains(trace.End))
+                {
+                    RemoveTrace(trace.SegmentId);
+                }
+            }
+
             _components.Remove(component);
             _componentsByPosition.Remove(component.Position);
             OnComponentRemoved?.Invoke(instanceId);
             return true;
+        }
+
+        /// <summary>
+        /// Adds a trace segment to an existing net.
+        /// </summary>
+        /// <param name="netId">Target net ID.</param>
+        /// <param name="start">Trace start position.</param>
+        /// <param name="end">Trace end position.</param>
+        /// <returns>The created trace segment.</returns>
+        public TraceSegment AddTrace(int netId, GridPosition start, GridPosition end)
+        {
+            var net = GetNet(netId);
+            if (net == null)
+                throw new ArgumentException($"Net {netId} not found.", nameof(netId));
+            if (!Bounds.Contains(start) || !Bounds.Contains(end))
+                throw new ArgumentException("Trace endpoints must be within board bounds.");
+
+            var trace = new TraceSegment(_nextTraceId++, netId, start, end);
+            _traces.Add(trace);
+            OnTraceAdded?.Invoke(trace);
+            return trace;
+        }
+
+        /// <summary>
+        /// Removes a trace segment by ID.
+        /// </summary>
+        /// <param name="segmentId">Trace segment ID.</param>
+        /// <returns>True when removed.</returns>
+        public bool RemoveTrace(int segmentId)
+        {
+            var trace = _traces.FirstOrDefault(t => t.SegmentId == segmentId);
+            if (trace == null)
+                return false;
+
+            _traces.Remove(trace);
+            OnTraceRemoved?.Invoke(segmentId);
+
+            // If the net has no remaining traces, clear pin links and remove it.
+            if (!_traces.Any(t => t.NetId == trace.NetId))
+            {
+                var net = GetNet(trace.NetId);
+                if (net != null)
+                {
+                    foreach (var pin in net.ConnectedPins.ToList())
+                    {
+                        var component = GetComponent(pin.ComponentInstanceId);
+                        var pinInstance = component?.Pins.FirstOrDefault(p => p.PinIndex == pin.PinIndex);
+                        if (pinInstance != null && pinInstance.ConnectedNetId == net.NetId)
+                        {
+                            pinInstance.ConnectedNetId = null;
+                        }
+
+                        net.RemovePin(pin);
+                    }
+
+                    _nets.Remove(net);
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Gets all trace segments that belong to the specified net.
+        /// </summary>
+        /// <param name="netId">Net ID.</param>
+        /// <returns>Matching trace segments.</returns>
+        public IReadOnlyList<TraceSegment> GetTraces(int netId)
+        {
+            return _traces.Where(t => t.NetId == netId).ToList();
         }
 
         /// <summary>
@@ -154,6 +253,19 @@ namespace CircuitCraft.Core
             var pinInstance = component.Pins.FirstOrDefault(p => p.PinIndex == pin.PinIndex);
             if (pinInstance == null)
                 throw new ArgumentException($"Pin {pin.PinIndex} not found on component {pin.ComponentInstanceId}.");
+
+            if (pinInstance.ConnectedNetId.HasValue && pinInstance.ConnectedNetId.Value != netId)
+            {
+                var previousNet = GetNet(pinInstance.ConnectedNetId.Value);
+                if (previousNet != null)
+                {
+                    previousNet.RemovePin(pin);
+                    if (previousNet.ConnectedPins.Count == 0)
+                    {
+                        _nets.Remove(previousNet);
+                    }
+                }
+            }
 
             pinInstance.ConnectedNetId = netId;
             net.AddPin(pin);
