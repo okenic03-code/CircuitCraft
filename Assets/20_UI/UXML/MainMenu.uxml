@@ -1,10 +1,28 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="../USS/MainMenu.uss" />
     <ui:VisualElement name="MainMenuContainer" class="main-menu-container">
-        <ui:Label text="CircuitCraft" class="title-text" />
-        <ui:Button name="btn-play" text="Play" class="menu-button-primary" />
-        <ui:Button name="btn-settings" text="Settings" class="menu-button-secondary" />
-        <ui:Button name="btn-quit" text="Quit" class="menu-button-secondary" />
+        
+        <!-- Title -->
+        <ui:VisualElement name="title-container" class="title-container">
+            <ui:Label text="CircuitCraft" class="title-text" />
+        </ui:VisualElement>
+        
+        <!-- Buttons with icons -->
+        <ui:Button name="btn-play" class="menu-button-primary">
+            <ui:VisualElement name="icon-play" class="button-icon icon-play" />
+            <ui:Label text="Play" class="button-label" />
+        </ui:Button>
+        
+        <ui:Button name="btn-settings" class="menu-button-secondary">
+            <ui:VisualElement name="icon-settings" class="button-icon icon-settings" />
+            <ui:Label text="Settings" class="button-label" />
+        </ui:Button>
+        
+        <ui:Button name="btn-quit" class="menu-button-secondary">
+            <ui:VisualElement name="icon-quit" class="button-icon icon-quit" />
+            <ui:Label text="Quit" class="button-label" />
+        </ui:Button>
+        
         <ui:Label name="version-text" text="v0.1.0" class="version-text" />
     </ui:VisualElement>
 </ui:UXML>

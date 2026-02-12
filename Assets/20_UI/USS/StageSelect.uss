@@ -1,0 +1,118 @@
+/* StageSelect.uss */
+
+/* Root Container */
+.stage-select-root {
+    flex-grow: 1;
+    background-color: #1E1E1E;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+/* Header */
+.world-title {
+    font-size: 32px;
+    color: #FFFFFF;
+    -unity-font-style: bold;
+    margin-bottom: 40px;
+    -unity-text-align: middle-center;
+}
+
+/* Stage Grid */
+.stage-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 60px;
+    width: 100%;
+}
+
+/* Stage Card */
+.stage-card {
+    width: 120px;
+    height: 140px;
+    background-color: #252525;
+    border-radius: 8px;
+    margin: 10px;
+    padding: 10px;
+    align-items: center;
+    justify-content: space-between;
+    border-width: 1px;
+    border-color: #3C3C3C;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.stage-card:hover {
+    background-color: #333333;
+    scale: 1.05;
+    border-color: #555555;
+}
+
+/* Locked State */
+.stage-card.locked {
+    opacity: 0.5;
+    background-color: #1A1A1A;
+    border-color: #2A2A2A;
+}
+
+.stage-card.locked:hover {
+    scale: 1.0; /* No scale effect for locked cards */
+    background-color: #1A1A1A;
+}
+
+/* Completed State */
+.stage-card.completed {
+    border-color: #4CAF50; /* Subtle green border */
+    border-width: 1px;
+}
+
+/* Typography inside Card */
+.stage-number {
+    font-size: 14px;
+    color: #888888;
+    -unity-font-style: bold;
+    margin-top: 5px;
+}
+
+.stage-name {
+    font-size: 12px;
+    color: #FFFFFF;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.stage-stars {
+    font-size: 18px;
+    color: #FFD700; /* Gold */
+    -unity-text-align: middle-center;
+    margin-bottom: 5px;
+}
+
+/* Back Button */
+.back-button {
+    width: 200px;
+    height: 40px;
+    background-color: transparent;
+    border-width: 1px;
+    border-color: #444444;
+    border-radius: 4px;
+    color: #CCCCCC;
+    font-size: 14px;
+    -unity-font-style: bold;
+    transition-property: background-color, color;
+    transition-duration: 0.15s;
+}
+
+.back-button:hover {
+    background-color: #333333;
+    color: #FFFFFF;
+    border-color: #666666;
+}
+
+.back-button:active {
+    background-color: #222222;
+}
