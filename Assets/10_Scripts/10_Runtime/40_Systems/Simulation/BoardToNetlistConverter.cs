@@ -122,26 +122,14 @@ namespace CircuitCraft.Systems
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
                     if (nodes.Length >= 2)
-<<<<<<< HEAD
-                        return NetlistElement.Diode(elementId, nodes[0], nodes[1]);
-=======
                         return NetlistElement.Diode(elementId, nodes[0], nodes[1],
                             GetDiodeModelName(definition),
                             definition.SaturationCurrent,
                             definition.EmissionCoefficient);
->>>>>>> feature/mvp-gameplay
                     break;
 
                 case ComponentKind.BJT:
                     if (nodes.Length >= 3)
-<<<<<<< HEAD
-                        return NetlistElement.BJT(elementId, nodes[0], nodes[1], nodes[2]);
-                    break;
-
-                case ComponentKind.MOSFET:
-                    if (nodes.Length >= 4)
-                        return NetlistElement.MOSFET(elementId, nodes[0], nodes[1], nodes[2], nodes[3]);
-=======
                         return NetlistElement.BJT(elementId, nodes[0], nodes[1], nodes[2],
                             GetBJTModelName(definition),
                             definition.BJTPolarity == BJTPolarity.NPN,
@@ -157,7 +145,6 @@ namespace CircuitCraft.Systems
                             definition.FETPolarity == FETPolarity.NChannel,
                             definition.ThresholdVoltage,
                             definition.Transconductance);
->>>>>>> feature/mvp-gameplay
                     break;
 
                 case ComponentKind.Ground:
@@ -285,8 +272,6 @@ namespace CircuitCraft.Systems
         private double GetInductance(ComponentDefinition def) => def.InductanceHenrys > 0 ? def.InductanceHenrys : 1e-3;
         private double GetVoltage(ComponentDefinition def) => def.VoltageVolts != 0 ? def.VoltageVolts : 5.0;
         private double GetCurrent(ComponentDefinition def) => def.CurrentAmps > 0 ? def.CurrentAmps : 0.001;
-<<<<<<< HEAD
-=======
 
         /// <summary>
         /// Gets the SPICE model name from BJT model enum.
@@ -343,6 +328,5 @@ namespace CircuitCraft.Systems
                 default: return "1N4148";
             }
         }
->>>>>>> feature/mvp-gameplay
     }
 }
