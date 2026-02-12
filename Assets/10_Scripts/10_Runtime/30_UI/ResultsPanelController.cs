@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using CircuitCraft.Managers;
 using CircuitCraft.Simulation;
+using CircuitCraft.Core;
 
 namespace CircuitCraft.UI
 {
@@ -22,19 +23,26 @@ namespace CircuitCraft.UI
     {
         [Header("Dependencies")]
         [SerializeField] private GameManager _gameManager;
+        [SerializeField] private StageManager _stageManager;
         
         private UIDocument _uiDocument;
         private VisualElement _panel;
         private Label _resultsText;
         private Button _clearButton;
         private Button _toggleButton;
+
+        // New Score Elements
+        private Label _starDisplay;
+        private Label _resultStatus;
+        private Label _scoreBreakdown;
+        private Label _totalScore;
         
         private void Awake() => Init();
 
         private void Init()
         {
             InitializeUIDocument();
-            ValidateGameManager();
+            ValidateDependencies();
         }
 
         private void InitializeUIDocument()
@@ -42,12 +50,12 @@ namespace CircuitCraft.UI
             _uiDocument = GetComponent<UIDocument>();
         }
 
-        private void ValidateGameManager()
+        private void ValidateDependencies()
         {
             if (_gameManager == null)
-            {
-                Debug.LogError("ResultsPanelController: GameManager reference is missing. Assign via Inspector.");
-            }
+                Debug.LogError("ResultsPanelController: GameManager reference is missing.");
+            if (_stageManager == null)
+                Debug.LogError("ResultsPanelController: StageManager reference is missing.");
         }
 
         private void OnEnable()
@@ -62,6 +70,11 @@ namespace CircuitCraft.UI
             _resultsText = root.Q<Label>("results-text");
             _clearButton = root.Q<Button>("btn-clear-results");
             _toggleButton = root.Q<Button>("btn-toggle-results");
+
+            _starDisplay = root.Q<Label>("star-display");
+            _resultStatus = root.Q<Label>("result-status");
+            _scoreBreakdown = root.Q<Label>("score-breakdown");
+            _totalScore = root.Q<Label>("total-score");
             
             // Bind events
             if (_clearButton != null)
@@ -72,6 +85,9 @@ namespace CircuitCraft.UI
             
             if (_gameManager != null)
                 _gameManager.OnSimulationCompleted += OnSimulationCompleted;
+
+            if (_stageManager != null)
+                _stageManager.OnStageCompleted += OnStageCompleted;
                 
             // Initial state
             UpdateToggleText();
@@ -87,12 +103,70 @@ namespace CircuitCraft.UI
             
             if (_gameManager != null)
                 _gameManager.OnSimulationCompleted -= OnSimulationCompleted;
+
+            if (_stageManager != null)
+                _stageManager.OnStageCompleted -= OnStageCompleted;
         }
         
+        private void OnStageCompleted(ScoreBreakdown breakdown)
+        {
+            DisplayScoreBreakdown(breakdown);
+            ShowPanel();
+        }
+
+        public void DisplayScoreBreakdown(ScoreBreakdown breakdown)
+        {
+            if (_resultStatus != null)
+            {
+                _resultStatus.text = breakdown.Passed ? "PASSED" : "FAILED";
+                _resultStatus.style.color = breakdown.Passed ? new StyleColor(new Color(0.2f, 0.8f, 0.2f)) : new StyleColor(new Color(0.8f, 0.2f, 0.2f));
+            }
+
+            if (_starDisplay != null)
+            {
+                _starDisplay.text = GetStarString(breakdown.Stars);
+            }
+
+            if (_scoreBreakdown != null)
+            {
+                StringBuilder sb = new StringBuilder();
+                foreach (var item in breakdown.LineItems)
+                {
+                    sb.AppendLine($"{item.Label}: {item.Points}");
+                }
+                _scoreBreakdown.text = sb.ToString();
+            }
+
+            if (_totalScore != null)
+            {
+                _totalScore.text = $"Total Score: {breakdown.TotalScore}";
+            }
+        }
+
+        private string GetStarString(int starCount)
+        {
+            return starCount switch
+            {
+                3 => "★★★",
+                2 => "★★☆",
+                1 => "★☆☆",
+                _ => "☆☆☆"
+            };
+        }
+
         private void OnSimulationCompleted(SimulationResult result)
         {
+            ClearScoreDisplay();
             DisplayResults(result);
             ShowPanel();
+        }
+
+        private void ClearScoreDisplay()
+        {
+            if (_resultStatus != null) _resultStatus.text = "";
+            if (_starDisplay != null) _starDisplay.text = "";
+            if (_scoreBreakdown != null) _scoreBreakdown.text = "";
+            if (_totalScore != null) _totalScore.text = "";
         }
         
         private void DisplayResults(SimulationResult result)

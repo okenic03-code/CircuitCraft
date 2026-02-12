@@ -7,6 +7,7 @@
             <ui:Button name="RunSimulationButton" text="Run Simulation" />
             <ui:Button name="SaveCircuitButton" text="Save Circuit" />
             <ui:Button name="LoadCircuitButton" text="Load Circuit" />
+            <ui:Button name="btn-toggle-results" text="Results" />
         </ui:VisualElement>
 
         <!-- Main Content Area -->
@@ -30,6 +31,18 @@
         <!-- Bottom Status Bar -->
         <ui:VisualElement name="StatusBar" class="status-bar">
             <ui:Label text="Ready" name="StatusText" />
+        </ui:VisualElement>
+
+        <!-- Results Panel Overlay -->
+        <ui:VisualElement name="results-panel" class="results-panel" style="display: none;">
+            <ui:Label name="result-status" class="result-status" text="PASS" />
+            <ui:Label name="star-display" class="star-display" text="★★★" />
+            <ui:Label name="score-breakdown" class="score-breakdown" text="" />
+            <ui:Label name="total-score" class="total-score" text="1000" />
+            <ui:ScrollView class="results-log-scroll">
+                <ui:Label name="results-text" class="results-text" text="" />
+            </ui:ScrollView>
+            <ui:Button name="btn-clear-results" text="Close Panel" class="close-button" />
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -35,6 +35,7 @@ namespace CircuitCraft.UI
         private List<(Button btn, Action action)> _registeredCallbacks;
         
         private VisualElement _root;
+        private Button _selectedButton;
         
         private void Awake() => Init();
 
@@ -137,6 +138,22 @@ namespace CircuitCraft.UI
         }
         
         /// <summary>
+        /// Sets the available component definitions at runtime (e.g. when loading a new stage).
+        /// Replaces the current definitions and re-registers button callbacks.
+        /// </summary>
+        /// <param name="components">The component definitions to make available in the palette.</param>
+        public void SetAvailableComponents(ComponentDefinition[] components)
+        {
+            _componentDefinitions = components;
+
+            // Re-register callbacks if we have a live root element
+            if (_root != null)
+            {
+                RegisterCallbacks();
+            }
+        }
+
+        /// <summary>
         /// Handler for component button clicks.
         /// Notifies PlacementController to select the component.
         /// </summary>
@@ -146,8 +163,16 @@ namespace CircuitCraft.UI
             {
                 _placementController.SetSelectedComponent(def);
                 
-                // TODO: Add visual feedback (highlight selected button) if needed.
-                // This could be handled via USS pseudo-states or manually setting classes.
+                // Remove "selected" class from previously selected button
+                if (_selectedButton != null)
+                {
+                    _selectedButton.RemoveFromClassList("selected");
+                }
+                
+                // Find and highlight the newly selected button
+                var btn = _root.Q<Button>($"btn-{def.Id}");
+                btn?.AddToClassList("selected");
+                _selectedButton = btn;
             }
         }
     }

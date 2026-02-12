@@ -20,6 +20,7 @@ namespace CircuitCraft.UI
         [Header("Dependencies")]
         [SerializeField] private UIDocument _uiDocument;
         [SerializeField] private GameManager _gameManager;
+        [SerializeField] private StageManager _stageManager;
         
         [Header("UI Element Names")]
         [SerializeField] private string _simulateButtonName = "simulate-button";
@@ -68,6 +69,11 @@ namespace CircuitCraft.UI
             {
                 Debug.LogError("SimulationButtonController: GameManager reference is missing.");
             }
+
+            if (_stageManager == null)
+            {
+                Debug.LogError("SimulationButtonController: StageManager reference is missing.");
+            }
         }
         
         private void OnDisable()
@@ -88,9 +94,9 @@ namespace CircuitCraft.UI
             OnSimulateClickedAsync().Forget();
         }
 
-        private async UniTaskVoid OnSimulateClickedAsync()
+        private UniTaskVoid OnSimulateClickedAsync()
         {
-            if (_gameManager == null) return;
+            if (_gameManager == null || _stageManager == null) return default;
 
             if (_statusLabel != null)
             {
@@ -105,19 +111,18 @@ namespace CircuitCraft.UI
 
             try
             {
-                await _gameManager.RunSimulationAsync(this.GetCancellationTokenOnDestroy());
+                _stageManager.RunSimulationAndEvaluate();
             }
-            catch (OperationCanceledException)
+            catch (Exception ex)
             {
-                if (_statusLabel != null)
-                {
-                    _statusLabel.text = "Simulation Cancelled";
-                }
+                Debug.LogError($"SimulationButtonController: Failed to start stage simulation. {ex.Message}");
             }
             finally
             {
                 UpdateButtonState();
             }
+
+            return default;
         }
         
         private void OnSimulationCompleted(SimulationResult result)
