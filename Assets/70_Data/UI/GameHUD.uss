@@ -8,7 +8,7 @@
     flex-grow: 1;
     flex-direction: column;
     background-color: transparent;
-    -unity-font-definition: initial; /* Reset to default font */
+    /* Font inherited from UnityDefaultRuntimeTheme */
     color: rgb(220, 220, 220);
     font-size: 12px;
 }
@@ -114,6 +114,12 @@
 
 .btn-toolbar:active {
     background-color: rgb(70, 70, 70);
+}
+
+.btn-toolbar:disabled {
+    opacity: 0.35;
+    color: rgb(120, 120, 120);
+    border-color: rgb(50, 50, 50);
 }
 
 /* ============================================================

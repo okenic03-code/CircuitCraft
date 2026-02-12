@@ -19,6 +19,12 @@
             <ui:Label name="simulation-status" text="" class="toolbar-status" />
             <ui:VisualElement class="toolbar-spacer" />
 
+            <!-- Undo/Redo -->
+            <ui:Button name="UndoButton" text="&#8592; Undo" class="btn-toolbar btn-undo" />
+            <ui:Button name="RedoButton" text="Redo &#8594;" class="btn-toolbar btn-redo" />
+
+            <ui:VisualElement class="toolbar-separator" />
+
             <!-- Board Actions -->
             <ui:Button name="ClearBoardButton" text="Clear Board" class="btn-toolbar" />
         </ui:VisualElement>

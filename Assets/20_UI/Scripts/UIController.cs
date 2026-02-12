@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
+using CircuitCraft.Controllers;
+using CircuitCraft.Data;
 using CircuitCraft.Views;
 
 namespace CircuitCraft.UI
@@ -15,6 +17,8 @@ namespace CircuitCraft.UI
         [SerializeField] private UIDocument uiDocument;
         [SerializeField] private Camera _mainCamera;
         [SerializeField] private GridCursor _gridCursor;
+        [SerializeField] private PlacementController _placementController;
+        [SerializeField] private GridSettings _gridSettings;
 
         private VisualElement _root;
         private VisualElement _toolbar;
@@ -27,6 +31,8 @@ namespace CircuitCraft.UI
         private Label _statusZoom;
 
         private Button _clearBoardButton;
+        private Button _undoButton;
+        private Button _redoButton;
 
         private void Awake()
         {
@@ -38,6 +44,9 @@ namespace CircuitCraft.UI
 
             if (_gridCursor == null)
                 _gridCursor = FindFirstObjectByType<GridCursor>();
+
+            if (_placementController == null)
+                _placementController = FindFirstObjectByType<PlacementController>();
         }
 
         private void OnEnable()
@@ -64,6 +73,12 @@ namespace CircuitCraft.UI
         {
             if (_clearBoardButton != null)
                 _clearBoardButton.clicked -= OnClearBoard;
+
+            if (_undoButton != null)
+                _undoButton.clicked -= OnUndo;
+
+            if (_redoButton != null)
+                _redoButton.clicked -= OnRedo;
         }
 
         private void Update()
@@ -83,17 +98,27 @@ namespace CircuitCraft.UI
             _statusZoom = _root.Q<Label>("StatusZoom");
 
             _clearBoardButton = _root.Q<Button>("ClearBoardButton");
+            _undoButton = _root.Q<Button>("UndoButton");
+            _redoButton = _root.Q<Button>("RedoButton");
 
             if (_statusText == null) Debug.LogWarning("UIController: StatusText not found.");
             if (_toolbar == null) Debug.LogWarning("UIController: Toolbar not found.");
             if (_gameView == null) Debug.LogWarning("UIController: GameView not found.");
             if (_statusBar == null) Debug.LogWarning("UIController: StatusBar not found.");
+            if (_undoButton == null) Debug.LogWarning("UIController: UndoButton not found.");
+            if (_redoButton == null) Debug.LogWarning("UIController: RedoButton not found.");
         }
 
         private void RegisterCallbacks()
         {
             if (_clearBoardButton != null)
                 _clearBoardButton.clicked += OnClearBoard;
+
+            if (_undoButton != null)
+                _undoButton.clicked += OnUndo;
+
+            if (_redoButton != null)
+                _redoButton.clicked += OnRedo;
         }
 
         private void UpdateStatusBar()
@@ -107,6 +132,12 @@ namespace CircuitCraft.UI
                     : "Pos: --";
             }
 
+            // Grid cell size from GridSettings
+            if (_statusGrid != null && _gridSettings != null)
+            {
+                _statusGrid.text = $"Grid: {_gridSettings.CellSize:F1}";
+            }
+
             // Zoom percentage from camera orthographic size
             if (_statusZoom != null && _mainCamera != null && _mainCamera.orthographic)
             {
@@ -114,6 +145,9 @@ namespace CircuitCraft.UI
                 float zoomPercent = (12f / _mainCamera.orthographicSize) * 100f;
                 _statusZoom.text = $"{Mathf.RoundToInt(zoomPercent)}%";
             }
+
+            // Undo/Redo button enabled state
+            UpdateUndoRedoState();
         }
 
         /// <summary>
@@ -129,6 +163,36 @@ namespace CircuitCraft.UI
         {
             Debug.Log("UIController: Clear Board requested.");
             SetStatusText("Board cleared.");
+        }
+
+        private void OnUndo()
+        {
+            if (_placementController != null && _placementController.CanUndo)
+            {
+                _placementController.UndoLastAction();
+                SetStatusText("Undo");
+            }
+        }
+
+        private void OnRedo()
+        {
+            if (_placementController != null && _placementController.CanRedo)
+            {
+                _placementController.RedoLastAction();
+                SetStatusText("Redo");
+            }
+        }
+
+        private void UpdateUndoRedoState()
+        {
+            if (_placementController == null)
+                return;
+
+            if (_undoButton != null)
+                _undoButton.SetEnabled(_placementController.CanUndo);
+
+            if (_redoButton != null)
+                _redoButton.SetEnabled(_placementController.CanRedo);
         }
     }
 }

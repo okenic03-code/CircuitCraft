@@ -201,8 +201,7 @@ MonoBehaviour:
   _gameManager: {fileID: 1268765404}
   _componentViewPrefab: {fileID: 5961584455894186576, guid: bc3e36097dd62624ba4a13bdf7304046,
     type: 3}
-  _gridCellSize: 1
-  _gridOrigin: {x: 0, y: 0, z: 0}
+  _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
 --- !u!4 &112042352
 Transform:
   m_ObjectHideFlags: 0
@@ -251,10 +250,7 @@ MonoBehaviour:
   _camera: {fileID: 866817686}
   _componentViewPrefab: {fileID: 5961584455894186576, guid: bc3e36097dd62624ba4a13bdf7304046,
     type: 3}
-  _cellSize: 1
-  _gridOrigin: {x: 0, y: 0, z: 0}
-  _gridWidth: 20
-  _gridHeight: 20
+  _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
 --- !u!4 &236485886
 Transform:
   m_ObjectHideFlags: 0
@@ -453,12 +449,12 @@ MonoBehaviour:
   _uiDocument: {fileID: 440354469}
   _placementController: {fileID: 236485885}
   _componentDefinitions:
+  - {fileID: 11400000, guid: daa77e23871833947b8fd68222472733, type: 2}
+  - {fileID: 11400000, guid: 7600b0307f210524988f9d65cf569108, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
   - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
   - {fileID: 11400000, guid: e8da7b3c2a7ca494eaa819665e3eea83, type: 2}
-  - {fileID: 11400000, guid: 7600b0307f210524988f9d65cf569108, type: 2}
-  - {fileID: 11400000, guid: daa77e23871833947b8fd68222472733, type: 2}
   - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
-  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
 --- !u!114 &440354468
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -474,6 +470,8 @@ MonoBehaviour:
   uiDocument: {fileID: 0}
   _mainCamera: {fileID: 0}
   _gridCursor: {fileID: 0}
+  _placementController: {fileID: 236485885}
+  _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
 --- !u!114 &440354469
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -648,10 +646,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 391a613dc388f734a8144815ade69326, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _gridWidth: 20
-  _gridHeight: 20
-  _cellSize: 1
-  _gridOrigin: {x: 0, y: 0, z: 0}
+  _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
   _gridColor: {r: 0.12, g: 0.12, b: 0.22, a: 0.7}
   _lineWidth: 0.02
   _lineMaterial: {fileID: 0}
@@ -701,13 +696,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _boardWidth: 20
   _boardHeight: 20
-  _componentDefinitions:
-  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
-  - {fileID: 11400000, guid: e8da7b3c2a7ca494eaa819665e3eea83, type: 2}
-  - {fileID: 11400000, guid: 7600b0307f210524988f9d65cf569108, type: 2}
-  - {fileID: 11400000, guid: daa77e23871833947b8fd68222472733, type: 2}
-  - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
-  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _simulationManager: {fileID: 1633261871}
 --- !u!4 &1268765405
 Transform:
   m_ObjectHideFlags: 0
@@ -806,10 +795,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 866817686}
-  _cellSize: 1
-  _gridOrigin: {x: 0, y: 0, z: 0}
-  _gridWidth: 20
-  _gridHeight: 20
+  _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
   _cursorSprite: {fileID: 0}
   _validColor: {r: 0, g: 1, b: 0, a: 0.5}
   _invalidColor: {r: 1, g: 0, b: 0, a: 0.5}
@@ -820,6 +806,57 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1529819355}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1633261870
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1633261872}
+  - component: {fileID: 1633261871}
+  m_Layer: 0
+  m_Name: SimulationManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1633261871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633261870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e389b570af31f74db55df1cdea5c04c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _componentDefinitions:
+  - {fileID: 11400000, guid: daa77e23871833947b8fd68222472733, type: 2}
+  - {fileID: 11400000, guid: 7600b0307f210524988f9d65cf569108, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: e8da7b3c2a7ca494eaa819665e3eea83, type: 2}
+  - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
+--- !u!4 &1633261872
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1633261870}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -841,3 +878,4 @@ SceneRoots:
   - {fileID: 236485886}
   - {fileID: 66569308}
   - {fileID: 440354470}
+  - {fileID: 1633261872}
