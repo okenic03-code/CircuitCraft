@@ -30,9 +30,15 @@ namespace CircuitCraft.Controllers
         private ComponentView _selectedComponent;
         private BoardState _boardState;
         
-        private void Awake()
+        private void Awake() => Init();
+        
+        private void Init()
         {
-            // Auto-assign camera if not set
+            InitializeCamera();
+        }
+        
+        private void InitializeCamera()
+        {
             if (_camera == null)
             {
                 _camera = Camera.main;

@@ -47,9 +47,16 @@ namespace CircuitCraft.Controllers
         private ComponentView _cachedPreviewView;
         private SpriteRenderer _cachedPreviewSprite;
         
-        private void Awake()
+        private void Awake() => Init();
+        
+        private void Init()
         {
-            // Auto-assign camera if not set
+            InitializeCamera();
+            ValidateDependencies();
+        }
+        
+        private void InitializeCamera()
+        {
             if (_camera == null)
             {
                 _camera = Camera.main;
@@ -58,8 +65,10 @@ namespace CircuitCraft.Controllers
                     Debug.LogError("PlacementController: No camera assigned and Camera.main is null!");
                 }
             }
-            
-            // Validate dependencies
+        }
+        
+        private void ValidateDependencies()
+        {
             if (_gameManager == null)
             {
                 Debug.LogError("PlacementController: GameManager reference is missing!");

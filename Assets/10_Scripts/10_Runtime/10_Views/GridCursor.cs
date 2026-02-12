@@ -24,27 +24,46 @@ namespace CircuitCraft.Views
         private Vector2Int _currentGridPosition;
         private bool _isOverGrid;
         
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
+        {
+            InitializeCamera();
+            InitializeCursorSprite();
+            ValidateGridSettings();
+            SetupInitialCursorState();
+        }
+
+        private void InitializeCamera()
         {
             // Auto-assign camera if not set
             if (_camera == null)
             {
                 _camera = Camera.main;
             }
-            
+        }
+
+        private void InitializeCursorSprite()
+        {
             // Auto-assign sprite renderer if not set
             if (_cursorSprite == null)
             {
                 _cursorSprite = GetComponentInChildren<SpriteRenderer>();
             }
-            
-            // Validate GridSettings
+        }
+
+        private void ValidateGridSettings()
+        {
+            // Validate GridSettings reference
             if (_gridSettings == null)
             {
                 Debug.LogError("GridCursor: GridSettings reference is missing!");
             }
-            
-            // Hide cursor initially
+        }
+
+        private void SetupInitialCursorState()
+        {
+            // Initialize cursor with valid color
             if (_cursorSprite != null)
             {
                 _cursorSprite.color = _validColor;

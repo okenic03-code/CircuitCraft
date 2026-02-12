@@ -26,7 +26,14 @@ namespace CircuitCraft.Controllers
         private Vector3 _lastMousePosition;
         private bool _isPanning;
         
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
+        {
+            InitializeCamera();
+        }
+
+        private void InitializeCamera()
         {
             _camera = GetComponent<Camera>();
         }

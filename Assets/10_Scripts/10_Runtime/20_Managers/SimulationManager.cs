@@ -34,12 +34,33 @@ namespace CircuitCraft.Managers
 
         public event Action<SimulationResult> OnSimulationCompleted;
 
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
+        {
+            InitializeSimulationService();
+            InitializeComponentLookup();
+            InitializeNetlistConverter();
+            RegisterServices();
+        }
+
+        private void InitializeSimulationService()
         {
             _simulationService = new SpiceSharpSimulationService();
-            RebuildComponentDefinitionLookup();
-            _netlistConverter = new BoardToNetlistConverter(this);
+        }
 
+        private void InitializeComponentLookup()
+        {
+            RebuildComponentDefinitionLookup();
+        }
+
+        private void InitializeNetlistConverter()
+        {
+            _netlistConverter = new BoardToNetlistConverter(this);
+        }
+
+        private void RegisterServices()
+        {
             ServiceRegistry.Register(this);
         }
 

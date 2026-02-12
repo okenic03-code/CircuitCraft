@@ -23,7 +23,14 @@ namespace CircuitCraft.Utils
 
         private ISimulationService _simulationService;
 
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
+        {
+            InitializeSimulationService();
+        }
+
+        private void InitializeSimulationService()
         {
             _simulationService = new SpiceSharpSimulationService();
         }

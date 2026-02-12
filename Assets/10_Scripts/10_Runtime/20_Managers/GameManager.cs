@@ -21,20 +21,30 @@ namespace CircuitCraft.Managers
         [SerializeField] private BoardState _boardState;
         [SerializeField] private SimulationManager _simulationManager;
 
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
+        {
+            InitializeServiceRegistry();
+            ValidateSimulationManager();
+            InitializeBoardState();
+        }
+
+        private void InitializeServiceRegistry()
         {
             ServiceRegistry.Register(this);
+        }
 
+        private void ValidateSimulationManager()
+        {
             if (_simulationManager == null)
             {
-                _simulationManager = FindFirstObjectByType<SimulationManager>();
+                Debug.LogError("GameManager: SimulationManager reference is missing. Assign via Inspector.");
             }
+        }
 
-            if (_simulationManager == null)
-            {
-                Debug.LogWarning("GameManager: SimulationManager reference is missing.");
-            }
-
+        private void InitializeBoardState()
+        {
             if (_boardState == null)
             {
                 _boardState = new BoardState(_boardWidth, _boardHeight);

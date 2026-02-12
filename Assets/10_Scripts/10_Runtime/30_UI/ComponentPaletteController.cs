@@ -32,13 +32,21 @@ namespace CircuitCraft.UI
         private ComponentDefinition[] _componentDefinitions;
         
         // Store registered callbacks to properly unregister them
-        private List<(Button btn, Action action)> _registeredCallbacks = new List<(Button, Action)>();
+        private List<(Button btn, Action action)> _registeredCallbacks;
         
         private VisualElement _root;
         
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
         {
-            // Validate dependencies
+            InitializeUIDocument();
+            ValidatePlacementController();
+            InitializeCallbacksList();
+        }
+
+        private void InitializeUIDocument()
+        {
             if (_uiDocument == null)
             {
                 _uiDocument = GetComponent<UIDocument>();
@@ -47,15 +55,19 @@ namespace CircuitCraft.UI
                     Debug.LogError("ComponentPaletteController: UIDocument reference is missing!");
                 }
             }
+        }
 
+        private void ValidatePlacementController()
+        {
             if (_placementController == null)
             {
-                _placementController = FindFirstObjectByType<PlacementController>();
-                if (_placementController == null)
-                {
-                    Debug.LogError("ComponentPaletteController: PlacementController reference is missing!");
-                }
+                Debug.LogError("ComponentPaletteController: PlacementController reference is missing. Assign via Inspector.");
             }
+        }
+
+        private void InitializeCallbacksList()
+        {
+            _registeredCallbacks = new List<(Button, Action)>();
         }
 
         private void OnEnable()

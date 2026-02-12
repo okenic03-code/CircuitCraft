@@ -3,7 +3,7 @@ using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace CircuitCraft.Tests.Simulation
 {
@@ -19,7 +19,7 @@ namespace CircuitCraft.Tests.Simulation
         }
 
         [Test]
-        public async Task RC_Transient_CapacitorCharging_MatchesExponentialCurve()
+        public async UniTask RC_Transient_CapacitorCharging_MatchesExponentialCurve()
         {
             // Arrange
             var netlist = new CircuitNetlist { Title = "RC Transient Test" };

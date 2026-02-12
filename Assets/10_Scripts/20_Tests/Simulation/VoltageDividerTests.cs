@@ -1,5 +1,5 @@
 using NUnit.Framework;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
 
@@ -30,7 +30,7 @@ namespace CircuitCraft.Tests.Simulation
         /// Vout = V_in * R2 / (R1 + R2) = 5 * 2000 / (1000 + 2000) = 3.333V
         /// </summary>
         [Test]
-        public async Task RunVoltageDividerTest_CalculatesCorrectOutputVoltage()
+        public async UniTask RunVoltageDividerTest_CalculatesCorrectOutputVoltage()
         {
             // Arrange
             var netlist = new CircuitNetlist { Title = "Voltage Divider Test" };

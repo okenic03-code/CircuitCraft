@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Systems;
@@ -69,7 +69,7 @@ namespace CircuitCraft.Tests.Integration
         /// Expected: Vout = 5V * 2k / (1k + 2k) = 3.333V
         /// </summary>
         [Test]
-        public async Task VoltageDivider_EndToEnd_CalculatesCorrectOutputVoltage()
+        public async UniTask VoltageDivider_EndToEnd_CalculatesCorrectOutputVoltage()
         {
             // Arrange: Create the board and circuit
             var board = new BoardState(10, 10);

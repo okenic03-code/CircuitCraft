@@ -60,14 +60,27 @@ namespace CircuitCraft.Components
         /// </summary>
         public Vector2Int GridPosition { get; set; }
         
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
         {
-            // Auto-assign components if not set in Inspector
+            InitializeSpriteRenderer();
+            InitializeLabelText();
+            ApplySpriteMaterial();
+        }
+
+        private void InitializeSpriteRenderer()
+        {
+            // Auto-assign SpriteRenderer if not set in Inspector
             if (_spriteRenderer == null)
             {
                 _spriteRenderer = GetComponent<SpriteRenderer>();
             }
-            
+        }
+
+        private void InitializeLabelText()
+        {
+            // Auto-assign label text component if not set in Inspector
             if (_labelText == null)
             {
 #if UNITY_TEXTMESHPRO
@@ -76,8 +89,11 @@ namespace CircuitCraft.Components
                 _labelText = GetComponentInChildren<TextMesh>();
 #endif
             }
-            
-            // Apply material if provided
+        }
+
+        private void ApplySpriteMaterial()
+        {
+            // Apply custom material if provided
             if (_spriteMaterial != null && _spriteRenderer != null)
             {
                 _spriteRenderer.material = _spriteMaterial;

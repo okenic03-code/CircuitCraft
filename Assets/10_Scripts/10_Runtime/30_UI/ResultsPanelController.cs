@@ -29,14 +29,24 @@ namespace CircuitCraft.UI
         private Button _clearButton;
         private Button _toggleButton;
         
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
+        {
+            InitializeUIDocument();
+            ValidateGameManager();
+        }
+
+        private void InitializeUIDocument()
         {
             _uiDocument = GetComponent<UIDocument>();
-            
-            // Try to find GameManager if not assigned
+        }
+
+        private void ValidateGameManager()
+        {
             if (_gameManager == null)
             {
-                _gameManager = FindFirstObjectByType<GameManager>();
+                Debug.LogError("ResultsPanelController: GameManager reference is missing. Assign via Inspector.");
             }
         }
 

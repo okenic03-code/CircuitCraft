@@ -2,7 +2,7 @@ using NUnit.Framework;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
 using System;
-using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace CircuitCraft.Tests.Simulation
 {
@@ -18,7 +18,7 @@ namespace CircuitCraft.Tests.Simulation
         }
 
         [Test]
-        public async Task LEDCircuit_9VSource_470OhmResistor_2VLED_HasCorrectCurrent()
+        public async UniTask LEDCircuit_9VSource_470OhmResistor_2VLED_HasCorrectCurrent()
         {
             // Arrange
             var netlist = new CircuitNetlist { Title = "LED Current Limiter Test" };
