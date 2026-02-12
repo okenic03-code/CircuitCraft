@@ -1,7 +1,7 @@
 using NUnit.Framework;
+using Cysharp.Threading.Tasks;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
-using UnityEngine;
 
 namespace CircuitCraft.Tests.Simulation
 {
@@ -30,7 +30,7 @@ namespace CircuitCraft.Tests.Simulation
         /// Vout = V_in * R2 / (R1 + R2) = 5 * 2000 / (1000 + 2000) = 3.333V
         /// </summary>
         [Test]
-        public void RunVoltageDividerTest_CalculatesCorrectOutputVoltage()
+        public async UniTask RunVoltageDividerTest_CalculatesCorrectOutputVoltage()
         {
             // Arrange
             var netlist = new CircuitNetlist { Title = "Voltage Divider Test" };
@@ -48,10 +48,10 @@ namespace CircuitCraft.Tests.Simulation
             netlist.AddProbe(ProbeDefinition.Voltage("V_out", "out"));
 
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            request.EnableSafetyChecks = true;
+            request.IsSafetyChecksEnabled = true;
 
             // Act
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request);
 
             // Assert
             Assert.IsTrue(result.IsSuccess, $"Simulation failed: {result.StatusMessage}");

@@ -1,4 +1,8 @@
+using System;
+using System.Threading;
 using UnityEngine;
+using UnityEngine.Serialization;
+using Cysharp.Threading.Tasks;
 using CircuitCraft.Simulation;
 using CircuitCraft.Simulation.SpiceSharp;
 
@@ -11,14 +15,22 @@ namespace CircuitCraft.Utils
     public class SpiceSharpTestRunner : MonoBehaviour
     {
         [Header("Test Results")]
-        [SerializeField] private bool _lastTestPassed;
+        [FormerlySerializedAs("_lastTestPassed")]
+        [SerializeField] private bool _isLastTestPassed;
         [SerializeField] private string _lastTestMessage;
         [SerializeField] private double _lastVoutValue;
         [SerializeField] private double _lastElapsedMs;
 
         private ISimulationService _simulationService;
 
-        private void Awake()
+        private void Awake() => Init();
+
+        private void Init()
+        {
+            InitializeSimulationService();
+        }
+
+        private void InitializeSimulationService()
         {
             _simulationService = new SpiceSharpSimulationService();
         }
@@ -30,6 +42,11 @@ namespace CircuitCraft.Utils
         /// </summary>
         [ContextMenu("Run Voltage Divider Test")]
         public void RunVoltageDividerTest()
+        {
+            RunVoltageDividerTestAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTask RunVoltageDividerTestAsync(CancellationToken cancellationToken)
         {
             Debug.Log("=== SpiceSharp Voltage Divider Test ===");
 
@@ -52,7 +69,7 @@ namespace CircuitCraft.Utils
 
             // Create request
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            request.EnableSafetyChecks = true;
+            request.IsSafetyChecksEnabled = true;
 
             // Run simulation
             if (_simulationService == null)
@@ -60,7 +77,7 @@ namespace CircuitCraft.Utils
                 _simulationService = new SpiceSharpSimulationService();
             }
 
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request, cancellationToken);
 
             // Log results
             Debug.Log($"Status: {result.Status} - {result.StatusMessage}");
@@ -87,19 +104,19 @@ namespace CircuitCraft.Utils
                     if (error < 0.001)
                     {
                         Debug.Log($"<color=green>TEST PASSED!</color> Vout = {vOut.Value:F4}V (expected {expected:F4}V)");
-                        _lastTestPassed = true;
+                        _isLastTestPassed = true;
                     }
                     else
                     {
                         Debug.LogError($"TEST FAILED! Vout = {vOut.Value:F4}V (expected {expected:F4}V, error = {error:F4}V)");
-                        _lastTestPassed = false;
+                        _isLastTestPassed = false;
                     }
                 }
             }
             else
             {
                 Debug.LogError($"Simulation failed: {result.StatusMessage}");
-                _lastTestPassed = false;
+                _isLastTestPassed = false;
 
                 foreach (var issue in result.Issues)
                 {
@@ -115,6 +132,11 @@ namespace CircuitCraft.Utils
         /// </summary>
         [ContextMenu("Run LED Circuit Test")]
         public void RunLEDCircuitTest()
+        {
+            RunLEDCircuitTestAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTask RunLEDCircuitTestAsync(CancellationToken cancellationToken)
         {
             Debug.Log("=== SpiceSharp LED Circuit Test ===");
 
@@ -138,14 +160,14 @@ namespace CircuitCraft.Utils
 
             // Create request with safety checks
             var request = SimulationRequest.DCOperatingPoint(netlist);
-            request.EnableSafetyChecks = true;
+            request.IsSafetyChecksEnabled = true;
 
             if (_simulationService == null)
             {
                 _simulationService = new SpiceSharpSimulationService();
             }
 
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request, cancellationToken);
 
             Debug.Log($"Status: {result.Status} - {result.StatusMessage}");
             Debug.Log($"Elapsed: {result.ElapsedMilliseconds:F2}ms");
@@ -171,12 +193,12 @@ namespace CircuitCraft.Utils
                     if (errorMa < 0.1)
                     {
                         Debug.Log($"<color=green>TEST PASSED!</color> LED current = {currentMa:F2}mA (expected {expectedMa:F2}mA)");
-                        _lastTestPassed = true;
+                        _isLastTestPassed = true;
                     }
                     else
                     {
                         Debug.LogError($"TEST FAILED! LED current = {currentMa:F2}mA (expected {expectedMa:F2}mA)");
-                        _lastTestPassed = false;
+                        _isLastTestPassed = false;
                     }
                 }
 
@@ -193,7 +215,7 @@ namespace CircuitCraft.Utils
             else
             {
                 Debug.LogError($"Simulation failed: {result.StatusMessage}");
-                _lastTestPassed = false;
+                _isLastTestPassed = false;
             }
         }
 
@@ -204,6 +226,11 @@ namespace CircuitCraft.Utils
         /// </summary>
         [ContextMenu("Run RC Transient Test")]
         public void RunRCTransientTest()
+        {
+            RunRCTransientTestAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTask RunRCTransientTestAsync(CancellationToken cancellationToken)
         {
             Debug.Log("=== SpiceSharp RC Transient Test ===");
 
@@ -231,7 +258,7 @@ namespace CircuitCraft.Utils
                 _simulationService = new SpiceSharpSimulationService();
             }
 
-            var result = _simulationService.Run(request);
+            var result = await _simulationService.RunAsync(request, cancellationToken);
 
             Debug.Log($"Status: {result.Status} - {result.StatusMessage}");
             Debug.Log($"Elapsed: {result.ElapsedMilliseconds:F2}ms");
@@ -256,19 +283,19 @@ namespace CircuitCraft.Utils
                     if (error < 0.1)
                     {
                         Debug.Log($"<color=green>TEST PASSED!</color> Final V_cap = {vCapProbe.Value:F3}V (expected ~{expected:F3}V)");
-                        _lastTestPassed = true;
+                        _isLastTestPassed = true;
                     }
                     else
                     {
                         Debug.LogError($"TEST FAILED! Final V_cap = {vCapProbe.Value:F3}V (expected ~{expected:F3}V)");
-                        _lastTestPassed = false;
+                        _isLastTestPassed = false;
                     }
                 }
             }
             else
             {
                 Debug.LogError($"Simulation failed: {result.StatusMessage}");
-                _lastTestPassed = false;
+                _isLastTestPassed = false;
 
                 foreach (var issue in result.Issues)
                 {
@@ -283,18 +310,30 @@ namespace CircuitCraft.Utils
         [ContextMenu("Run All Tests")]
         public void RunAllTests()
         {
+            RunAllTestsAsync(this.GetCancellationTokenOnDestroy()).Forget();
+        }
+
+        private async UniTaskVoid RunAllTestsAsync(CancellationToken cancellationToken)
+        {
             Debug.Log("=== Running All SpiceSharp Tests ===\n");
-            
-            RunVoltageDividerTest();
-            Debug.Log("");
-            
-            RunLEDCircuitTest();
-            Debug.Log("");
-            
-            RunRCTransientTest();
-            Debug.Log($"Last test passed: {_lastTestPassed}");
-            
-            Debug.Log("\n=== All Tests Complete ===");
+
+            try
+            {
+                await RunVoltageDividerTestAsync(cancellationToken);
+                Debug.Log("");
+
+                await RunLEDCircuitTestAsync(cancellationToken);
+                Debug.Log("");
+
+                await RunRCTransientTestAsync(cancellationToken);
+                Debug.Log($"Last test passed: {_isLastTestPassed}");
+
+                Debug.Log("\n=== All Tests Complete ===");
+            }
+            catch (OperationCanceledException)
+            {
+                Debug.Log("SpiceSharp tests cancelled.");
+            }
         }
     }
 }

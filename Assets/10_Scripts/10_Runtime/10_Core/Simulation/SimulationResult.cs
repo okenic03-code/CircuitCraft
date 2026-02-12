@@ -121,7 +121,7 @@ namespace CircuitCraft.Simulation
         /// <summary>
         /// Whether the simulation ran at all (even if with errors).
         /// </summary>
-        public bool Ran { get; set; }
+        public bool HasRun { get; set; }
 
         /// <summary>
         /// Overall status of the simulation.
@@ -223,7 +223,7 @@ namespace CircuitCraft.Simulation
         {
             return new SimulationResult
             {
-                Ran = true,
+                HasRun = true,
                 Status = SimulationStatus.Success,
                 StatusMessage = "Simulation completed successfully",
                 SimulationType = simType,
@@ -238,7 +238,7 @@ namespace CircuitCraft.Simulation
         {
             return new SimulationResult
             {
-                Ran = false,
+                HasRun = false,
                 Status = status,
                 StatusMessage = message,
                 SimulationType = simType

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using SpiceSharp;
 using SpiceSharp.Components;
 using SpiceSharp.Simulations;
@@ -29,38 +31,53 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// </summary>
         /// <param name="circuit">The SpiceSharp circuit to simulate.</param>
         /// <param name="netlist">The domain netlist (for probe definitions).</param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>Simulation result with probe measurements.</returns>
-        public SimulationResult RunDCOperatingPoint(Circuit circuit, CircuitNetlist netlist)
+        public async UniTask<SimulationResult> RunDCOperatingPointAsync(
+            Circuit circuit,
+            CircuitNetlist netlist,
+            CancellationToken cancellationToken = default)
         {
-            var stopwatch = Stopwatch.StartNew();
-            var result = SimulationResult.Success(SimulationType.DCOperatingPoint, 0);
-
-            try
+            return await UniTask.RunOnThreadPool(() =>
             {
-                var op = new OP("op");
-                var exports = CreateExports(op, netlist);
+                cancellationToken.ThrowIfCancellationRequested();
 
-                op.ExportSimulationData += (sender, args) =>
+                var stopwatch = Stopwatch.StartNew();
+                var result = SimulationResult.Success(SimulationType.DCOperatingPoint, 0);
+
+                try
                 {
-                    CollectDCResults(exports, netlist.Probes, result);
-                };
+                    var op = new OP("op");
+                    var exports = CreateExports(op, netlist);
 
-                op.Run(circuit);
+                    op.ExportSimulationData += (sender, args) =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        CollectDCResults(exports, netlist.Probes, result);
+                    };
 
-                stopwatch.Stop();
-                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
-                result.StatusMessage = $"DC operating point completed in {result.ElapsedMilliseconds:F1}ms";
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                result = SimulationResult.Failure(SimulationType.DCOperatingPoint, 
-                    SimulationStatus.Error, $"Simulation error: {ex.Message}");
-                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
-                result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
-            }
+                    cancellationToken.ThrowIfCancellationRequested();
+                    op.Run(circuit);
 
-            return result;
+                    stopwatch.Stop();
+                    result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                    result.StatusMessage = $"DC operating point completed in {result.ElapsedMilliseconds:F1}ms";
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    stopwatch.Stop();
+                    result = SimulationResult.Failure(SimulationType.DCOperatingPoint,
+                        SimulationStatus.Error, $"Simulation error: {ex.Message}");
+                    result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                    result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
+                }
+
+                return result;
+            }, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -69,52 +86,69 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// <param name="circuit">The SpiceSharp circuit to simulate.</param>
         /// <param name="netlist">The domain netlist (for probe definitions).</param>
         /// <param name="config">Transient simulation configuration.</param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>Simulation result with probe measurements over time.</returns>
-        public SimulationResult RunTransient(Circuit circuit, CircuitNetlist netlist, TransientConfig config)
+        public async UniTask<SimulationResult> RunTransientAsync(
+            Circuit circuit,
+            CircuitNetlist netlist,
+            TransientConfig config,
+            CancellationToken cancellationToken = default)
         {
-            var stopwatch = Stopwatch.StartNew();
-            var result = SimulationResult.Success(SimulationType.Transient, 0);
-
-            try
+            return await UniTask.RunOnThreadPool(() =>
             {
-                var step = config.MaxStep > 0 ? config.MaxStep : config.StopTime / 100;
-                var tran = new Transient("tran", step, config.StopTime);
-                var exports = CreateExports(tran, netlist);
+                cancellationToken.ThrowIfCancellationRequested();
 
-                // Create temporary storage for time series data
-                var probeData = new Dictionary<string, List<double>>();
-                var timePoints = new List<double>();
-                
-                foreach (var probe in netlist.Probes)
+                var stopwatch = Stopwatch.StartNew();
+                var result = SimulationResult.Success(SimulationType.Transient, 0);
+
+                try
                 {
-                    probeData[probe.Id] = new List<double>();
+                    var step = config.MaxStep > 0 ? config.MaxStep : config.StopTime / 100;
+                    var tran = new Transient("tran", step, config.StopTime);
+                    var exports = CreateExports(tran, netlist);
+
+                    // Create temporary storage for time series data
+                    var probeData = new Dictionary<string, List<double>>();
+                    var timePoints = new List<double>();
+
+                    foreach (var probe in netlist.Probes)
+                    {
+                        probeData[probe.Id] = new List<double>();
+                    }
+
+                    tran.ExportSimulationData += (sender, args) =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        timePoints.Add(args.Time);
+                        CollectTransientPoint(exports, netlist.Probes, probeData);
+                    };
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    tran.Run(circuit);
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    // Build final results
+                    BuildTransientResults(netlist.Probes, probeData, timePoints, result);
+
+                    stopwatch.Stop();
+                    result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                    result.StatusMessage = $"Transient completed in {result.ElapsedMilliseconds:F1}ms ({timePoints.Count} points)";
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    stopwatch.Stop();
+                    result = SimulationResult.Failure(SimulationType.Transient,
+                        SimulationStatus.Error, $"Simulation error: {ex.Message}");
+                    result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                    result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
                 }
 
-                tran.ExportSimulationData += (sender, args) =>
-                {
-                    timePoints.Add(args.Time);
-                    CollectTransientPoint(exports, netlist.Probes, probeData);
-                };
-
-                tran.Run(circuit);
-
-                // Build final results
-                BuildTransientResults(netlist.Probes, probeData, timePoints, result);
-
-                stopwatch.Stop();
-                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
-                result.StatusMessage = $"Transient completed in {result.ElapsedMilliseconds:F1}ms ({timePoints.Count} points)";
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                result = SimulationResult.Failure(SimulationType.Transient, 
-                    SimulationStatus.Error, $"Simulation error: {ex.Message}");
-                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
-                result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
-            }
-
-            return result;
+                return result;
+            }, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -123,67 +157,84 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// <param name="circuit">The SpiceSharp circuit to simulate.</param>
         /// <param name="netlist">The domain netlist (for probe definitions).</param>
         /// <param name="config">DC sweep configuration.</param>
+        /// <param name="cancellationToken">Optional cancellation token.</param>
         /// <returns>Simulation result with probe measurements at each sweep point.</returns>
-        public SimulationResult RunDCSweep(Circuit circuit, CircuitNetlist netlist, DCSweepConfig config)
+        public async UniTask<SimulationResult> RunDCSweepAsync(
+            Circuit circuit,
+            CircuitNetlist netlist,
+            DCSweepConfig config,
+            CancellationToken cancellationToken = default)
         {
-            var stopwatch = Stopwatch.StartNew();
-            var result = SimulationResult.Success(SimulationType.DCSweep, 0);
-
-            try
+            return await UniTask.RunOnThreadPool(() =>
             {
-                var dc = new DC("dc", config.SourceId, config.StartValue, config.StopValue, config.StepValue);
-                var exports = CreateExports(dc, netlist);
+                cancellationToken.ThrowIfCancellationRequested();
 
-                // Create temporary storage for sweep data
-                var probeData = new Dictionary<string, List<double>>();
-                var sweepPoints = new List<double>();
-                
-                foreach (var probe in netlist.Probes)
+                var stopwatch = Stopwatch.StartNew();
+                var result = SimulationResult.Success(SimulationType.DCSweep, 0);
+
+                try
                 {
-                    probeData[probe.Id] = new List<double>();
-                }
+                    var dc = new DC("dc", config.SourceId, config.StartValue, config.StopValue, config.StepValue);
+                    var exports = CreateExports(dc, netlist);
 
-                dc.ExportSimulationData += (sender, args) =>
-                {
-                    sweepPoints.Add(dc.GetCurrentSweepValue().ToArray()[0]);
-                    CollectTransientPoint(exports, netlist.Probes, probeData);
-                };
+                    // Create temporary storage for sweep data
+                    var probeData = new Dictionary<string, List<double>>();
+                    var sweepPoints = new List<double>();
 
-                dc.Run(circuit);
-
-                // Build final results
-                foreach (var probe in netlist.Probes)
-                {
-                    if (!probeData.TryGetValue(probe.Id, out var data)) continue;
-
-                    result.ProbeResults.Add(new ProbeResult
+                    foreach (var probe in netlist.Probes)
                     {
-                        ProbeId = probe.Id,
-                        Type = probe.Type,
-                        Target = probe.Target,
-                        MinValue = data.Count > 0 ? data.Min() : 0,
-                        MaxValue = data.Count > 0 ? data.Max() : 0,
-                        AverageValue = data.Count > 0 ? data.Average() : 0,
-                        Value = data.Count > 0 ? data[data.Count - 1] : 0,
-                        TimePoints = new List<double>(sweepPoints),
-                        Values = new List<double>(data)
-                    });
+                        probeData[probe.Id] = new List<double>();
+                    }
+
+                    dc.ExportSimulationData += (sender, args) =>
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        sweepPoints.Add(dc.GetCurrentSweepValue().ToArray()[0]);
+                        CollectTransientPoint(exports, netlist.Probes, probeData);
+                    };
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    dc.Run(circuit);
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    // Build final results
+                    foreach (var probe in netlist.Probes)
+                    {
+                        if (!probeData.TryGetValue(probe.Id, out var data)) continue;
+
+                        result.ProbeResults.Add(new ProbeResult
+                        {
+                            ProbeId = probe.Id,
+                            Type = probe.Type,
+                            Target = probe.Target,
+                            MinValue = data.Count > 0 ? data.Min() : 0,
+                            MaxValue = data.Count > 0 ? data.Max() : 0,
+                            AverageValue = data.Count > 0 ? data.Average() : 0,
+                            Value = data.Count > 0 ? data[data.Count - 1] : 0,
+                            TimePoints = new List<double>(sweepPoints),
+                            Values = new List<double>(data)
+                        });
+                    }
+
+                    stopwatch.Stop();
+                    result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                    result.StatusMessage = $"DC sweep completed in {result.ElapsedMilliseconds:F1}ms ({sweepPoints.Count} points)";
+                }
+                catch (OperationCanceledException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    stopwatch.Stop();
+                    result = SimulationResult.Failure(SimulationType.DCSweep,
+                        SimulationStatus.Error, $"Simulation error: {ex.Message}");
+                    result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
+                    result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
                 }
 
-                stopwatch.Stop();
-                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
-                result.StatusMessage = $"DC sweep completed in {result.ElapsedMilliseconds:F1}ms ({sweepPoints.Count} points)";
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                result = SimulationResult.Failure(SimulationType.DCSweep, 
-                    SimulationStatus.Error, $"Simulation error: {ex.Message}");
-                result.ElapsedMilliseconds = stopwatch.Elapsed.TotalMilliseconds;
-                result.Issues.Add(SimulationIssue.ConvergenceFailure(ex.Message));
-            }
-
-            return result;
+                return result;
+            }, cancellationToken: cancellationToken);
         }
 
         /// <summary>

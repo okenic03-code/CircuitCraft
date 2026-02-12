@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60c684b44d897ec448ff093554857a02, type: 3}
+  m_Name: MOSFET_2N7000
+  m_EditorClassIdentifier: 
+  _id: mosfet-2n7000
+  _displayName: 2N7000 N-Channel MOSFET
+  _kind: 6
+  _pins: []
+  _footprint:
+    _size: {x: 0, y: 0}
+  _baseCost: 30
+  _prefab: {fileID: 0}
+  _resistanceOhms: 0
+  _voltageVolts: 0
+  _capacitanceFarads: 0
+  _inductanceHenrys: 0
+  _currentAmps: 0
+  _bjtPolarity: 0
+  _bjtModel: 0
+  _beta: 100
+  _earlyVoltage: 75
+  _fetPolarity: 0
+  _mosfetModel: 2
+  _thresholdVoltage: 2
+  _transconductance: 0.3
+  _diodeModel: 0
+  _saturationCurrent: 0.000000001
+  _emissionCoefficient: 1.8
+  _forwardVoltage: 0.7

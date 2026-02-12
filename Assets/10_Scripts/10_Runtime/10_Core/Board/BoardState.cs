@@ -11,7 +11,9 @@ namespace CircuitCraft.Core
     public class BoardState
     {
         private readonly List<PlacedComponent> _components = new List<PlacedComponent>();
+        private readonly Dictionary<GridPosition, PlacedComponent> _componentsByPosition = new Dictionary<GridPosition, PlacedComponent>();
         private readonly List<Net> _nets = new List<Net>();
+        private readonly IReadOnlyList<PlacedComponent> _readOnlyComponents;
         private int _nextComponentId = 1;
         private int _nextNetId = 1;
 
@@ -19,7 +21,7 @@ namespace CircuitCraft.Core
         public BoardBounds Bounds { get; }
 
         /// <summary>Gets the read-only list of placed components.</summary>
-        public IReadOnlyList<PlacedComponent> Components => _components.AsReadOnly();
+        public IReadOnlyList<PlacedComponent> Components => _readOnlyComponents;
 
         /// <summary>Gets the read-only list of nets.</summary>
         public IReadOnlyList<Net> Nets => _nets.AsReadOnly();
@@ -44,6 +46,7 @@ namespace CircuitCraft.Core
         public BoardState(int width, int height)
         {
             Bounds = new BoardBounds(width, height);
+            _readOnlyComponents = _components.AsReadOnly();
         }
 
         /// <summary>
@@ -60,9 +63,13 @@ namespace CircuitCraft.Core
             if (!Bounds.Contains(position))
                 throw new ArgumentException($"Position {position} is outside board bounds.");
 
+            if (_componentsByPosition.ContainsKey(position))
+                throw new InvalidOperationException($"Position {position} is already occupied.");
+
             var instanceId = _nextComponentId++;
             var component = new PlacedComponent(instanceId, componentDefId, position, rotation, pins);
             _components.Add(component);
+            _componentsByPosition.Add(position, component);
 
             OnComponentPlaced?.Invoke(component);
             return component;
@@ -79,37 +86,38 @@ namespace CircuitCraft.Core
             if (component == null)
                 return false;
 
-        // Remove component's pins from all nets
-        var netsToCheck = new List<Net>();
-        foreach (var net in _nets)
-        {
-            var pinsToRemove = net.ConnectedPins
-                .Where(p => p.ComponentInstanceId == instanceId)
-                .ToList();
-            foreach (var pin in pinsToRemove)
+            // Remove component's pins from all nets
+            var netsToCheck = new List<Net>();
+            foreach (var net in _nets)
             {
-                net.RemovePin(pin);
-            }
-            
-            // Track nets that might now be empty
-            if (pinsToRemove.Count > 0)
-            {
-                netsToCheck.Add(net);
-            }
-        }
-        
-        // Remove empty nets
-        foreach (var net in netsToCheck)
-        {
-            if (net.ConnectedPins.Count == 0)
-            {
-                _nets.Remove(net);
-            }
-        }
+                var pinsToRemove = net.ConnectedPins
+                    .Where(p => p.ComponentInstanceId == instanceId)
+                    .ToList();
+                foreach (var pin in pinsToRemove)
+                {
+                    net.RemovePin(pin);
+                }
 
-        _components.Remove(component);
-        OnComponentRemoved?.Invoke(instanceId);
-        return true;
+                // Track nets that might now be empty
+                if (pinsToRemove.Count > 0)
+                {
+                    netsToCheck.Add(net);
+                }
+            }
+
+            // Remove empty nets
+            foreach (var net in netsToCheck)
+            {
+                if (net.ConnectedPins.Count == 0)
+                {
+                    _nets.Remove(net);
+                }
+            }
+
+            _components.Remove(component);
+            _componentsByPosition.Remove(component.Position);
+            OnComponentRemoved?.Invoke(instanceId);
+            return true;
         }
 
         /// <summary>
@@ -196,7 +204,18 @@ namespace CircuitCraft.Core
         /// <returns>True if position is occupied.</returns>
         public bool IsPositionOccupied(GridPosition pos)
         {
-            return _components.Any(c => c.Position.Equals(pos));
+            return _componentsByPosition.ContainsKey(pos);
+        }
+
+        /// <summary>
+        /// Gets a component at a specific board position.
+        /// </summary>
+        /// <param name="position">Position to query.</param>
+        /// <returns>The component at the position, or null if unoccupied.</returns>
+        public PlacedComponent GetComponentAt(GridPosition position)
+        {
+            _componentsByPosition.TryGetValue(position, out var component);
+            return component;
         }
 
         /// <summary>

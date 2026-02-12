@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CircuitCraft.Data
 {
@@ -11,9 +12,10 @@ namespace CircuitCraft.Data
     {
         [SerializeField]
         [Tooltip("Size of the component in grid cells (width, height).")]
-        private Vector2Int size;
+        [FormerlySerializedAs("size")]
+        private Vector2Int _size;
 
         /// <summary>Size of the component in grid cells (width, height).</summary>
-        public Vector2Int Size => size;
+        public Vector2Int Size => _size;
     }
 }

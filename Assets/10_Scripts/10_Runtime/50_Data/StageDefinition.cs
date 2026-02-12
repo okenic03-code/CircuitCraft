@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CircuitCraft.Data
 {
@@ -12,69 +13,78 @@ namespace CircuitCraft.Data
         [Header("General Info")]
         [SerializeField]
         [Tooltip("Unique internal identifier for the stage (e.g., 'w1-s1').")]
-        private string stageId;
+        [FormerlySerializedAs("stageId")]
+        private string _stageId;
 
         [SerializeField]
         [Tooltip("User-facing name of the stage.")]
-        private string displayName;
+        [FormerlySerializedAs("displayName")]
+        private string _displayName;
 
         [SerializeField]
         [Tooltip("Identifier for the world this stage belongs to.")]
-        private string worldId;
+        [FormerlySerializedAs("worldId")]
+        private string _worldId;
 
         [SerializeField]
         [Tooltip("The sequential number of the stage within its world.")]
-        private int stageNumber;
+        [FormerlySerializedAs("stageNumber")]
+        private int _stageNumber;
 
         [Header("Grid Configuration")]
         [SerializeField]
         [Tooltip("The dimensions of the playable grid.")]
-        private Vector2Int gridSize;
+        [FormerlySerializedAs("gridSize")]
+        private Vector2Int _gridSize;
 
         [Header("Allowed Components")]
         [SerializeField]
         [Tooltip("The set of components the player is allowed to use in this stage.")]
-        private ComponentDefinition[] allowedComponents;
+        [FormerlySerializedAs("allowedComponents")]
+        private ComponentDefinition[] _allowedComponents;
 
         [Header("Win Conditions & Simulation")]
         [SerializeField]
         [Tooltip("Test cases to verify the player's circuit against.")]
-        private StageTestCase[] testCases;
+        [FormerlySerializedAs("testCases")]
+        private StageTestCase[] _testCases;
 
         [SerializeField]
         [Tooltip("Maximum budget allowed for the circuit. 0 means no limit.")]
-        private float budgetLimit;
+        [FormerlySerializedAs("budgetLimit")]
+        private float _budgetLimit;
 
         [Header("Additional Constraints")]
         [SerializeField]
         [Tooltip("Extra constraints for this stage.")]
-        private StageConstraints constraints;
+        [FormerlySerializedAs("constraints")]
+        private StageConstraints _constraints;
 
         /// <summary>Unique internal identifier for the stage.</summary>
-        public string StageId => stageId;
+        public string StageId => _stageId;
 
         /// <summary>User-facing name of the stage.</summary>
-        public string DisplayName => displayName;
+        public string DisplayName => _displayName;
 
         /// <summary>Identifier for the world this stage belongs to.</summary>
-        public string WorldId => worldId;
+        public string WorldId => _worldId;
 
         /// <summary>The sequential number of the stage within its world.</summary>
-        public int StageNumber => stageNumber;
+        public int StageNumber => _stageNumber;
 
         /// <summary>The dimensions of the playable grid.</summary>
-        public Vector2Int GridSize => gridSize;
+        public Vector2Int GridSize => _gridSize;
 
         /// <summary>The set of components the player is allowed to use in this stage.</summary>
-        public ComponentDefinition[] AllowedComponents => allowedComponents;
+        public ComponentDefinition[] AllowedComponents => _allowedComponents;
 
         /// <summary>Test cases to verify the player's circuit against.</summary>
-        public StageTestCase[] TestCases => testCases;
+        public StageTestCase[] TestCases => _testCases;
 
         /// <summary>Maximum budget allowed for the circuit. 0 means no limit.</summary>
-        public float BudgetLimit => budgetLimit;
+        public float BudgetLimit => _budgetLimit;
 
         /// <summary>Extra constraints for this stage.</summary>
-        public StageConstraints Constraints => constraints;
+        public StageConstraints Constraints => _constraints;
     }
 }
