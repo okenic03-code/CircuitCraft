@@ -1,0 +1,194 @@
+using System.Collections.Generic;
+using System.Linq;
+using CircuitCraft.Core;
+
+namespace CircuitCraft.Commands
+{
+    /// <summary>
+    /// Command that routes trace segments between two pins and manages net connections.
+    /// Supports undo/redo through the CommandHistory system.
+    /// </summary>
+    public class RouteTraceCommand : ICommand
+    {
+        private readonly BoardState _boardState;
+        private readonly PinReference _startPin;
+        private readonly PinReference _endPin;
+        private readonly List<(GridPosition start, GridPosition end)> _segments;
+
+        // State captured during Execute for Undo
+        private int _netId;
+        private readonly List<int> _addedSegmentIds = new List<int>();
+        private bool _createdNewNet;
+        private int? _startPinPreviousNetId;
+        private int? _endPinPreviousNetId;
+
+        public string Description => $"Route trace from {_startPin} to {_endPin}";
+
+        /// <summary>
+        /// Creates a new route trace command.
+        /// </summary>
+        /// <param name="boardState">The board state to operate on.</param>
+        /// <param name="startPin">The starting pin reference.</param>
+        /// <param name="endPin">The ending pin reference.</param>
+        /// <param name="segments">Manhattan trace segments to add.</param>
+        public RouteTraceCommand(
+            BoardState boardState,
+            PinReference startPin,
+            PinReference endPin,
+            List<(GridPosition start, GridPosition end)> segments)
+        {
+            _boardState = boardState;
+            _startPin = startPin;
+            _endPin = endPin;
+            _segments = segments;
+        }
+
+        public void Execute()
+        {
+            // Capture previous pin net connections for undo
+            _startPinPreviousNetId = GetPinConnectedNetId(_startPin);
+            _endPinPreviousNetId = GetPinConnectedNetId(_endPin);
+
+            // Resolve which net to use (may create a new one)
+            _netId = ResolveNetId();
+
+            // Connect pins to the net
+            _boardState.ConnectPinToNet(_netId, _startPin);
+            _boardState.ConnectPinToNet(_netId, _endPin);
+
+            // Add trace segments
+            _addedSegmentIds.Clear();
+            foreach (var segment in _segments)
+            {
+                var trace = _boardState.AddTrace(_netId, segment.start, segment.end);
+                _addedSegmentIds.Add(trace.SegmentId);
+            }
+        }
+
+        public void Undo()
+        {
+            // Remove all trace segments added by this command (reverse order)
+            for (int i = _addedSegmentIds.Count - 1; i >= 0; i--)
+            {
+                _boardState.RemoveTrace(_addedSegmentIds[i]);
+            }
+            _addedSegmentIds.Clear();
+
+            // BoardState.RemoveTrace auto-cleans the net when no traces remain
+            // (disconnects all pins, removes net). Check if net still exists.
+            var net = _boardState.GetNet(_netId);
+
+            if (net != null)
+            {
+                // Net still has other traces. Only disconnect pins that we newly
+                // connected (skip pins that were already on this net before Execute).
+                if (!_startPinPreviousNetId.HasValue || _startPinPreviousNetId.Value != _netId)
+                {
+                    DisconnectPinFromNet(_startPin, net);
+                }
+
+                if (!_endPinPreviousNetId.HasValue || _endPinPreviousNetId.Value != _netId)
+                {
+                    DisconnectPinFromNet(_endPin, net);
+                }
+            }
+
+            // Restore previous pin connections if they were on different nets
+            RestorePreviousPinConnection(_startPin, _startPinPreviousNetId);
+            RestorePreviousPinConnection(_endPin, _endPinPreviousNetId);
+        }
+
+        private int ResolveNetId()
+        {
+            int? startNetId = _startPinPreviousNetId;
+            int? endNetId = _endPinPreviousNetId;
+
+            if (startNetId.HasValue && endNetId.HasValue)
+            {
+                if (startNetId.Value != endNetId.Value)
+                {
+                    MergeNets(startNetId.Value, endNetId.Value);
+                }
+
+                _createdNewNet = false;
+                return startNetId.Value;
+            }
+
+            if (startNetId.HasValue)
+            {
+                _createdNewNet = false;
+                return startNetId.Value;
+            }
+
+            if (endNetId.HasValue)
+            {
+                _createdNewNet = false;
+                return endNetId.Value;
+            }
+
+            // Neither pin connected — create a new net
+            string netName = $"NET{_boardState.Nets.Count + 1}";
+            _createdNewNet = true;
+            return _boardState.CreateNet(netName).NetId;
+        }
+
+        private void MergeNets(int targetNetId, int sourceNetId)
+        {
+            if (targetNetId == sourceNetId)
+                return;
+
+            var sourceNet = _boardState.GetNet(sourceNetId);
+            if (sourceNet == null)
+                return;
+
+            foreach (var pin in sourceNet.ConnectedPins.ToList())
+            {
+                _boardState.ConnectPinToNet(targetNetId, pin);
+            }
+
+            foreach (var trace in _boardState.GetTraces(sourceNetId).ToList())
+            {
+                _boardState.AddTrace(targetNetId, trace.Start, trace.End);
+                _boardState.RemoveTrace(trace.SegmentId);
+            }
+        }
+
+        private int? GetPinConnectedNetId(PinReference pinRef)
+        {
+            var component = _boardState.GetComponent(pinRef.ComponentInstanceId);
+            if (component == null)
+                return null;
+
+            var pin = component.Pins.FirstOrDefault(p => p.PinIndex == pinRef.PinIndex);
+            return pin?.ConnectedNetId;
+        }
+
+        private void DisconnectPinFromNet(PinReference pinRef, Net net)
+        {
+            net.RemovePin(pinRef);
+
+            var component = _boardState.GetComponent(pinRef.ComponentInstanceId);
+            if (component == null)
+                return;
+
+            var pinInstance = component.Pins.FirstOrDefault(p => p.PinIndex == pinRef.PinIndex);
+            if (pinInstance != null && pinInstance.ConnectedNetId == _netId)
+            {
+                pinInstance.ConnectedNetId = null;
+            }
+        }
+
+        private void RestorePreviousPinConnection(PinReference pinRef, int? previousNetId)
+        {
+            if (!previousNetId.HasValue || previousNetId.Value == _netId)
+                return;
+
+            // Only restore if the previous net still exists
+            var previousNet = _boardState.GetNet(previousNetId.Value);
+            if (previousNet == null)
+                return;
+
+            _boardState.ConnectPinToNet(previousNetId.Value, pinRef);
+        }
+    }
+}
