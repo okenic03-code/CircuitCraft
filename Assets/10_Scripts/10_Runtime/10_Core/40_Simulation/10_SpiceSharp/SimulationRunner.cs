@@ -189,7 +189,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                     dc.ExportSimulationData += (sender, args) =>
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        sweepPoints.Add(dc.GetCurrentSweepValue().ToArray()[0]);
+                        sweepPoints.Add(dc.GetCurrentSweepValue().First());
                         CollectTransientPoint(exports, netlist.Probes, probeData);
                     };
 

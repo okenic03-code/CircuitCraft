@@ -5,8 +5,14 @@ namespace CircuitCraft.Commands
 {
     public class CommandHistory
     {
-        private readonly Stack<ICommand> _undoStack = new Stack<ICommand>();
+        private readonly int _maxCapacity;
+        private readonly List<ICommand> _undoStack = new List<ICommand>();
         private readonly Stack<ICommand> _redoStack = new Stack<ICommand>();
+
+        public CommandHistory(int maxCapacity = 100)
+        {
+            _maxCapacity = maxCapacity;
+        }
 
         public bool CanUndo => _undoStack.Count > 0;
         public bool CanRedo => _redoStack.Count > 0;
@@ -21,7 +27,13 @@ namespace CircuitCraft.Commands
                 throw new ArgumentNullException(nameof(command));
 
             command.Execute();
-            _undoStack.Push(command);
+            _undoStack.Add(command);
+
+            while (_undoStack.Count > _maxCapacity)
+            {
+                _undoStack.RemoveAt(0);
+            }
+
             _redoStack.Clear();
             OnCommandExecuted?.Invoke(command);
         }
@@ -31,7 +43,8 @@ namespace CircuitCraft.Commands
             if (!CanUndo)
                 return;
 
-            var command = _undoStack.Pop();
+            var command = _undoStack[_undoStack.Count - 1];
+            _undoStack.RemoveAt(_undoStack.Count - 1);
             command.Undo();
             _redoStack.Push(command);
             OnUndo?.Invoke(command);
@@ -44,7 +57,7 @@ namespace CircuitCraft.Commands
 
             var command = _redoStack.Pop();
             command.Execute();
-            _undoStack.Push(command);
+            _undoStack.Add(command);
             OnRedo?.Invoke(command);
         }
 

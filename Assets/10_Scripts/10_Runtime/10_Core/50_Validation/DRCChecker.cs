@@ -10,6 +10,9 @@ namespace CircuitCraft.Core
     /// </summary>
     public class DRCChecker
     {
+        private readonly Dictionary<GridPosition, HashSet<int>> _positionToNets =
+            new Dictionary<GridPosition, HashSet<int>>();
+
         /// <summary>
         /// Runs all design rule checks on the given board state.
         /// </summary>
@@ -36,23 +39,23 @@ namespace CircuitCraft.Core
         private void DetectShorts(BoardState board, List<DRCViolationItem> violations)
         {
             // Map each grid position to the set of net IDs that pass through it
-            var positionToNets = new Dictionary<GridPosition, HashSet<int>>();
+            _positionToNets.Clear();
 
             foreach (var trace in board.Traces)
             {
                 EnumerateTracePositions(trace, position =>
                 {
-                    if (!positionToNets.TryGetValue(position, out var netIds))
+                    if (!_positionToNets.TryGetValue(position, out var netIds))
                     {
                         netIds = new HashSet<int>();
-                        positionToNets[position] = netIds;
+                        _positionToNets[position] = netIds;
                     }
                     netIds.Add(trace.NetId);
                 });
             }
 
             // Any position with 2+ different net IDs is a short
-            foreach (var kvp in positionToNets)
+            foreach (var kvp in _positionToNets)
             {
                 if (kvp.Value.Count >= 2)
                 {
@@ -72,6 +75,13 @@ namespace CircuitCraft.Core
                     ));
                 }
             }
+
+            foreach (var kvp in _positionToNets)
+            {
+                kvp.Value.Clear();
+            }
+
+            _positionToNets.Clear();
         }
 
         /// <summary>
