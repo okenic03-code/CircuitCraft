@@ -1,8 +1,10 @@
 using System;
 using UnityEngine;
 using UnityEngine.UIElements;
+using CircuitCraft.Commands;
 using CircuitCraft.Controllers;
 using CircuitCraft.Data;
+using CircuitCraft.Managers;
 using CircuitCraft.Views;
 
 namespace CircuitCraft.UI
@@ -19,6 +21,9 @@ namespace CircuitCraft.UI
         [SerializeField] private GridCursor _gridCursor;
         [SerializeField] private PlacementController _placementController;
         [SerializeField] private GridSettings _gridSettings;
+        [SerializeField] private GameManager _gameManager;
+
+        private CommandHistory _commandHistory;
 
         private VisualElement _root;
         private VisualElement _toolbar;
@@ -34,6 +39,15 @@ namespace CircuitCraft.UI
         private Button _undoButton;
         private Button _redoButton;
 
+        private Vector2Int _lastGridPos = new Vector2Int(int.MinValue, int.MinValue);
+        private int _lastGridX = int.MinValue;
+        private int _lastGridY = int.MinValue;
+        private bool _lastGridValid = false;
+        private float _lastCellSize = float.MinValue;
+        private int _lastZoomPercent = int.MinValue;
+        private bool _lastCanUndo = false;
+        private bool _lastCanRedo = false;
+
         private void Awake()
         {
             if (uiDocument == null)
@@ -47,6 +61,9 @@ namespace CircuitCraft.UI
 
             if (_placementController == null)
                 _placementController = FindFirstObjectByType<PlacementController>();
+
+            if (_gameManager == null)
+                _gameManager = FindFirstObjectByType<GameManager>();
         }
 
         private void OnEnable()
@@ -65,6 +82,10 @@ namespace CircuitCraft.UI
             }
 
             QueryVisualElements();
+
+            if (_gameManager != null)
+                _commandHistory = _gameManager.CommandHistory;
+
             RegisterCallbacks();
             SetStatusText("Ready");
         }
@@ -127,15 +148,36 @@ namespace CircuitCraft.UI
             if (_statusCoords != null && _gridCursor != null)
             {
                 Vector2Int gridPos = _gridCursor.GetCurrentGridPosition();
-                _statusCoords.text = _gridCursor.IsOverValidGrid()
-                    ? $"Pos: ({gridPos.x}, {gridPos.y})"
-                    : "Pos: --";
+                bool overGrid = _gridCursor.IsOverValidGrid();
+                if (overGrid)
+                {
+                    if (!_lastGridValid || gridPos.x != _lastGridX || gridPos.y != _lastGridY)
+                    {
+                        _statusCoords.text = $"Pos: ({gridPos.x}, {gridPos.y})";
+                        _lastGridPos = gridPos;
+                        _lastGridX = gridPos.x;
+                        _lastGridY = gridPos.y;
+                        _lastGridValid = true;
+                    }
+                }
+                else if (_lastGridValid)
+                {
+                    _statusCoords.text = "Pos: --";
+                    _lastGridValid = false;
+                    _lastGridX = int.MinValue;
+                    _lastGridY = int.MinValue;
+                    _lastGridPos = new Vector2Int(int.MinValue, int.MinValue);
+                }
             }
 
             // Grid cell size from GridSettings
             if (_statusGrid != null && _gridSettings != null)
             {
-                _statusGrid.text = $"Grid: {_gridSettings.CellSize:F1} | \u221e";
+                if (!Mathf.Approximately(_lastCellSize, _gridSettings.CellSize))
+                {
+                    _statusGrid.text = $"Grid: {_gridSettings.CellSize:F1} | \u221e";
+                    _lastCellSize = _gridSettings.CellSize;
+                }
             }
 
             // Zoom percentage from camera orthographic size
@@ -143,7 +185,12 @@ namespace CircuitCraft.UI
             {
                 // Default ortho size = 12, treat as 100%
                 float zoomPercent = (12f / _mainCamera.orthographicSize) * 100f;
-                _statusZoom.text = $"{Mathf.RoundToInt(zoomPercent)}%";
+                int roundedZoomPercent = Mathf.RoundToInt(zoomPercent);
+                if (_lastZoomPercent != roundedZoomPercent)
+                {
+                    _statusZoom.text = roundedZoomPercent + "%";
+                    _lastZoomPercent = roundedZoomPercent;
+                }
             }
 
             // Undo/Redo button enabled state
@@ -167,32 +214,41 @@ namespace CircuitCraft.UI
 
         private void OnUndo()
         {
-            if (_placementController != null && _placementController.CanUndo)
+            if (_commandHistory != null && _commandHistory.CanUndo)
             {
-                _placementController.UndoLastAction();
+                _commandHistory.Undo();
                 SetStatusText("Undo");
             }
         }
 
         private void OnRedo()
         {
-            if (_placementController != null && _placementController.CanRedo)
+            if (_commandHistory != null && _commandHistory.CanRedo)
             {
-                _placementController.RedoLastAction();
+                _commandHistory.Redo();
                 SetStatusText("Redo");
             }
         }
 
         private void UpdateUndoRedoState()
         {
-            if (_placementController == null)
+            if (_commandHistory == null)
                 return;
 
-            if (_undoButton != null)
-                _undoButton.SetEnabled(_placementController.CanUndo);
+            bool canUndo = _commandHistory.CanUndo;
+            bool canRedo = _commandHistory.CanRedo;
 
-            if (_redoButton != null)
-                _redoButton.SetEnabled(_placementController.CanRedo);
+            if (_undoButton != null && _lastCanUndo != canUndo)
+            {
+                _undoButton.SetEnabled(canUndo);
+                _lastCanUndo = canUndo;
+            }
+
+            if (_redoButton != null && _lastCanRedo != canRedo)
+            {
+                _redoButton.SetEnabled(canRedo);
+                _lastCanRedo = canRedo;
+            }
         }
     }
 }

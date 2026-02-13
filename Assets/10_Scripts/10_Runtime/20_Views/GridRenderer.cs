@@ -14,6 +14,7 @@ namespace CircuitCraft.Views
         [SerializeField] private Color _gridColor = new Color(0.15f, 0.25f, 0.4f, 0.8f);
         [SerializeField] private float _lineWidth = 0.03f;
         [SerializeField] private Material _lineMaterial;
+        [SerializeField] private Shader _defaultShader;
 
         [Header("Suggested Area")]
         [SerializeField] private Color _suggestedAreaBorderColor = new Color(0.3f, 0.5f, 0.8f, 1f);
@@ -29,6 +30,7 @@ namespace CircuitCraft.Views
         private float _cachedAspect;
         private bool _hasCachedCameraState;
         private bool _forceRefresh = true;
+        private bool _visualsDirty;
         private Material _runtimeLineMaterial;
 
         private void Awake()
@@ -55,35 +57,46 @@ namespace CircuitCraft.Views
                 return;
             }
 
-            if (!_forceRefresh && !HasCameraChanged())
+            bool cameraChanged = HasCameraChanged();
+            if (!_forceRefresh && !_visualsDirty && !cameraChanged)
             {
                 return;
             }
 
             EnsureGridContainer();
-            UpdateCachedCameraState();
-            _forceRefresh = false;
 
-            float cellSize = Mathf.Max(0.0001f, _gridSettings.CellSize);
-            Vector3 origin = _gridSettings.GridOrigin;
-            Vector3 camPos = _camera.transform.position;
+            if (_forceRefresh || cameraChanged)
+            {
+                UpdateCachedCameraState();
+                _forceRefresh = false;
 
-            float halfHeight = _camera.orthographicSize;
-            float halfWidth = halfHeight * _camera.aspect;
+                float cellSize = Mathf.Max(0.0001f, _gridSettings.CellSize);
+                Vector3 origin = _gridSettings.GridOrigin;
+                Vector3 camPos = _camera.transform.position;
 
-            float worldMinX = camPos.x - halfWidth;
-            float worldMaxX = camPos.x + halfWidth;
-            float worldMinZ = camPos.z - halfHeight;
-            float worldMaxZ = camPos.z + halfHeight;
+                float halfHeight = _camera.orthographicSize;
+                float halfWidth = halfHeight * _camera.aspect;
 
-            int gridMinX = Mathf.FloorToInt((worldMinX - origin.x) / cellSize) - 1;
-            int gridMaxX = Mathf.CeilToInt((worldMaxX - origin.x) / cellSize) + 1;
-            int gridMinY = Mathf.FloorToInt((worldMinZ - origin.z) / cellSize) - 1;
-            int gridMaxY = Mathf.CeilToInt((worldMaxZ - origin.z) / cellSize) + 1;
+                float worldMinX = camPos.x - halfWidth;
+                float worldMaxX = camPos.x + halfWidth;
+                float worldMinZ = camPos.z - halfHeight;
+                float worldMaxZ = camPos.z + halfHeight;
 
-            UpdateHorizontalLines(gridMinY, gridMaxY, gridMinX, gridMaxX, origin, cellSize);
-            UpdateVerticalLines(gridMinX, gridMaxX, gridMinY, gridMaxY, origin, cellSize);
-            UpdateSuggestedAreaBorder(origin, cellSize);
+                int gridMinX = Mathf.FloorToInt((worldMinX - origin.x) / cellSize) - 1;
+                int gridMaxX = Mathf.CeilToInt((worldMaxX - origin.x) / cellSize) + 1;
+                int gridMinY = Mathf.FloorToInt((worldMinZ - origin.z) / cellSize) - 1;
+                int gridMaxY = Mathf.CeilToInt((worldMaxZ - origin.z) / cellSize) + 1;
+
+                UpdateHorizontalLines(gridMinY, gridMaxY, gridMinX, gridMaxX, origin, cellSize);
+                UpdateVerticalLines(gridMinX, gridMaxX, gridMinY, gridMaxY, origin, cellSize);
+                UpdateSuggestedAreaBorder(origin, cellSize);
+            }
+
+            if (_visualsDirty)
+            {
+                UpdateLineVisuals();
+                _visualsDirty = false;
+            }
         }
 
         private bool HasCameraChanged()
@@ -129,7 +142,7 @@ namespace CircuitCraft.Views
         private void UpdateHorizontalLines(int gridMinY, int gridMaxY, int gridMinX, int gridMaxX, Vector3 origin, float cellSize)
         {
             int neededCount = Mathf.Max(0, gridMaxY - gridMinY + 1);
-            EnsureLinePoolSize(_horizontalLines, neededCount, "HLine");
+            EnsureLinePoolSize(_horizontalLines, neededCount, "HLine", _gridColor, _lineWidth);
 
             float startX = origin.x + (gridMinX * cellSize);
             float endX = origin.x + (gridMaxX * cellSize);
@@ -141,7 +154,6 @@ namespace CircuitCraft.Views
                 float z = origin.z + (gridY * cellSize);
                 LineRenderer line = _horizontalLines[lineIndex++];
                 line.enabled = true;
-                SetLineVisual(line, _gridColor, _lineWidth);
 
                 line.positionCount = 2;
                 line.SetPosition(0, new Vector3(startX, y, z));
@@ -154,7 +166,7 @@ namespace CircuitCraft.Views
         private void UpdateVerticalLines(int gridMinX, int gridMaxX, int gridMinY, int gridMaxY, Vector3 origin, float cellSize)
         {
             int neededCount = Mathf.Max(0, gridMaxX - gridMinX + 1);
-            EnsureLinePoolSize(_verticalLines, neededCount, "VLine");
+            EnsureLinePoolSize(_verticalLines, neededCount, "VLine", _gridColor, _lineWidth);
 
             float startZ = origin.z + (gridMinY * cellSize);
             float endZ = origin.z + (gridMaxY * cellSize);
@@ -166,7 +178,6 @@ namespace CircuitCraft.Views
                 float x = origin.x + (gridX * cellSize);
                 LineRenderer line = _verticalLines[lineIndex++];
                 line.enabled = true;
-                SetLineVisual(line, _gridColor, _lineWidth);
 
                 line.positionCount = 2;
                 line.SetPosition(0, new Vector3(x, y, startZ));
@@ -178,7 +189,7 @@ namespace CircuitCraft.Views
 
         private void UpdateSuggestedAreaBorder(Vector3 origin, float cellSize)
         {
-            EnsureLinePoolSize(_suggestedAreaLines, 4, "SuggestedBorder");
+            EnsureLinePoolSize(_suggestedAreaLines, 4, "SuggestedBorder", _suggestedAreaBorderColor, _suggestedAreaBorderWidth);
 
             float x0 = origin.x;
             float z0 = origin.z;
@@ -195,13 +206,12 @@ namespace CircuitCraft.Views
         private void SetBorderLine(LineRenderer line, Vector3 start, Vector3 end)
         {
             line.enabled = true;
-            SetLineVisual(line, _suggestedAreaBorderColor, _suggestedAreaBorderWidth);
             line.positionCount = 2;
             line.SetPosition(0, start);
             line.SetPosition(1, end);
         }
 
-        private void EnsureLinePoolSize(List<LineRenderer> pool, int requiredCount, string linePrefix)
+        private void EnsureLinePoolSize(List<LineRenderer> pool, int requiredCount, string linePrefix, Color lineColor, float lineWidth)
         {
             while (pool.Count < requiredCount)
             {
@@ -210,10 +220,28 @@ namespace CircuitCraft.Views
                 lineObject.transform.SetParent(_gridContainer.transform, false);
 
                 LineRenderer line = lineObject.AddComponent<LineRenderer>();
-                ConfigureLineRenderer(line);
+                ConfigureLineRenderer(line, lineColor, lineWidth);
                 line.enabled = false;
                 line.positionCount = 0;
                 pool.Add(line);
+            }
+        }
+
+        private void UpdateLineVisuals()
+        {
+            for (int i = 0; i < _horizontalLines.Count; i++)
+            {
+                SetLineVisual(_horizontalLines[i], _gridColor, _lineWidth);
+            }
+
+            for (int i = 0; i < _verticalLines.Count; i++)
+            {
+                SetLineVisual(_verticalLines[i], _gridColor, _lineWidth);
+            }
+
+            for (int i = 0; i < _suggestedAreaLines.Count; i++)
+            {
+                SetLineVisual(_suggestedAreaLines[i], _suggestedAreaBorderColor, _suggestedAreaBorderWidth);
             }
         }
 
@@ -253,7 +281,12 @@ namespace CircuitCraft.Views
 
         private void ConfigureLineRenderer(LineRenderer line)
         {
-            SetLineVisual(line, _gridColor, _lineWidth);
+            ConfigureLineRenderer(line, _gridColor, _lineWidth);
+        }
+
+        private void ConfigureLineRenderer(LineRenderer line, Color lineColor, float width)
+        {
+            SetLineVisual(line, lineColor, width);
             line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             line.receiveShadows = false;
             line.useWorldSpace = true;
@@ -261,7 +294,8 @@ namespace CircuitCraft.Views
 
         private Material CreateDefaultMaterial()
         {
-            Material mat = new Material(Shader.Find("Unlit/Color"));
+            var shader = _defaultShader != null ? _defaultShader : Shader.Find("Unlit/Color");
+            Material mat = new Material(shader);
             mat.color = _gridColor;
             return mat;
         }
@@ -274,25 +308,11 @@ namespace CircuitCraft.Views
             }
 
             _forceRefresh = true;
+            _visualsDirty = true;
 
             if (_runtimeLineMaterial != null)
             {
                 _runtimeLineMaterial.color = _gridColor;
-            }
-
-            for (int i = 0; i < _horizontalLines.Count; i++)
-            {
-                SetLineVisual(_horizontalLines[i], _gridColor, _lineWidth);
-            }
-
-            for (int i = 0; i < _verticalLines.Count; i++)
-            {
-                SetLineVisual(_verticalLines[i], _gridColor, _lineWidth);
-            }
-
-            for (int i = 0; i < _suggestedAreaLines.Count; i++)
-            {
-                SetLineVisual(_suggestedAreaLines[i], _suggestedAreaBorderColor, _suggestedAreaBorderWidth);
             }
         }
 

@@ -20,8 +20,9 @@ namespace CircuitCraft.Views
         [SerializeField] private SpriteRenderer _cursorSprite;
         [SerializeField] private Color _validColor = new Color(0f, 1f, 0f, 0.5f);
         [SerializeField] private Color _invalidColor = new Color(1f, 0f, 0f, 0.5f);
-        
+
         private Vector2Int _currentGridPosition;
+        private Vector3 _lastMousePosition;
         private bool _isOverGrid;
         
         private void Awake() => Init();
@@ -72,6 +73,11 @@ namespace CircuitCraft.Views
         
         private void Update()
         {
+            if (Input.mousePosition == _lastMousePosition)
+            {
+                return;
+            }
+
             UpdateCursorPosition();
         }
         
@@ -80,6 +86,8 @@ namespace CircuitCraft.Views
         /// </summary>
         private void UpdateCursorPosition()
         {
+            _lastMousePosition = Input.mousePosition;
+
             if (_camera == null || _gridSettings == null)
             {
                 SetCursorVisible(false);

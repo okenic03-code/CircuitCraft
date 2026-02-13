@@ -34,15 +34,13 @@ namespace CircuitCraft.Controllers
         [Tooltip("Grid configuration settings (cell size, origin, dimensions).")]
         private GridSettings _gridSettings;
 
-        [Header("Command History")]
-        [SerializeField]
-        [Tooltip("Tracks placement commands for undo and redo.")]
-        private CommandHistory _commandHistory = new CommandHistory();
+        private CommandHistory _commandHistory;
         
         // State
         private ComponentDefinition _selectedComponent;
         private GameObject _previewInstance;
         private int _currentRotation = 0;
+        private Vector3 _lastMousePosition = Vector3.negativeInfinity;
         private float? _customValue;
         
         // Cached preview component references
@@ -55,6 +53,11 @@ namespace CircuitCraft.Controllers
         {
             InitializeCamera();
             ValidateDependencies();
+
+            if (_gameManager != null)
+            {
+                _commandHistory = _gameManager.CommandHistory;
+            }
         }
         
         private void InitializeCamera()
@@ -97,7 +100,11 @@ namespace CircuitCraft.Controllers
         {
             HandleCancellation();
             HandleRotation();
-            UpdatePreview();
+            bool mouseMoved = Input.mousePosition != _lastMousePosition;
+            if (mouseMoved)
+            {
+                UpdatePreview();
+            }
             HandlePlacement();
         }
         
@@ -128,6 +135,8 @@ namespace CircuitCraft.Controllers
                 {
                     // Cycle rotation: 0 → 90 → 180 → 270 → 0
                     _currentRotation = (_currentRotation + 90) % 360;
+                    // Invalidate mouse cache so preview updates after rotation
+                    _lastMousePosition = Vector3.negativeInfinity;
                     
                     // Apply rotation to preview instance
                     if (_previewInstance != null)
@@ -145,8 +154,13 @@ namespace CircuitCraft.Controllers
         /// </summary>
         private void UpdatePreview()
         {
+            if (Input.mousePosition == _lastMousePosition)
+                return;
+
             if (_selectedComponent == null || _previewInstance == null || _gridSettings == null)
                 return;
+
+            _lastMousePosition = Input.mousePosition;
             
             // Get cursor grid position
             Vector2Int gridPos = GridUtility.ScreenToGridPosition(
@@ -243,7 +257,9 @@ namespace CircuitCraft.Controllers
                 }
                 else
                 {
+#if UNITY_EDITOR
                     Debug.Log($"PlacementController: Invalid placement at {gridPos}");
+#endif
                 }
             }
         }
@@ -315,26 +331,9 @@ namespace CircuitCraft.Controllers
             );
             _commandHistory.ExecuteCommand(placeCommand);
             
+#if UNITY_EDITOR
             Debug.Log($"PlacementController: Placed {_selectedComponent.DisplayName} at {position}");
-            
-            // Instantiate ComponentView prefab at world position
-            if (_componentViewPrefab != null && _gridSettings != null)
-            {
-                Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
-                GameObject viewObject = Instantiate(_componentViewPrefab, worldPos, Quaternion.Euler(0, 0, -_currentRotation));
-                
-                // Initialize ComponentView with definition
-                ComponentView componentView = viewObject.GetComponent<ComponentView>();
-                if (componentView != null)
-                {
-                    componentView.Initialize(_selectedComponent);
-                    componentView.GridPosition = gridPos;
-                }
-                else
-                {
-                    Debug.LogWarning("PlacementController: ComponentView prefab does not have ComponentView component!");
-                }
-            }
+#endif
         }
         
         /// <summary>
@@ -349,20 +348,25 @@ namespace CircuitCraft.Controllers
             // Reset rotation when selecting a new component
             _currentRotation = 0;
             _customValue = null;
+            _lastMousePosition = Vector3.negativeInfinity;
             
             // Destroy old preview
             DestroyPreview();
             
             if (_selectedComponent != null)
             {
+#if UNITY_EDITOR
                 Debug.Log($"PlacementController: Selected component: {_selectedComponent.DisplayName}");
+#endif
                 
                 // Create new preview
                 CreatePreview();
             }
             else
             {
+#if UNITY_EDITOR
                 Debug.Log("PlacementController: Deselected component");
+#endif
             }
         }
 
