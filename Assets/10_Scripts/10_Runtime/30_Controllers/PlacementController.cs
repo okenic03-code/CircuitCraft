@@ -43,6 +43,7 @@ namespace CircuitCraft.Controllers
         private ComponentDefinition _selectedComponent;
         private GameObject _previewInstance;
         private int _currentRotation = 0;
+        private float? _customValue;
         
         // Cached preview component references
         private ComponentView _cachedPreviewView;
@@ -309,7 +310,8 @@ namespace CircuitCraft.Controllers
                 _selectedComponent.Id,
                 position,
                 _currentRotation,
-                pinInstances
+                pinInstances,
+                _customValue
             );
             _commandHistory.ExecuteCommand(placeCommand);
             
@@ -346,6 +348,7 @@ namespace CircuitCraft.Controllers
             
             // Reset rotation when selecting a new component
             _currentRotation = 0;
+            _customValue = null;
             
             // Destroy old preview
             DestroyPreview();
@@ -396,6 +399,26 @@ namespace CircuitCraft.Controllers
         public ComponentDefinition GetSelectedComponent()
         {
             return _selectedComponent;
+        }
+
+        /// <summary>
+        /// Sets the custom electrical value for the next placed component.
+        /// Applies to resistors (Ω), capacitors (F), inductors (H), voltage sources (V), and current sources (A).
+        /// Pass null to use the component definition's default value.
+        /// </summary>
+        /// <param name="value">Custom value, or null to use default.</param>
+        public void SetCustomValue(float? value)
+        {
+            _customValue = value;
+        }
+
+        /// <summary>
+        /// Gets the current custom electrical value that will be applied to the next placed component.
+        /// </summary>
+        /// <returns>Custom value, or null if using definition default.</returns>
+        public float? GetCustomValue()
+        {
+            return _customValue;
         }
     }
 }

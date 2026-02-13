@@ -53,6 +53,12 @@ namespace CircuitCraft.Systems
         /// <summary>Rotation in degrees (0, 90, 180, 270).</summary>
         public int rotation;
 
+        /// <summary>User-specified custom electrical value (0 if not custom).</summary>
+        public float customValue;
+
+        /// <summary>Whether the component has a user-specified custom value.</summary>
+        public bool hasCustomValue;
+
         /// <summary>Pin instances belonging to this component.</summary>
         public List<PinInstanceSaveData> pins = new List<PinInstanceSaveData>();
     }

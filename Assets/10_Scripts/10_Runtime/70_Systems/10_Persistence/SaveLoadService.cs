@@ -79,11 +79,13 @@ namespace CircuitCraft.Systems
                         }
                     }
 
+                    var customValue = compData.hasCustomValue ? (float?)compData.customValue : null;
                     var placed = boardState.PlaceComponent(
                         compData.componentDefId,
                         new GridPosition(compData.positionX, compData.positionY),
                         compData.rotation,
-                        pins
+                        pins,
+                        customValue
                     );
 
                     componentIdMap[compData.instanceId] = placed.InstanceId;
@@ -199,6 +201,8 @@ namespace CircuitCraft.Systems
                     positionY = comp.Position.Y,
                     rotation = comp.Rotation
                 };
+                compData.hasCustomValue = comp.CustomValue.HasValue;
+                compData.customValue = comp.CustomValue ?? 0f;
 
                 foreach (var pin in comp.Pins)
                 {

@@ -72,15 +72,16 @@ namespace CircuitCraft.Core
         /// <param name="position">Position on the board.</param>
         /// <param name="rotation">Rotation (0, 90, 180, 270).</param>
         /// <param name="pins">Pin instances for this component.</param>
+        /// <param name="customValue">User-specified custom electrical value (null to use definition default).</param>
         /// <returns>The placed component.</returns>
         public PlacedComponent PlaceComponent(string componentDefId, GridPosition position, 
-                                               int rotation, IEnumerable<PinInstance> pins)
+                                               int rotation, IEnumerable<PinInstance> pins, float? customValue = null)
         {
             if (_componentsByPosition.ContainsKey(position))
                 throw new InvalidOperationException($"Position {position} is already occupied.");
 
             var instanceId = _nextComponentId++;
-            var component = new PlacedComponent(instanceId, componentDefId, position, rotation, pins);
+            var component = new PlacedComponent(instanceId, componentDefId, position, rotation, pins, customValue);
             _components.Add(component);
             _componentsByPosition.Add(position, component);
 

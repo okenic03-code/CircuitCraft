@@ -15,6 +15,7 @@ namespace CircuitCraft.Commands
         private int _rotation;
         private List<PinInstance> _pins;
         private bool _hasCapturedState;
+        private float? _capturedCustomValue;
 
         public string Description => $"Remove component {_instanceId}";
 
@@ -35,6 +36,7 @@ namespace CircuitCraft.Commands
             _position = component.Position;
             _rotation = component.Rotation;
             _pins = component.Pins.ToList();
+            _capturedCustomValue = component.CustomValue;
             _hasCapturedState = true;
 
             _boardState.RemoveComponent(_currentInstanceId);
@@ -45,7 +47,7 @@ namespace CircuitCraft.Commands
             if (!_hasCapturedState)
                 return;
 
-            var restored = _boardState.PlaceComponent(_componentDefId, _position, _rotation, _pins);
+            var restored = _boardState.PlaceComponent(_componentDefId, _position, _rotation, _pins, _capturedCustomValue);
             _currentInstanceId = restored.InstanceId;
         }
     }

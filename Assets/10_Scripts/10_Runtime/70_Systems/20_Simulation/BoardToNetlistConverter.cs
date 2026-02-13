@@ -96,27 +96,27 @@ namespace CircuitCraft.Systems
             {
                 case ComponentKind.Resistor:
                     if (nodes.Length >= 2)
-                        return NetlistElement.Resistor(elementId, nodes[0], nodes[1], GetResistance(definition));
+                        return NetlistElement.Resistor(elementId, nodes[0], nodes[1], GetResistance(definition, component));
                     break;
 
                 case ComponentKind.Capacitor:
                     if (nodes.Length >= 2)
-                        return NetlistElement.Capacitor(elementId, nodes[0], nodes[1], GetCapacitance(definition));
+                        return NetlistElement.Capacitor(elementId, nodes[0], nodes[1], GetCapacitance(definition, component));
                     break;
 
                 case ComponentKind.Inductor:
                     if (nodes.Length >= 2)
-                        return CreateInductor(elementId, nodes[0], nodes[1], GetInductance(definition));
+                        return CreateInductor(elementId, nodes[0], nodes[1], GetInductance(definition, component));
                     break;
 
                 case ComponentKind.VoltageSource:
                     if (nodes.Length >= 2)
-                        return NetlistElement.VoltageSource(elementId, nodes[0], nodes[1], GetVoltage(definition));
+                        return NetlistElement.VoltageSource(elementId, nodes[0], nodes[1], GetVoltage(definition, component));
                     break;
 
                 case ComponentKind.CurrentSource:
                     if (nodes.Length >= 2)
-                        return NetlistElement.CurrentSource(elementId, nodes[0], nodes[1], GetCurrent(definition));
+                        return NetlistElement.CurrentSource(elementId, nodes[0], nodes[1], GetCurrent(definition, component));
                     break;
 
                 case ComponentKind.Diode:
@@ -267,11 +267,16 @@ namespace CircuitCraft.Systems
         }
 
         // Helper methods to extract component values from ComponentDefinition
-        private double GetResistance(ComponentDefinition def) => def.ResistanceOhms > 0 ? def.ResistanceOhms : 1000.0;
-        private double GetCapacitance(ComponentDefinition def) => def.CapacitanceFarads > 0 ? def.CapacitanceFarads : 1e-6;
-        private double GetInductance(ComponentDefinition def) => def.InductanceHenrys > 0 ? def.InductanceHenrys : 1e-3;
-        private double GetVoltage(ComponentDefinition def) => def.VoltageVolts != 0 ? def.VoltageVolts : 5.0;
-        private double GetCurrent(ComponentDefinition def) => def.CurrentAmps > 0 ? def.CurrentAmps : 0.001;
+        private double GetResistance(ComponentDefinition def, PlacedComponent component) =>
+            component.CustomValue.HasValue ? component.CustomValue.Value : (def.ResistanceOhms > 0 ? def.ResistanceOhms : 1000.0);
+        private double GetCapacitance(ComponentDefinition def, PlacedComponent component) =>
+            component.CustomValue.HasValue ? component.CustomValue.Value : (def.CapacitanceFarads > 0 ? def.CapacitanceFarads : 1e-6);
+        private double GetInductance(ComponentDefinition def, PlacedComponent component) =>
+            component.CustomValue.HasValue ? component.CustomValue.Value : (def.InductanceHenrys > 0 ? def.InductanceHenrys : 1e-3);
+        private double GetVoltage(ComponentDefinition def, PlacedComponent component) =>
+            component.CustomValue.HasValue ? component.CustomValue.Value : (def.VoltageVolts != 0 ? def.VoltageVolts : 5.0);
+        private double GetCurrent(ComponentDefinition def, PlacedComponent component) =>
+            component.CustomValue.HasValue ? component.CustomValue.Value : (def.CurrentAmps > 0 ? def.CurrentAmps : 0.001);
 
         /// <summary>
         /// Gets the SPICE model name from BJT model enum.

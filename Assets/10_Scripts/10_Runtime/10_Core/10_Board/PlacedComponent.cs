@@ -23,6 +23,9 @@ namespace CircuitCraft.Core
         /// <summary>Gets the rotation of this component in degrees (0, 90, 180, 270).</summary>
         public int Rotation { get; }
 
+        /// <summary>Gets the user-specified custom electrical value (null if using definition default).</summary>
+        public float? CustomValue { get; }
+
         /// <summary>Gets the read-only list of pins on this component.</summary>
         public IReadOnlyList<PinInstance> Pins => _pins.AsReadOnly();
 
@@ -34,8 +37,9 @@ namespace CircuitCraft.Core
         /// <param name="position">Position on the board grid.</param>
         /// <param name="rotation">Rotation in degrees (0, 90, 180, 270).</param>
         /// <param name="pins">Pin instances for this component.</param>
+        /// <param name="customValue">User-specified custom electrical value (null to use definition default).</param>
         public PlacedComponent(int instanceId, string componentDefId, GridPosition position, 
-                               int rotation, IEnumerable<PinInstance> pins)
+                               int rotation, IEnumerable<PinInstance> pins, float? customValue = null)
         {
             if (instanceId < 0)
                 throw new ArgumentOutOfRangeException(nameof(instanceId), "Instance ID must be non-negative.");
@@ -50,6 +54,7 @@ namespace CircuitCraft.Core
             ComponentDefinitionId = componentDefId;
             Position = position;
             Rotation = rotation;
+            CustomValue = customValue;
             _pins.AddRange(pins);
         }
 
@@ -106,7 +111,8 @@ namespace CircuitCraft.Core
         /// </summary>
         public override string ToString()
         {
-            return $"Component[{InstanceId}:{ComponentDefinitionId}@{Position} R{Rotation}°] ({_pins.Count} pins)";
+            var customValueStr = CustomValue.HasValue ? $" V={CustomValue.Value}" : "";
+            return $"Component[{InstanceId}:{ComponentDefinitionId}@{Position} R{Rotation}°]{customValueStr} ({_pins.Count} pins)";
         }
     }
 }
