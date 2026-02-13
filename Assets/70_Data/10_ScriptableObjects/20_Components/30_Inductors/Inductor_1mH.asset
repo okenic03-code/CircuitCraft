@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60c684b44d897ec448ff093554857a02, type: 3}
-  m_Name: Inductor_1mH
+  m_Name: Inductor
   m_EditorClassIdentifier: 
-  _id: inductor-1mh
-  _displayName: Inductor 1mH
+  _id: inductor
+  _displayName: Inductor
   _kind: 2
   _pins: []
   _footprint:

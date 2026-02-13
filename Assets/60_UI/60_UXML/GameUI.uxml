@@ -23,8 +23,8 @@
                 <ui:ScrollView class="palette-scroll">
                     <!-- Sources -->
                     <ui:Label text="Sources" class="section-header" />
-                    <ui:Button name="btn-voltage_source_5v" class="component-button">
-                        <ui:Label text="5V Source" />
+                    <ui:Button name="btn-voltage_source" class="component-button">
+                        <ui:Label text="Voltage Source" />
                     </ui:Button>
                     <ui:Button name="btn-ground" class="component-button">
                         <ui:Label text="Ground" />
@@ -32,31 +32,14 @@
 
                     <!-- Passive Components -->
                     <ui:Label text="Passive" class="section-header" />
-                    <ui:Label text="Resistors" class="sub-section-header" />
-                    <ui:Button name="btn-resistor_1k" class="component-button">
-                        <ui:Label text="1kΩ Resistor" />
+                    <ui:Button name="btn-resistor" class="component-button">
+                        <ui:Label text="Resistor" />
                     </ui:Button>
-                    <ui:Button name="btn-resistor_10k" class="component-button">
-                        <ui:Label text="10kΩ Resistor" />
+                    <ui:Button name="btn-capacitor" class="component-button">
+                        <ui:Label text="Capacitor" />
                     </ui:Button>
-                    
-                    <ui:Label text="Capacitors" class="sub-section-header" />
-                    <ui:Button name="btn-capacitor_10uF" class="component-button">
-                        <ui:Label text="10µF Capacitor" />
-                    </ui:Button>
-                    <ui:Button name="btn-capacitor_100uF" class="component-button">
-                        <ui:Label text="100µF Capacitor" />
-                    </ui:Button>
-                    
-                    <ui:Label text="Inductors" class="sub-section-header" />
-                    <ui:Button name="btn-inductor-1mh" class="component-button">
-                        <ui:Label text="1mH Inductor" />
-                    </ui:Button>
-                    <ui:Button name="btn-inductor-10mh" class="component-button">
-                        <ui:Label text="10mH Inductor" />
-                    </ui:Button>
-                    <ui:Button name="btn-inductor-100mh" class="component-button">
-                        <ui:Label text="100mH Inductor" />
+                    <ui:Button name="btn-inductor" class="component-button">
+                        <ui:Label text="Inductor" />
                     </ui:Button>
 
                     <!-- Semiconductors -->

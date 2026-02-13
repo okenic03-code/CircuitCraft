@@ -522,16 +522,12 @@ MonoBehaviour:
   _placementController: {fileID: 236485885}
   _componentDefinitions:
   - {fileID: 11400000, guid: daa77e23871833947b8fd68222472733, type: 2}
-  - {fileID: 11400000, guid: 7600b0307f210524988f9d65cf569108, type: 2}
   - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
   - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
-  - {fileID: 11400000, guid: e8da7b3c2a7ca494eaa819665e3eea83, type: 2}
   - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
   - {fileID: 11400000, guid: f448ff2a8f75f874886a7d9b90a504bd, type: 2}
   - {fileID: 11400000, guid: f2efa2aa19683584aa5554d883ecb215, type: 2}
   - {fileID: 11400000, guid: f6d691cfba2a42728134fdc48926fd27, type: 2}
-  - {fileID: 11400000, guid: 138f83db921b413baa1cde1665a670ea, type: 2}
-  - {fileID: 11400000, guid: 6aab8954f2674be6b64aba1ac83f500e, type: 2}
   - {fileID: 11400000, guid: a1b80d670bf44f30a08c63c5d44fd416, type: 2}
   - {fileID: 11400000, guid: 58487cb9ae6c41ab83efada188f8083b, type: 2}
   - {fileID: 11400000, guid: b87f30b1ef7c4dea86d22af6425edaab, type: 2}
