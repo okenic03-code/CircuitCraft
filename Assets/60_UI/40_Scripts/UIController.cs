@@ -135,7 +135,7 @@ namespace CircuitCraft.UI
             // Grid cell size from GridSettings
             if (_statusGrid != null && _gridSettings != null)
             {
-                _statusGrid.text = $"Grid: {_gridSettings.CellSize:F1}";
+                _statusGrid.text = $"Grid: {_gridSettings.CellSize:F1} | \u221e";
             }
 
             // Zoom percentage from camera orthographic size

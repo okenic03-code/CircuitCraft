@@ -41,11 +41,22 @@
                     </ui:Button>
                     
                     <ui:Label text="Capacitors" class="sub-section-header" />
-                    <ui:Button name="btn-capacitor_10uf" class="component-button">
+                    <ui:Button name="btn-capacitor_10uF" class="component-button">
                         <ui:Label text="10µF Capacitor" />
                     </ui:Button>
-                    <ui:Button name="btn-capacitor_100uf" class="component-button">
+                    <ui:Button name="btn-capacitor_100uF" class="component-button">
                         <ui:Label text="100µF Capacitor" />
+                    </ui:Button>
+                    
+                    <ui:Label text="Inductors" class="sub-section-header" />
+                    <ui:Button name="btn-inductor-1mh" class="component-button">
+                        <ui:Label text="1mH Inductor" />
+                    </ui:Button>
+                    <ui:Button name="btn-inductor-10mh" class="component-button">
+                        <ui:Label text="10mH Inductor" />
+                    </ui:Button>
+                    <ui:Button name="btn-inductor-100mh" class="component-button">
+                        <ui:Label text="100mH Inductor" />
                     </ui:Button>
 
                     <!-- Semiconductors -->
@@ -56,7 +67,42 @@
                     <ui:Button name="btn-diode_1n4148" class="component-button">
                         <ui:Label text="1N4148 Diode" />
                     </ui:Button>
+                    <ui:Button name="btn-diode-1n4001" class="component-button">
+                        <ui:Label text="1N4001 Rectifier" />
+                    </ui:Button>
+                    
+                    <ui:Label text="Transistors" class="sub-section-header" />
+                    <ui:Button name="btn-bjt-2n2222" class="component-button">
+                        <ui:Label text="2N2222 NPN" />
+                    </ui:Button>
+                    <ui:Button name="btn-bjt-2n3906" class="component-button">
+                        <ui:Label text="2N3906 PNP" />
+                    </ui:Button>
+                    <ui:Button name="btn-mosfet-2n7000" class="component-button">
+                        <ui:Label text="2N7000 NMOS" />
+                    </ui:Button>
+                    <ui:Button name="btn-mosfet-irf9540" class="component-button">
+                        <ui:Label text="IRF9540 PMOS" />
+                    </ui:Button>
                 </ui:ScrollView>
+                
+                <!-- Property Editor (below palette scroll) -->
+                <ui:VisualElement name="PropertyEditor" class="property-editor" style="display: none;">
+                    <ui:Label name="PropEditorTitle" text="Component" class="prop-editor-title" />
+                    <!-- Editable mode (R/L/C/V/I) -->
+                    <ui:VisualElement name="PropEditorEditable" class="prop-editor-section">
+                        <ui:Label name="PropValueLabel" text="Resistance" class="prop-label" />
+                        <ui:VisualElement class="prop-input-row">
+                            <ui:TextField name="PropValueField" class="prop-value-field" />
+                            <ui:Label name="PropUnitLabel" text="Ω" class="prop-unit-label" />
+                        </ui:VisualElement>
+                        <ui:Label name="PropDefaultHint" text="Default: 1000" class="prop-default-hint" />
+                    </ui:VisualElement>
+                    <!-- Read-only mode (BJT/FET/Diode) -->
+                    <ui:VisualElement name="PropEditorReadOnly" class="prop-editor-section" style="display: none;">
+                        <ui:Label name="PropSpecsText" text="" class="prop-specs-text" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
             
             <!-- Center Game View (Transparent & Click-through) -->

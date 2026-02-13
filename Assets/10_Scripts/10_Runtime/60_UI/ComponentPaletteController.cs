@@ -37,6 +37,12 @@ namespace CircuitCraft.UI
         private VisualElement _root;
         private Button _selectedButton;
         
+        /// <summary>
+        /// Fired when a component is selected or deselected in the palette.
+        /// The argument is the selected ComponentDefinition, or null if deselected.
+        /// </summary>
+        public event Action<ComponentDefinition> OnComponentSelected;
+        
         private void Awake() => Init();
 
         private void Init()
@@ -173,7 +179,22 @@ namespace CircuitCraft.UI
                 var btn = _root.Q<Button>($"btn-{def.Id}");
                 btn?.AddToClassList("selected");
                 _selectedButton = btn;
+                
+                OnComponentSelected?.Invoke(def);
             }
+        }
+        
+        /// <summary>
+        /// Deselects the current component in the palette and fires OnComponentSelected with null.
+        /// </summary>
+        public void DeselectComponent()
+        {
+            if (_selectedButton != null)
+            {
+                _selectedButton.RemoveFromClassList("selected");
+                _selectedButton = null;
+            }
+            OnComponentSelected?.Invoke(null);
         }
     }
 }
