@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading;
+using CircuitCraft.Commands;
 using CircuitCraft.Core;
 using CircuitCraft.Simulation;
 using CircuitCraft.Systems;
@@ -24,6 +25,7 @@ namespace CircuitCraft.Managers
         [SerializeField] private SimulationManager _simulationManager;
 
         private SaveLoadService _saveLoadService;
+        private CommandHistory _commandHistory = new CommandHistory();
 
         private void Awake() => Init();
 
@@ -67,6 +69,8 @@ namespace CircuitCraft.Managers
         /// Gets the current BoardState instance.
         /// </summary>
         public BoardState BoardState => _boardState;
+
+        public CommandHistory CommandHistory => _commandHistory;
 
         /// <summary>
         /// Event raised when the current board has been saved successfully.

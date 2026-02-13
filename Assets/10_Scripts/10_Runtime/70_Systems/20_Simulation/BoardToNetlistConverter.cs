@@ -50,7 +50,7 @@ namespace CircuitCraft.Systems
             var netlist = new CircuitNetlist
             {
                 Title = "BoardState Circuit",
-                GroundNode = "GND"
+                GroundNode = "0"
             };
 
             // Convert each placed component to netlist elements
