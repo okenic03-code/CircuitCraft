@@ -20,6 +20,7 @@ namespace CircuitCraft.Views
         [SerializeField] private Color _wireColor = new Color(0.1f, 0.85f, 1f, 1f);
         [SerializeField] private float _wireWidth = 0.08f;
         [SerializeField] private float _wireY = 0.05f;
+        [SerializeField] private Shader _lineShader;
 
         private BoardState _boardState;
         private Material _lineMaterial;
@@ -46,7 +47,8 @@ namespace CircuitCraft.Views
                 return;
             }
 
-            _lineMaterial = new Material(Shader.Find("Sprites/Default"));
+            var shader = _lineShader != null ? _lineShader : Shader.Find("Sprites/Default");
+            _lineMaterial = new Material(shader);
             Subscribe();
 
             foreach (var trace in _boardState.Traces)

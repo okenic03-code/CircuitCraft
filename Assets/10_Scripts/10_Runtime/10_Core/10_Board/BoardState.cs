@@ -14,7 +14,12 @@ namespace CircuitCraft.Core
         private readonly Dictionary<GridPosition, PlacedComponent> _componentsByPosition = new Dictionary<GridPosition, PlacedComponent>();
         private readonly List<Net> _nets = new List<Net>();
         private readonly List<TraceSegment> _traces = new List<TraceSegment>();
+        private readonly Dictionary<int, PlacedComponent> _componentsById = new Dictionary<int, PlacedComponent>();
+        private readonly Dictionary<int, Net> _netsById = new Dictionary<int, Net>();
+        private readonly Dictionary<int, TraceSegment> _tracesById = new Dictionary<int, TraceSegment>();
+        private readonly Dictionary<int, List<TraceSegment>> _tracesByNetId = new Dictionary<int, List<TraceSegment>>();
         private readonly IReadOnlyList<PlacedComponent> _readOnlyComponents;
+        private readonly IReadOnlyList<Net> _readOnlyNets;
         private readonly IReadOnlyList<TraceSegment> _readOnlyTraces;
         private int _nextComponentId = 1;
         private int _nextNetId = 1;
@@ -30,7 +35,7 @@ namespace CircuitCraft.Core
         public IReadOnlyList<PlacedComponent> Components => _readOnlyComponents;
 
         /// <summary>Gets the read-only list of nets.</summary>
-        public IReadOnlyList<Net> Nets => _nets.AsReadOnly();
+        public IReadOnlyList<Net> Nets => _readOnlyNets;
 
         /// <summary>Gets the read-only list of traces.</summary>
         public IReadOnlyList<TraceSegment> Traces => _readOnlyTraces;
@@ -62,6 +67,7 @@ namespace CircuitCraft.Core
         {
             SuggestedBounds = new BoardBounds(width, height);
             _readOnlyComponents = _components.AsReadOnly();
+            _readOnlyNets = _nets.AsReadOnly();
             _readOnlyTraces = _traces.AsReadOnly();
         }
 
@@ -83,6 +89,7 @@ namespace CircuitCraft.Core
             var instanceId = _nextComponentId++;
             var component = new PlacedComponent(instanceId, componentDefId, position, rotation, pins, customValue);
             _components.Add(component);
+            _componentsById.Add(component.InstanceId, component);
             _componentsByPosition.Add(position, component);
 
             OnComponentPlaced?.Invoke(component);
@@ -96,8 +103,7 @@ namespace CircuitCraft.Core
         /// <returns>True if component was removed.</returns>
         public bool RemoveComponent(int instanceId)
         {
-            var component = _components.FirstOrDefault(c => c.InstanceId == instanceId);
-            if (component == null)
+            if (!_componentsById.TryGetValue(instanceId, out var component))
                 return false;
 
             var removedPinPositions = new HashSet<GridPosition>();
@@ -106,31 +112,36 @@ namespace CircuitCraft.Core
                 removedPinPositions.Add(component.GetPinWorldPosition(pin.PinIndex));
             }
 
-            // Remove component's pins from all nets
-            var netsToCheck = new List<Net>();
-            foreach (var net in _nets)
+            // Remove component's pins from their connected nets.
+            var netsToCheck = new HashSet<int>();
+            foreach (var pin in component.Pins)
             {
-                var pinsToRemove = net.ConnectedPins
-                    .Where(p => p.ComponentInstanceId == instanceId)
-                    .ToList();
-                foreach (var pin in pinsToRemove)
+                if (!pin.ConnectedNetId.HasValue)
                 {
-                    net.RemovePin(pin);
+                    continue;
                 }
 
-                // Track nets that might now be empty
-                if (pinsToRemove.Count > 0)
+                int netId = pin.ConnectedNetId.Value;
+                netsToCheck.Add(netId);
+
+                var net = GetNet(netId);
+                if (net == null)
                 {
-                    netsToCheck.Add(net);
+                    continue;
                 }
+
+                var pinReference = new PinReference(instanceId, pin.PinIndex, component.GetPinWorldPosition(pin.PinIndex));
+                net.RemovePin(pinReference);
             }
 
-            // Remove empty nets
-            foreach (var net in netsToCheck)
+            // Remove empty nets.
+            foreach (var netId in netsToCheck)
             {
-                if (net.ConnectedPins.Count == 0)
+                var net = GetNet(netId);
+                if (net != null && net.ConnectedPins.Count == 0)
                 {
                     _nets.Remove(net);
+                    _netsById.Remove(netId);
                 }
             }
 
@@ -145,6 +156,7 @@ namespace CircuitCraft.Core
             }
 
             _components.Remove(component);
+            _componentsById.Remove(instanceId);
             _componentsByPosition.Remove(component.Position);
             OnComponentRemoved?.Invoke(instanceId);
             return true;
@@ -165,6 +177,14 @@ namespace CircuitCraft.Core
 
             var trace = new TraceSegment(_nextTraceId++, netId, start, end);
             _traces.Add(trace);
+            _tracesById.Add(trace.SegmentId, trace);
+            if (!_tracesByNetId.TryGetValue(netId, out var netTraces))
+            {
+                netTraces = new List<TraceSegment>();
+                _tracesByNetId[netId] = netTraces;
+            }
+
+            netTraces.Add(trace);
             OnTraceAdded?.Invoke(trace);
             return trace;
         }
@@ -206,15 +226,21 @@ namespace CircuitCraft.Core
         /// <returns>True when removed.</returns>
         public bool RemoveTrace(int segmentId)
         {
-            var trace = _traces.FirstOrDefault(t => t.SegmentId == segmentId);
-            if (trace == null)
+            if (!_tracesById.TryGetValue(segmentId, out var trace))
                 return false;
 
             _traces.Remove(trace);
+            _tracesById.Remove(segmentId);
+            List<TraceSegment> netTraceList = null;
+            if (_tracesByNetId.TryGetValue(trace.NetId, out netTraceList))
+            {
+                netTraceList.Remove(trace);
+            }
+
             OnTraceRemoved?.Invoke(segmentId);
 
             // If the net has no remaining traces, clear pin links and remove it.
-            if (!_traces.Any(t => t.NetId == trace.NetId))
+            if (netTraceList == null || netTraceList.Count == 0)
             {
                 var net = GetNet(trace.NetId);
                 if (net != null)
@@ -232,7 +258,10 @@ namespace CircuitCraft.Core
                     }
 
                     _nets.Remove(net);
+                    _netsById.Remove(net.NetId);
                 }
+
+                _tracesByNetId.Remove(trace.NetId);
             }
 
             return true;
@@ -245,7 +274,10 @@ namespace CircuitCraft.Core
         /// <returns>Matching trace segments.</returns>
         public IReadOnlyList<TraceSegment> GetTraces(int netId)
         {
-            return _traces.Where(t => t.NetId == netId).ToList();
+            if (_tracesByNetId.TryGetValue(netId, out var netTraces))
+                return netTraces;
+
+            return Array.Empty<TraceSegment>();
         }
 
         /// <summary>
@@ -258,6 +290,7 @@ namespace CircuitCraft.Core
             var netId = _nextNetId++;
             var net = new Net(netId, netName);
             _nets.Add(net);
+            _netsById.Add(net.NetId, net);
 
             OnNetCreated?.Invoke(net);
             return net;
@@ -292,6 +325,7 @@ namespace CircuitCraft.Core
                     if (previousNet.ConnectedPins.Count == 0)
                     {
                         _nets.Remove(previousNet);
+                        _netsById.Remove(previousNet.NetId);
                     }
                 }
             }
@@ -315,7 +349,8 @@ namespace CircuitCraft.Core
         /// <returns>The component, or null if not found.</returns>
         public PlacedComponent GetComponent(int instanceId)
         {
-            return _components.FirstOrDefault(c => c.InstanceId == instanceId);
+            _componentsById.TryGetValue(instanceId, out var component);
+            return component;
         }
 
         /// <summary>
@@ -325,7 +360,8 @@ namespace CircuitCraft.Core
         /// <returns>The net, or null if not found.</returns>
         public Net GetNet(int netId)
         {
-            return _nets.FirstOrDefault(n => n.NetId == netId);
+            _netsById.TryGetValue(netId, out var net);
+            return net;
         }
 
         /// <summary>

@@ -44,6 +44,9 @@ namespace CircuitCraft.Components
         [SerializeField]
         [Tooltip("Optional material override for sprite rendering.")]
         private Material _spriteMaterial;
+
+        private static readonly int _ColorProperty = Shader.PropertyToID("_Color");
+        private MaterialPropertyBlock _materialPropertyBlock;
         
         // State
         private ComponentDefinition _definition;
@@ -67,6 +70,7 @@ namespace CircuitCraft.Components
             InitializeSpriteRenderer();
             InitializeLabelText();
             ApplySpriteMaterial();
+            _materialPropertyBlock = new MaterialPropertyBlock();
         }
 
         private void InitializeSpriteRenderer()
@@ -96,7 +100,7 @@ namespace CircuitCraft.Components
             // Apply custom material if provided
             if (_spriteMaterial != null && _spriteRenderer != null)
             {
-                _spriteRenderer.material = _spriteMaterial;
+                _spriteRenderer.sharedMaterial = _spriteMaterial;
             }
         }
         
@@ -122,8 +126,10 @@ namespace CircuitCraft.Components
                 {
                     _spriteRenderer.sprite = _definition.Icon;
                 }
+#if UNITY_EDITOR
                 Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + 
                     (_definition.Icon == null ? " - Warning: Icon is null" : ""));
+#endif
             }
             
             // Set label text
@@ -186,7 +192,11 @@ namespace CircuitCraft.Components
         /// <param name="highlightColor">Color to apply.</param>
         private void ApplyHighlight(Color highlightColor)
         {
-            _spriteRenderer.color = highlightColor;
+            if (_materialPropertyBlock == null) return;
+
+            _spriteRenderer.GetPropertyBlock(_materialPropertyBlock);
+            _materialPropertyBlock.SetColor(_ColorProperty, highlightColor);
+            _spriteRenderer.SetPropertyBlock(_materialPropertyBlock);
         }
         
         /// <summary>
@@ -194,7 +204,11 @@ namespace CircuitCraft.Components
         /// </summary>
         private void RemoveHighlight()
         {
-            _spriteRenderer.color = _normalColor;
+            if (_materialPropertyBlock == null) return;
+
+            _spriteRenderer.GetPropertyBlock(_materialPropertyBlock);
+            _materialPropertyBlock.SetColor(_ColorProperty, _normalColor);
+            _spriteRenderer.SetPropertyBlock(_materialPropertyBlock);
         }
         
         /// <summary>

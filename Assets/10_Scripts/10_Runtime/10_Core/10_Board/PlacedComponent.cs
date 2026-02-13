@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CircuitCraft.Core
 {
@@ -10,6 +9,7 @@ namespace CircuitCraft.Core
     public class PlacedComponent
     {
         private readonly List<PinInstance> _pins = new List<PinInstance>();
+        private readonly IReadOnlyList<PinInstance> _readOnlyPins;
 
         /// <summary>Gets the unique instance ID for this component.</summary>
         public int InstanceId { get; }
@@ -27,7 +27,7 @@ namespace CircuitCraft.Core
         public float? CustomValue { get; }
 
         /// <summary>Gets the read-only list of pins on this component.</summary>
-        public IReadOnlyList<PinInstance> Pins => _pins.AsReadOnly();
+        public IReadOnlyList<PinInstance> Pins => _readOnlyPins;
 
         /// <summary>
         /// Creates a new placed component.
@@ -56,6 +56,7 @@ namespace CircuitCraft.Core
             Rotation = rotation;
             CustomValue = customValue;
             _pins.AddRange(pins);
+            _readOnlyPins = _pins.AsReadOnly();
         }
 
         /// <summary>
@@ -65,9 +66,10 @@ namespace CircuitCraft.Core
         /// <returns>World grid position of the pin.</returns>
         public GridPosition GetPinWorldPosition(int pinIndex)
         {
-            var pin = _pins.FirstOrDefault(p => p.PinIndex == pinIndex);
-            if (pin == null)
+            if (pinIndex < 0 || pinIndex >= _pins.Count)
                 throw new ArgumentException($"Pin index {pinIndex} not found on component {InstanceId}.", nameof(pinIndex));
+
+            var pin = _pins[pinIndex];
 
             // Apply rotation transformation to local position
             var localPos = pin.LocalPosition;

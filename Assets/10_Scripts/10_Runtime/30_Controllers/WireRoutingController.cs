@@ -20,8 +20,7 @@ namespace CircuitCraft.Controllers
         [SerializeField] private GridSettings _gridSettings;
         [SerializeField] private Camera _mainCamera;
 
-        [Header("Command History")]
-        [SerializeField] private CommandHistory _commandHistory = new CommandHistory();
+        private CommandHistory _commandHistory;
 
         [Header("Raycast Settings")]
         [SerializeField] private float _raycastDistance = 100f;
@@ -30,6 +29,7 @@ namespace CircuitCraft.Controllers
         [SerializeField] private Color _previewColor = Color.yellow;
         [SerializeField] private float _previewWidth = 0.08f;
         [SerializeField] private float _previewY = 0.06f;
+        [SerializeField] private Shader _previewShader;
 
         private enum RoutingState
         {
@@ -54,6 +54,7 @@ namespace CircuitCraft.Controllers
             if (_gameManager != null)
             {
                 _boardState = _gameManager.BoardState;
+                _commandHistory = _gameManager.CommandHistory;
             }
 
             EnsurePreviewLine();
@@ -345,7 +346,8 @@ namespace CircuitCraft.Controllers
             _previewLine.endColor = _previewColor;
             _previewLine.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             _previewLine.receiveShadows = false;
-            _previewLine.material = new Material(Shader.Find("Sprites/Default"));
+            var shader = _previewShader != null ? _previewShader : Shader.Find("Sprites/Default");
+            _previewLine.material = new Material(shader);
         }
 
         private void ShowPreview()
