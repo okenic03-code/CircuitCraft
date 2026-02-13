@@ -3,45 +3,96 @@
     <ui:VisualElement name="Root" class="root">
         <!-- Top Toolbar -->
         <ui:VisualElement name="Toolbar" class="toolbar">
-            <ui:Button name="ClearBoardButton" text="Clear Board" />
-            <ui:Button name="RunSimulationButton" text="Run Simulation" />
-            <ui:Button name="SaveCircuitButton" text="Save Circuit" />
-            <ui:Button name="LoadCircuitButton" text="Load Circuit" />
-            <ui:Button name="btn-toggle-results" text="Results" />
+            <ui:VisualElement class="toolbar-group">
+                <ui:Button name="UndoButton" class="toolbar-button" text="Undo" />
+                <ui:Button name="RedoButton" class="toolbar-button" text="Redo" />
+                <ui:VisualElement style="width: 16px;" /> <!-- Spacer -->
+                <ui:Button name="ClearBoardButton" class="toolbar-button" text="Clear Board" />
+            </ui:VisualElement>
+            
+            <ui:VisualElement class="toolbar-group">
+                <ui:Button name="simulate-button" class="toolbar-button" text="RUN SIMULATION" />
+                <ui:Button name="btn-toggle-results" class="toolbar-button" text="Results" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Main Content Area -->
         <ui:VisualElement name="MainContainer" class="main-container">
-            <!-- Left Panel -->
+            <!-- Left Component Palette -->
             <ui:VisualElement name="ComponentPalette" class="component-palette">
-                <ui:Button name="ComponentButton_Resistor" class="component-item" text="Resistor (R)" />
-                <ui:Button name="ComponentButton_Capacitor" class="component-item" text="Capacitor (C)" />
-                <ui:Button name="ComponentButton_Inductor" class="component-item" text="Inductor (L)" />
-                <ui:Button name="ComponentButton_VoltageSource" class="component-item" text="Voltage Source (V)" />
-                <ui:Button name="ComponentButton_CurrentSource" class="component-item" text="Current Source (I)" />
-                <ui:Button name="ComponentButton_Wire" class="component-item" text="Wire" />
+                <ui:ScrollView class="palette-scroll">
+                    <!-- Sources -->
+                    <ui:Label text="Sources" class="section-header" />
+                    <ui:Button name="btn-voltage_source_5v" class="component-button">
+                        <ui:Label text="5V Source" />
+                    </ui:Button>
+                    <ui:Button name="btn-ground" class="component-button">
+                        <ui:Label text="Ground" />
+                    </ui:Button>
+
+                    <!-- Passive Components -->
+                    <ui:Label text="Passive" class="section-header" />
+                    <ui:Label text="Resistors" class="sub-section-header" />
+                    <ui:Button name="btn-resistor_1k" class="component-button">
+                        <ui:Label text="1kΩ Resistor" />
+                    </ui:Button>
+                    <ui:Button name="btn-resistor_10k" class="component-button">
+                        <ui:Label text="10kΩ Resistor" />
+                    </ui:Button>
+                    
+                    <ui:Label text="Capacitors" class="sub-section-header" />
+                    <ui:Button name="btn-capacitor_10uf" class="component-button">
+                        <ui:Label text="10µF Capacitor" />
+                    </ui:Button>
+                    <ui:Button name="btn-capacitor_100uf" class="component-button">
+                        <ui:Label text="100µF Capacitor" />
+                    </ui:Button>
+
+                    <!-- Semiconductors -->
+                    <ui:Label text="Semiconductors" class="section-header" />
+                    <ui:Button name="btn-led_red" class="component-button">
+                        <ui:Label text="Red LED" />
+                    </ui:Button>
+                    <ui:Button name="btn-diode_1n4148" class="component-button">
+                        <ui:Label text="1N4148 Diode" />
+                    </ui:Button>
+                </ui:ScrollView>
             </ui:VisualElement>
             
-            <!-- Center Game View -->
-            <ui:VisualElement name="GameView" class="game-view">
-                <ui:Label text="Game View" />
+            <!-- Center Game View (Transparent & Click-through) -->
+            <ui:VisualElement name="GameView" class="game-view" picking-mode="Ignore">
+                <ui:Label name="simulation-status" text="SIMULATING..." style="display: none;" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Bottom Status Bar -->
         <ui:VisualElement name="StatusBar" class="status-bar">
-            <ui:Label text="Ready" name="StatusText" />
+            <ui:Label name="StatusText" text="Ready" class="status-label" />
+            
+            <ui:VisualElement style="flex-grow: 1;" /> <!-- Flexible Spacer -->
+            
+            <ui:VisualElement class="status-separator" />
+            <ui:Label name="StatusCoords" text="0, 0" class="status-label" />
+            
+            <ui:VisualElement class="status-separator" />
+            <ui:Label name="StatusGrid" text="Grid: 1.0m" class="status-label" />
+            
+            <ui:VisualElement class="status-separator" />
+            <ui:Label name="StatusZoom" text="100%" class="status-label" />
         </ui:VisualElement>
 
         <!-- Results Panel Overlay -->
         <ui:VisualElement name="results-panel" class="results-panel" style="display: none;">
             <ui:Label name="result-status" class="result-status" text="PASS" />
             <ui:Label name="star-display" class="star-display" text="★★★" />
-            <ui:Label name="score-breakdown" class="score-breakdown" text="" />
             <ui:Label name="total-score" class="total-score" text="1000" />
+            
+            <ui:Label name="score-breakdown" class="score-breakdown" text="Base Score: 500&#10;Bonus: 500" />
+            
             <ui:ScrollView class="results-log-scroll">
-                <ui:Label name="results-text" class="results-text" text="" />
+                <ui:Label name="results-text" class="results-text" text="Simulation successful." />
             </ui:ScrollView>
+            
             <ui:Button name="btn-clear-results" text="Close Panel" class="close-button" />
         </ui:VisualElement>
     </ui:VisualElement>

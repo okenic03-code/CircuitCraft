@@ -1,84 +1,221 @@
-/* GameUI.uss */
+/* GameUI.uss - Dark CAD/EDA Theme */
 
-/* Root - Full Screen Container */
+/* Variables */
+:root {
+    --color-background: #1A1A2E;
+    --color-surface: #16213E;
+    --color-surface-lighter: #1F2D50;
+    --color-toolbar: #0F3460;
+    --color-accent: #00D4FF;
+    --color-accent-hover: #33DDFF;
+    --color-accent-active: #00A3CC;
+    --color-text-primary: #E0E0E0;
+    --color-text-secondary: #8892A0;
+    --color-border: #2A3A5C;
+    --color-success: #00E676;
+    --color-error: #FF5252;
+    --color-warning: #FFD740;
+    --color-star: #FFD700;
+}
+
+/* Global Reset */
+* {
+    -unity-font-definition: initial;
+    color: var(--color-text-primary);
+}
+
+/* Root Container */
 .root {
     flex-grow: 1;
-    background-color: #1E1E1E;
-    color: #CCCCCC;
+    background-color: var(--color-background);
     font-size: 14px;
 }
 
-/* Toolbar - Top Bar */
+/* Toolbar */
 .toolbar {
-    height: 40px;
-    background-color: #1E1E1E;
+    height: 48px;
+    background-color: var(--color-toolbar);
     border-bottom-width: 1px;
-    border-bottom-color: #3C3C3C;
+    border-bottom-color: var(--color-border);
     flex-direction: row;
     align-items: center;
-    padding-left: 10px;
-    padding-right: 10px;
+    justify-content: space-between;
+    padding-left: 12px;
+    padding-right: 12px;
 }
 
-/* Main Container - Holds Palette and Game View */
+.toolbar-group {
+    flex-direction: row;
+    align-items: center;
+}
+
+.toolbar-button {
+    height: 32px;
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: 4px;
+    margin-right: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
+    color: var(--color-text-primary);
+    -unity-text-align: middle-center;
+    transition: background-color 0.1s, border-color 0.1s;
+}
+
+.toolbar-button:hover {
+    background-color: var(--color-surface-lighter);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+
+.toolbar-button:active {
+    background-color: var(--color-surface);
+}
+
+.toolbar-button:disabled {
+    opacity: 0.4;
+}
+
+/* Simulate Button Special Style */
+#simulate-button {
+    background-color: rgba(0, 212, 255, 0.15);
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    -unity-font-style: bold;
+}
+
+#simulate-button:hover {
+    background-color: var(--color-accent);
+    color: #000000;
+}
+
+/* Main Layout */
 .main-container {
     flex-grow: 1;
     flex-direction: row;
 }
 
-/* Component Palette - Left Sidebar */
+/* Component Palette */
 .component-palette {
-    width: 200px;
-    min-width: 200px;
-    background-color: #252525;
+    width: 240px;
+    min-width: 240px;
+    background-color: var(--color-surface);
     border-right-width: 1px;
-    border-right-color: #3C3C3C;
-    padding: 10px;
-    overflow: scroll;
+    border-right-color: var(--color-border);
+    padding: 12px;
 }
 
-/* Component Item - Future usage */
-.component-item {
-    padding: 8px;
-    margin-bottom: 5px;
-    background-color: #333333;
-    border-radius: 4px;
-    border-width: 1px;
-    border-color: #444444;
-    cursor: link;
-}
-
-.component-item:hover {
-    background-color: #3794FF;
-    color: #FFFFFF;
-    border-color: #3794FF;
-}
-
-/* Game View - Main Area */
-.game-view {
+.palette-scroll {
     flex-grow: 1;
-    background-color: #1E1E1E;
-    /* Grid pattern placeholder */
-    border-width: 0;
-    margin: 0;
 }
 
-/* Status Bar - Bottom Bar */
-.status-bar {
-    height: 30px;
-    background-color: #1E1E1E;
-    border-top-width: 1px;
-    border-top-color: #3C3C3C;
+.section-header {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    -unity-font-style: bold;
+    margin-top: 16px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+    padding-bottom: 4px;
+}
+
+/* Note: :first-child not supported in Unity UI Toolkit */
+
+.sub-section-header {
+    font-size: 11px;
+    color: var(--color-text-secondary);
+    margin-top: 12px;
+    margin-bottom: 6px;
+    padding-left: 4px;
+    opacity: 0.8;
+}
+
+.component-button {
+    height: 40px;
     flex-direction: row;
     align-items: center;
-    padding-left: 10px;
-    padding-right: 10px;
-    font-size: 12px;
+    background-color: var(--color-surface-lighter);
+    border-radius: 4px;
+    margin-bottom: 6px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-width: 1px;
+    border-color: transparent;
+    transition: all 0.1s;
 }
 
-/* Global Text */
-Label {
-    color: #CCCCCC;
+.component-button:hover {
+    border-color: var(--color-accent);
+    background-color: rgba(0, 212, 255, 0.05);
+}
+
+.component-button.selected {
+    border-color: var(--color-accent);
+    background-color: rgba(0, 212, 255, 0.1);
+}
+
+.component-button Label {
+    color: var(--color-text-primary);
+    font-size: 13px;
+    white-space: normal;
+}
+
+/* Game View */
+.game-view {
+    flex-grow: 1;
+    background-color: transparent;
+    position: relative;
+}
+
+#simulation-status {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    translate: -50% 0;
+    background-color: rgba(15, 52, 96, 0.9);
+    padding: 8px 16px;
+    border-radius: 20px;
+    border-width: 1px;
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+    font-size: 14px;
+    -unity-font-style: bold;
+    display: none;
+}
+
+/* Status Bar */
+.status-bar {
+    height: 28px;
+    background-color: var(--color-toolbar);
+    border-top-width: 1px;
+    border-top-color: var(--color-border);
+    flex-direction: row;
+    align-items: center;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.status-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-right: 16px;
+    -unity-text-align: middle-left;
+}
+
+#StatusText {
+    flex-grow: 1;
+    color: var(--color-text-primary);
+}
+
+.status-separator {
+    width: 1px;
+    height: 16px;
+    background-color: var(--color-border);
+    margin-left: 8px;
+    margin-right: 8px;
 }
 
 /* Results Panel Overlay */
@@ -87,47 +224,50 @@ Label {
     top: 50%;
     left: 50%;
     translate: -50% -50%;
-    width: 400px;
-    max-height: 80%;
-    background-color: #2D2D2D;
-    border-width: 2px;
-    border-color: #3C3C3C;
-    border-radius: 8px;
-    padding: 20px;
+    width: 420px;
+    max-height: 85%;
+    background-color: var(--color-surface);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: 12px;
+    padding: 24px;
     align-items: center;
     display: flex;
+    /* Box shadow is not fully supported in all Unity versions via USS standard property, using minimal approach */
 }
 
 .result-status {
-    font-size: 24px;
+    font-size: 28px;
     -unity-font-style: bold;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     -unity-text-align: middle-center;
+    color: var(--color-success);
 }
 
 .star-display {
-    font-size: 32px;
-    color: #FFD700;
-    margin-bottom: 15px;
+    font-size: 36px;
+    color: var(--color-star);
+    margin-bottom: 20px;
     -unity-text-align: middle-center;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
 }
 
 .score-breakdown {
-    font-size: 14px;
+    font-size: 13px;
     white-space: pre-wrap;
-    margin-bottom: 15px;
-    color: #DDDDDD;
+    margin-bottom: 16px;
+    color: var(--color-text-secondary);
     width: 100%;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--color-border);
+    padding-bottom: 12px;
 }
 
 .total-score {
-    font-size: 20px;
+    font-size: 24px;
     -unity-font-style: bold;
-    border-top-width: 1px;
-    border-top-color: #555555;
-    padding-top: 10px;
-    margin-top: 10px;
-    color: #FFFFFF;
+    margin-bottom: 20px;
+    color: var(--color-text-primary);
     width: 100%;
     -unity-text-align: middle-center;
 }
@@ -135,29 +275,35 @@ Label {
 .results-log-scroll {
     flex-grow: 1;
     width: 100%;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    background-color: #222222;
-    padding: 5px;
-    border-radius: 4px;
+    margin-bottom: 16px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    padding: 8px;
+    border-width: 1px;
+    border-color: var(--color-border);
     min-height: 100px;
 }
 
 .results-text {
     font-size: 12px;
-    color: #AAAAAA;
+    color: var(--color-text-secondary);
     white-space: pre-wrap;
+    -unity-font-definition: initial; /* Fallback to standard font if monospace not available easily */
 }
 
 .close-button {
     width: 100%;
-    height: 30px;
-    margin-top: 10px;
-    background-color: #444444;
-    color: #FFFFFF;
-    border-radius: 4px;
+    height: 36px;
+    background-color: var(--color-surface-lighter);
+    border-width: 1px;
+    border-color: var(--color-border);
+    border-radius: 6px;
+    color: var(--color-text-primary);
+    -unity-font-style: bold;
+    transition: background-color 0.1s;
 }
 
 .close-button:hover {
-    background-color: #555555;
+    background-color: var(--color-border);
+    color: #FFFFFF;
 }
