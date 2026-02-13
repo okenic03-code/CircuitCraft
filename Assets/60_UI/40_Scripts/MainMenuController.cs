@@ -1,9 +1,13 @@
+using System;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.SceneManagement;
 
 namespace CircuitCraft.UI
 {
+    /// <summary>
+    /// Lightweight main menu button controller that raises events for external consumers.
+    /// Note: SceneFlowManager also handles main menu buttons directly.
+    /// </summary>
     public class MainMenuController : MonoBehaviour
     {
         [SerializeField] private UIDocument uiDocument;
@@ -11,6 +15,21 @@ namespace CircuitCraft.UI
         private Button _playButton;
         private Button _settingsButton;
         private Button _quitButton;
+
+        /// <summary>
+        /// Fired when the Play button is clicked.
+        /// </summary>
+        public event Action OnPlayRequested;
+
+        /// <summary>
+        /// Fired when the Settings button is clicked.
+        /// </summary>
+        public event Action OnSettingsRequested;
+
+        /// <summary>
+        /// Fired when the Quit button is clicked.
+        /// </summary>
+        public event Action OnQuitRequested;
 
         private void OnEnable()
         {
@@ -40,20 +59,17 @@ namespace CircuitCraft.UI
 
         private void OnPlayClicked(ClickEvent evt)
         {
-            SceneManager.LoadScene("GamePlay");
+            OnPlayRequested?.Invoke();
         }
 
         private void OnSettingsClicked(ClickEvent evt)
         {
-            Debug.Log("Settings clicked - Placeholder");
+            OnSettingsRequested?.Invoke();
         }
 
         private void OnQuitClicked(ClickEvent evt)
         {
-            Application.Quit();
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#endif
+            OnQuitRequested?.Invoke();
         }
     }
 }
