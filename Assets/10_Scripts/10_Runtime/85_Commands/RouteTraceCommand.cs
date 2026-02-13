@@ -18,6 +18,7 @@ namespace CircuitCraft.Commands
         // State captured during Execute for Undo
         private int _netId;
         private readonly List<int> _addedSegmentIds = new List<int>();
+        // ReSharper disable once NotAccessedField.Local
         private bool _createdNewNet;
         private int? _startPinPreviousNetId;
         private int? _endPinPreviousNetId;

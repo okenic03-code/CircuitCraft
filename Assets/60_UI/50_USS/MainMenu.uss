@@ -88,15 +88,15 @@
 }
 
 .icon-play {
-    background-image: url('project://database/Assets/60_UI/10_Sprites/MainMenu/IconPlay.png');
+    background-image: url('project://database/Assets/60_UI/10_Sprites/10_MainMenu/IconPlay.png');
 }
 
 .icon-settings {
-    background-image: url('project://database/Assets/60_UI/10_Sprites/MainMenu/IconSettings.png');
+    background-image: url('project://database/Assets/60_UI/10_Sprites/10_MainMenu/IconSettings.png');
 }
 
 .icon-quit {
-    background-image: url('project://database/Assets/60_UI/10_Sprites/MainMenu/IconQuit.png');
+    background-image: url('project://database/Assets/60_UI/10_Sprites/10_MainMenu/IconQuit.png');
 }
 
 .button-label {

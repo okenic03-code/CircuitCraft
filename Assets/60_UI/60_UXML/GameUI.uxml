@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:Style src="../USS/GameUI.uss" />
+    <ui:Style src="../50_USS/GameUI.uss" />
     <ui:VisualElement name="Root" class="root">
         <!-- Top Toolbar -->
         <ui:VisualElement name="Toolbar" class="toolbar">

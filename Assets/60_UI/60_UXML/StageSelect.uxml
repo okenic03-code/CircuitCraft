@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="False">
-    <ui:Style src="../USS/StageSelect.uss" />
+    <ui:Style src="../50_USS/StageSelect.uss" />
     <ui:VisualElement name="stage-select-root" class="stage-select-root">
         <!-- Header -->
         <ui:Label name="world-title" class="world-title" text="World 1: DC Basics" />
