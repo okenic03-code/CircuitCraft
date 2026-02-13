@@ -19,7 +19,7 @@ namespace CircuitCraft.Tests.Integration
     [TestFixture]
     public class BoardStateSimulationTests
     {
-        private const string TestAssetBasePath = "Assets/70_Data/10_ScriptableObjects/Components";
+        private const string TestAssetBasePath = "Assets/70_Data/10_ScriptableObjects/40_Components";
         private const string VSourceAssetName = "test_vsource_5v";
         private const string Resistor1kAssetName = "test_resistor_1k";
         private const string Resistor2kAssetName = "test_resistor_2k";

@@ -8,7 +8,7 @@ namespace CircuitCraft.Editor
     public static class MainMenuTextureGenerator
     {
         private const int IconSize = 128;
-        private const string OutputPath = "Assets/60_UI/10_Sprites/MainMenu";
+        private const string OutputPath = "Assets/60_UI/10_Sprites/10_MainMenu";
 
         [MenuItem("Tools/CircuitCraft/Generate MainMenu Textures")]
         public static void GenerateAll()
