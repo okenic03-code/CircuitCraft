@@ -37,6 +37,7 @@ namespace CircuitCraft.UI
         [SerializeField]
         [Tooltip("Seconds to wait after stage completion before returning to stage select.")]
         private float _completionDelay = 2.0f;
+        private WaitForSeconds _waitForCompletion;
 
         private enum GameScreen { MainMenu, StageSelect, GamePlay }
 
@@ -48,6 +49,7 @@ namespace CircuitCraft.UI
             WireMainMenuButtons();
             WireStageSelectEvents();
             WireStageManagerEvents();
+            _waitForCompletion = new WaitForSeconds(_completionDelay);
 
             ShowScreen(GameScreen.MainMenu);
         }
@@ -151,7 +153,7 @@ namespace CircuitCraft.UI
 
         private IEnumerator TransitionAfterCompletion()
         {
-            yield return new WaitForSeconds(_completionDelay);
+            yield return _waitForCompletion;
 
             SyncProgressionToStageSelect();
             ShowScreen(GameScreen.StageSelect);
@@ -179,7 +181,9 @@ namespace CircuitCraft.UI
             if (_gamePlayScreen != null)
                 _gamePlayScreen.SetActive(screen == GameScreen.GamePlay);
 
+#if UNITY_EDITOR
             Debug.Log($"SceneFlowManager: Showing {screen}");
+#endif
         }
 
         // ─── Progression Sync ─────────────────────────────────────────────

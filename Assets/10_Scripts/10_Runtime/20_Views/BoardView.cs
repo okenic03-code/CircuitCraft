@@ -52,7 +52,9 @@ namespace CircuitCraft.Views
                 if (_boardState != null)
                 {
                     SubscribeToBoardEvents();
+#if UNITY_EDITOR
                     Debug.Log("BoardView: Subscribed to BoardState events");
+#endif
                 }
                 else
                 {
@@ -168,8 +170,10 @@ namespace CircuitCraft.Views
                 // lookup service (IComponentDefinitionProvider). PlacementController handles
                 // Initialize() when placing via UI interaction. BoardView provides automatic
                 // sync from BoardState events for programmatic placement.
+#if UNITY_EDITOR
                 Debug.Log($"BoardView: Spawned ComponentView for {component.ComponentDefinitionId} " +
                           $"(InstanceId: {component.InstanceId}) at grid ({gridPos.x}, {gridPos.y})");
+#endif
             }
             else
             {
@@ -191,7 +195,9 @@ namespace CircuitCraft.Views
                 if (view != null)
                 {
                     Destroy(view.gameObject);
+#if UNITY_EDITOR
                     Debug.Log($"BoardView: Destroyed ComponentView for InstanceId {instanceId}");
+#endif
                 }
 
                 _componentViews.Remove(instanceId);

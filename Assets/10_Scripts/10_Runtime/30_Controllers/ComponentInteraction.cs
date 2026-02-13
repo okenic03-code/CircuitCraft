@@ -176,7 +176,9 @@ namespace CircuitCraft.Controllers
                     _selectedComponent = null; // Clear reference before destroying
                     Destroy(componentObject);
                     
+#if UNITY_EDITOR
                     Debug.Log($"ComponentInteraction: Deleted component {instanceId} at position {gridPos}");
+#endif
                 }
                 else
                 {

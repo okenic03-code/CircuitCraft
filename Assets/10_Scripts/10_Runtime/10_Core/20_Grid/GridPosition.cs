@@ -51,6 +51,20 @@ namespace CircuitCraft.Core
         }
 
         /// <summary>
+        /// Fills a buffer with the 4-connected neighbors (up, down, left, right).
+        /// The buffer must have at least offset + 4 elements.
+        /// </summary>
+        /// <param name="buffer">Destination buffer.</param>
+        /// <param name="offset">Starting index in the buffer (default 0).</param>
+        public void FillNeighbors(GridPosition[] buffer, int offset = 0)
+        {
+            buffer[offset] = new GridPosition(X, Y + 1); // Up
+            buffer[offset + 1] = new GridPosition(X, Y - 1); // Down
+            buffer[offset + 2] = new GridPosition(X - 1, Y); // Left
+            buffer[offset + 3] = new GridPosition(X + 1, Y); // Right
+        }
+
+        /// <summary>
         /// Checks equality with another grid position.
         /// </summary>
         public bool Equals(GridPosition other)
