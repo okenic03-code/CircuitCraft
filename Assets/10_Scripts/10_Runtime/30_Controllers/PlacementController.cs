@@ -249,21 +249,12 @@ namespace CircuitCraft.Controllers
         
         /// <summary>
         /// Checks if a component can be placed at the given grid position.
-        /// Validates position is within grid bounds and not already occupied.
+        /// Validates position is not already occupied (grid is unbounded).
         /// </summary>
         /// <param name="gridPos">Grid position to validate.</param>
         /// <returns>True if placement is valid, false otherwise.</returns>
         private bool IsValidPlacement(Vector2Int gridPos)
         {
-            if (_gridSettings == null)
-                return false;
-            
-            // Check grid bounds
-            if (!GridUtility.IsValidGridPosition(gridPos, _gridSettings.BoardWidth, _gridSettings.BoardHeight))
-            {
-                return false;
-            }
-            
             // Check if position is already occupied
             if (_gameManager != null && _gameManager.BoardState != null)
             {

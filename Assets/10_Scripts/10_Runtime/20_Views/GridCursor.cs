@@ -94,25 +94,18 @@ namespace CircuitCraft.Views
                 _gridSettings.GridOrigin
             );
             
-            // Check if position is valid
-            bool isValid = GridUtility.IsValidGridPosition(gridPos, _gridSettings.BoardWidth, _gridSettings.BoardHeight);
-            
-            // Update current position
+            // Update current position - grid is unbounded, always over grid
             _currentGridPosition = gridPos;
-            _isOverGrid = isValid;
+            _isOverGrid = true;
             
-            // Update visual position
-            if (isValid)
-            {
-                Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
-                transform.position = worldPos;
-                SetCursorVisible(true);
-                SetCursorColor(_validColor);
-            }
-            else
-            {
-                SetCursorVisible(false);
-            }
+            // Update world position - always show cursor at any coordinate
+            Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
+            transform.position = worldPos;
+            SetCursorVisible(true);
+            
+            // Color hint: green inside suggested area, red outside
+            bool insideSuggested = GridUtility.IsInsideSuggestedArea(gridPos, _gridSettings.SuggestedWidth, _gridSettings.SuggestedHeight);
+            SetCursorColor(insideSuggested ? _validColor : _invalidColor);
         }
         
         /// <summary>

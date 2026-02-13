@@ -13,10 +13,10 @@ namespace CircuitCraft.Systems
         /// <summary>Which stage this solution is for.</summary>
         public string stageId;
 
-        /// <summary>Board width in grid cells.</summary>
+        /// <summary>Suggested board width in grid cells (not a hard limit).</summary>
         public int boardWidth;
 
-        /// <summary>Board height in grid cells.</summary>
+        /// <summary>Suggested board height in grid cells (not a hard limit).</summary>
         public int boardHeight;
 
         /// <summary>All placed components.</summary>

@@ -12,10 +12,6 @@ namespace CircuitCraft.Controllers
     {
         [Header("Pan Settings")]
         [SerializeField] private float _panSpeed = 10f;
-        [SerializeField] private float _minX = -10f;
-        [SerializeField] private float _maxX = 30f;
-        [SerializeField] private float _minY = -10f;
-        [SerializeField] private float _maxY = 30f;
         
         [Header("Zoom Settings")]
         [SerializeField] private float _zoomSpeed = 2f;
@@ -57,7 +53,7 @@ namespace CircuitCraft.Controllers
             
             if (Mathf.Abs(horizontal) > 0.01f || Mathf.Abs(vertical) > 0.01f)
             {
-                panDelta = new Vector3(horizontal, vertical, 0f) * _panSpeed * Time.deltaTime;
+                panDelta = new Vector3(horizontal, 0f, vertical) * _panSpeed * Time.deltaTime;
             }
             
             // Middle mouse button panning
@@ -81,16 +77,13 @@ namespace CircuitCraft.Controllers
                 float worldDeltaX = -mouseDelta.x * (_camera.orthographicSize * 2f / Screen.height);
                 float worldDeltaY = -mouseDelta.y * (_camera.orthographicSize * 2f / Screen.height);
                 
-                panDelta += new Vector3(worldDeltaX, worldDeltaY, 0f);
+                panDelta += new Vector3(worldDeltaX, 0f, worldDeltaY);
             }
             
-            // Apply panning with bounds clamping
+            // Apply panning
             if (panDelta.sqrMagnitude > 0.0001f)
             {
-                Vector3 newPosition = transform.position + panDelta;
-                newPosition.x = Mathf.Clamp(newPosition.x, _minX, _maxX);
-                newPosition.y = Mathf.Clamp(newPosition.y, _minY, _maxY);
-                transform.position = newPosition;
+                transform.position += panDelta;
             }
         }
         
@@ -107,6 +100,46 @@ namespace CircuitCraft.Controllers
                 float newSize = _camera.orthographicSize - scroll * _zoomSpeed;
                 _camera.orthographicSize = Mathf.Clamp(newSize, _minZoom, _maxZoom);
             }
+        }
+        
+        /// <summary>
+        /// Moves the camera to frame the given world-space bounding rectangle.
+        /// Adjusts position to center on the rect and zoom to fit it in view.
+        /// </summary>
+        /// <param name="worldMin">Minimum corner of the rect in world space.</param>
+        /// <param name="worldMax">Maximum corner of the rect in world space.</param>
+        /// <param name="padding">Extra padding in world units around the rect.</param>
+        public void FrameBounds(Vector3 worldMin, Vector3 worldMax, float padding = 2f)
+        {
+            // Center camera on the rect
+            Vector3 center = (worldMin + worldMax) * 0.5f;
+            Vector3 pos = transform.position;
+            pos.x = center.x;
+            pos.z = center.z;
+            transform.position = pos;
+            
+            // Adjust zoom to fit the rect
+            float rectWidth = (worldMax.x - worldMin.x) + padding * 2f;
+            float rectHeight = (worldMax.z - worldMin.z) + padding * 2f;
+            
+            // Choose zoom based on aspect ratio
+            float aspect = _camera.aspect;
+            float requiredSize = Mathf.Max(rectHeight * 0.5f, rectWidth * 0.5f / aspect);
+            _camera.orthographicSize = Mathf.Clamp(requiredSize, _minZoom, _maxZoom);
+        }
+        
+        /// <summary>
+        /// Resets the camera to frame the default suggested area.
+        /// </summary>
+        /// <param name="suggestedWidth">Width in grid cells.</param>
+        /// <param name="suggestedHeight">Height in grid cells.</param>
+        /// <param name="cellSize">Size of each cell in world units.</param>
+        /// <param name="gridOrigin">World-space origin of the grid.</param>
+        public void FrameSuggestedArea(int suggestedWidth, int suggestedHeight, float cellSize, Vector3 gridOrigin)
+        {
+            Vector3 worldMin = gridOrigin;
+            Vector3 worldMax = gridOrigin + new Vector3(suggestedWidth * cellSize, 0f, suggestedHeight * cellSize);
+            FrameBounds(worldMin, worldMax);
         }
     }
 }

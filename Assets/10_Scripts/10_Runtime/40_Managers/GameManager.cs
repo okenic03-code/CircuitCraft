@@ -1,7 +1,9 @@
 using System;
+using System.IO;
 using System.Threading;
 using CircuitCraft.Core;
 using CircuitCraft.Simulation;
+using CircuitCraft.Systems;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 
@@ -13,13 +15,15 @@ namespace CircuitCraft.Managers
     /// </summary>
     public class GameManager : MonoBehaviour
     {
-        [Header("Board Configuration")]
-        [SerializeField] private int _boardWidth = 20;
-        [SerializeField] private int _boardHeight = 20;
+        [Header("Suggested Area Configuration")]
+        [SerializeField, Tooltip("Suggested width (not a hard limit)")] private int _suggestedWidth = 20;
+        [SerializeField, Tooltip("Suggested height (not a hard limit)")] private int _suggestedHeight = 20;
 
         [Header("Dependencies")]
         [SerializeField] private BoardState _boardState;
         [SerializeField] private SimulationManager _simulationManager;
+
+        private SaveLoadService _saveLoadService;
 
         private void Awake() => Init();
 
@@ -28,6 +32,7 @@ namespace CircuitCraft.Managers
             InitializeServiceRegistry();
             ValidateSimulationManager();
             InitializeBoardState();
+            InitializeSaveLoadService();
         }
 
         private void InitializeServiceRegistry()
@@ -47,9 +52,15 @@ namespace CircuitCraft.Managers
         {
             if (_boardState == null)
             {
-                _boardState = new BoardState(_boardWidth, _boardHeight);
-                Debug.Log($"GameManager: BoardState initialized ({_boardWidth}x{_boardHeight})");
+                _boardState = new BoardState(_suggestedWidth, _suggestedHeight);
+                Debug.Log($"GameManager: BoardState initialized with suggested area ({_suggestedWidth}x{_suggestedHeight})");
             }
+        }
+
+        private void InitializeSaveLoadService()
+        {
+            _saveLoadService = new SaveLoadService();
+            Debug.Log("GameManager: SaveLoadService initialized.");
         }
 
         /// <summary>
@@ -58,17 +69,27 @@ namespace CircuitCraft.Managers
         public BoardState BoardState => _boardState;
 
         /// <summary>
-        /// Resets the board to a new empty state with the specified dimensions.
+        /// Event raised when the current board has been saved successfully.
+        /// </summary>
+        public event Action<string> OnBoardSaved;
+
+        /// <summary>
+        /// Event raised when a board has been loaded successfully.
+        /// </summary>
+        public event Action<string> OnBoardLoaded;
+
+        /// <summary>
+        /// Resets the board to a new empty state with the specified suggested area.
         /// Used by StageManager when loading a new stage.
         /// </summary>
-        /// <param name="width">Board width in grid cells.</param>
-        /// <param name="height">Board height in grid cells.</param>
+        /// <param name="width">Suggested width in grid cells (not a hard limit).</param>
+        /// <param name="height">Suggested height in grid cells (not a hard limit).</param>
         public void ResetBoard(int width, int height)
         {
-            _boardWidth = width;
-            _boardHeight = height;
+            _suggestedWidth = width;
+            _suggestedHeight = height;
             _boardState = new BoardState(width, height);
-            Debug.Log($"GameManager: Board reset ({width}x{height})");
+            Debug.Log($"GameManager: Board reset with suggested area ({width}x{height})");
         }
 
         /// <summary>
@@ -130,6 +151,56 @@ namespace CircuitCraft.Managers
             }
 
             await _simulationManager.RunSimulationAsync(_boardState, cancellationToken);
+        }
+
+        /// <summary>
+        /// Saves the current board state to a JSON file for the given stage.
+        /// File is written to <c>Application.persistentDataPath/saves/{stageId}.json</c>.
+        /// </summary>
+        /// <param name="stageId">Stage identifier used as the file name.</param>
+        public void SaveCurrentBoard(string stageId)
+        {
+            try
+            {
+                var filePath = GetSaveFilePath(stageId);
+                _saveLoadService.SaveToFile(filePath, _boardState, stageId);
+                Debug.Log($"GameManager: Board saved for stage '{stageId}' at {filePath}");
+                OnBoardSaved?.Invoke(stageId);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"GameManager: Failed to save board for stage '{stageId}': {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Loads a previously saved board state from disk and replaces the current board.
+        /// File is read from <c>Application.persistentDataPath/saves/{stageId}.json</c>.
+        /// </summary>
+        /// <param name="stageId">Stage identifier used as the file name.</param>
+        public void LoadBoard(string stageId)
+        {
+            try
+            {
+                var filePath = GetSaveFilePath(stageId);
+                var data = _saveLoadService.LoadFromFile(filePath);
+                var newBoardState = new BoardState(data.boardWidth, data.boardHeight);
+                _saveLoadService.RestoreToBoard(newBoardState, data);
+                _boardState = newBoardState;
+                _suggestedWidth = data.boardWidth;
+                _suggestedHeight = data.boardHeight;
+                Debug.Log($"GameManager: Board loaded for stage '{stageId}' with suggested area ({data.boardWidth}x{data.boardHeight})");
+                OnBoardLoaded?.Invoke(stageId);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"GameManager: Failed to load board for stage '{stageId}': {ex.Message}");
+            }
+        }
+
+        private static string GetSaveFilePath(string stageId)
+        {
+            return Path.Combine(Application.persistentDataPath, "saves", $"{stageId}.json");
         }
     }
 }

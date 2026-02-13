@@ -20,8 +20,11 @@ namespace CircuitCraft.Core
         private int _nextNetId = 1;
         private int _nextTraceId = 1;
 
-        /// <summary>Gets the board boundaries.</summary>
-        public BoardBounds Bounds { get; }
+        /// <summary>Gets the suggested board area for initial framing and UX.</summary>
+        public BoardBounds SuggestedBounds { get; }
+
+        /// <summary>Gets the suggested board area for backward compatibility.</summary>
+        public BoardBounds Bounds => SuggestedBounds;
 
         /// <summary>Gets the read-only list of placed components.</summary>
         public IReadOnlyList<PlacedComponent> Components => _readOnlyComponents;
@@ -57,7 +60,7 @@ namespace CircuitCraft.Core
         /// <param name="height">Board height in grid cells.</param>
         public BoardState(int width, int height)
         {
-            Bounds = new BoardBounds(width, height);
+            SuggestedBounds = new BoardBounds(width, height);
             _readOnlyComponents = _components.AsReadOnly();
             _readOnlyTraces = _traces.AsReadOnly();
         }
@@ -73,9 +76,6 @@ namespace CircuitCraft.Core
         public PlacedComponent PlaceComponent(string componentDefId, GridPosition position, 
                                                int rotation, IEnumerable<PinInstance> pins)
         {
-            if (!Bounds.Contains(position))
-                throw new ArgumentException($"Position {position} is outside board bounds.");
-
             if (_componentsByPosition.ContainsKey(position))
                 throw new InvalidOperationException($"Position {position} is already occupied.");
 
@@ -161,13 +161,41 @@ namespace CircuitCraft.Core
             var net = GetNet(netId);
             if (net == null)
                 throw new ArgumentException($"Net {netId} not found.", nameof(netId));
-            if (!Bounds.Contains(start) || !Bounds.Contains(end))
-                throw new ArgumentException("Trace endpoints must be within board bounds.");
 
             var trace = new TraceSegment(_nextTraceId++, netId, start, end);
             _traces.Add(trace);
             OnTraceAdded?.Invoke(trace);
             return trace;
+        }
+
+        /// <summary>
+        /// Computes the axis-aligned bounding rectangle that contains all placed components and trace endpoints.
+        /// Returns SuggestedBounds when the board has no content.
+        /// </summary>
+        /// <returns>Computed content bounds or SuggestedBounds when empty.</returns>
+        public BoardBounds ComputeContentBounds()
+        {
+            var positions = new List<GridPosition>();
+
+            foreach (var component in _components)
+            {
+                positions.Add(component.Position);
+                foreach (var pin in component.Pins)
+                {
+                    positions.Add(component.GetPinWorldPosition(pin.PinIndex));
+                }
+            }
+
+            foreach (var trace in _traces)
+            {
+                positions.Add(trace.Start);
+                positions.Add(trace.End);
+            }
+
+            if (positions.Count == 0)
+                return SuggestedBounds;
+
+            return BoardBounds.FromContent(positions);
         }
 
         /// <summary>
@@ -335,7 +363,7 @@ namespace CircuitCraft.Core
         /// </summary>
         public override string ToString()
         {
-            return $"Board[{Bounds}] {_components.Count} components, {_nets.Count} nets";
+            return $"Board[{SuggestedBounds}] {_components.Count} components, {_nets.Count} nets";
         }
     }
 }

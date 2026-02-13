@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Simulation;
@@ -21,12 +22,16 @@ namespace CircuitCraft.Managers
         private StageDefinition _currentStage;
         private ObjectiveEvaluator _objectiveEvaluator;
         private ScoringSystem _scoringSystem;
+        private DRCChecker _drcChecker;
 
         /// <summary>Raised after a stage is loaded and ready for play.</summary>
         public event Action OnStageLoaded;
 
         /// <summary>Raised when simulation + evaluation + scoring completes.</summary>
         public event Action<ScoreBreakdown> OnStageCompleted;
+
+        /// <summary>Raised when design rule checks complete, before simulation runs.</summary>
+        public event Action<DRCResult> OnDRCCompleted;
 
         /// <summary>The currently loaded stage, or null.</summary>
         public StageDefinition CurrentStage => _currentStage;
@@ -35,6 +40,7 @@ namespace CircuitCraft.Managers
         {
             _objectiveEvaluator = new ObjectiveEvaluator();
             _scoringSystem = new ScoringSystem();
+            _drcChecker = new DRCChecker();
         }
 
         /// <summary>
@@ -52,7 +58,7 @@ namespace CircuitCraft.Managers
             // Reset board to stage grid dimensions
             _gameManager.ResetBoard(stage.GridSize.x, stage.GridSize.y);
 
-            Debug.Log($"StageManager: Loaded stage '{stage.DisplayName}' ({stage.GridSize.x}x{stage.GridSize.y})");
+            Debug.Log($"StageManager: Loaded stage '{stage.DisplayName}' (suggested area {stage.GridSize.x}x{stage.GridSize.y})");
             OnStageLoaded?.Invoke();
         }
 
@@ -81,7 +87,39 @@ namespace CircuitCraft.Managers
         {
             var boardState = _gameManager.BoardState;
 
-            // Run simulation and await completion
+            // 1. Run design rule checks before simulation
+            var drcResult = _drcChecker.Check(boardState);
+            Debug.Log($"StageManager: DRC completed — {drcResult}");
+            OnDRCCompleted?.Invoke(drcResult);
+
+            // 2. If shorts detected, auto-fail without running simulation
+            if (drcResult.ShortCount > 0)
+            {
+                Debug.LogError($"StageManager: {drcResult.ShortCount} short(s) detected — skipping simulation.");
+                foreach (var violation in drcResult.Violations)
+                {
+                    if (violation.ViolationType == DRCViolationType.Short)
+                        Debug.LogError($"  {violation.Message}");
+                }
+
+                var failedBreakdown = CreateDRCFailedBreakdown(drcResult);
+                Debug.Log($"StageManager: Stage '{_currentStage.DisplayName}' completed — {failedBreakdown.Summary}");
+                OnStageCompleted?.Invoke(failedBreakdown);
+                return;
+            }
+
+            // 3. Log unconnected pin warnings (don't block simulation)
+            if (drcResult.UnconnectedCount > 0)
+            {
+                Debug.LogWarning($"StageManager: {drcResult.UnconnectedCount} unconnected pin(s) detected.");
+                foreach (var violation in drcResult.Violations)
+                {
+                    if (violation.ViolationType == DRCViolationType.UnconnectedPin)
+                        Debug.LogWarning($"  {violation.Message}");
+                }
+            }
+
+            // 4. Run simulation and await completion
             await _simulationManager.RunSimulationAsync(boardState);
             var simResult = _simulationManager.LastSimulationResult;
 
@@ -131,6 +169,37 @@ namespace CircuitCraft.Managers
 
             Debug.Log($"StageManager: Stage '{_currentStage.DisplayName}' completed — {scoreBreakdown.Summary}");
             OnStageCompleted?.Invoke(scoreBreakdown);
+        }
+
+        /// <summary>
+        /// Creates a failed ScoreBreakdown when DRC detects shorts,
+        /// including DRC violation details in the line items.
+        /// </summary>
+        /// <param name="drcResult">The DRC result containing short violations.</param>
+        /// <returns>A zero-score, failed ScoreBreakdown.</returns>
+        private static ScoreBreakdown CreateDRCFailedBreakdown(DRCResult drcResult)
+        {
+            var lineItems = new List<ScoreLineItem>
+            {
+                new ScoreLineItem($"DRC Failed: {drcResult.ShortCount} short(s)", 0)
+            };
+
+            if (drcResult.UnconnectedCount > 0)
+            {
+                lineItems.Add(new ScoreLineItem(
+                    $"DRC Warning: {drcResult.UnconnectedCount} unconnected pin(s)", 0));
+            }
+
+            return new ScoreBreakdown(
+                baseScore: 0,
+                budgetBonus: 0,
+                compactBonus: 0,
+                totalScore: 0,
+                stars: 0,
+                passed: false,
+                lineItems: lineItems,
+                summary: $"FAILED — DRC: {drcResult.ShortCount} short(s) detected"
+            );
         }
     }
 }

@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace CircuitCraft.Data
 {
@@ -6,6 +7,7 @@ namespace CircuitCraft.Data
     /// ScriptableObject that consolidates grid configuration settings.
     /// Used by PlacementController, BoardView, GridCursor, and GridRenderer
     /// to maintain consistent grid parameters across the application.
+    /// The grid is now unbounded - suggested dimensions are UI hints only.
     /// </summary>
     [CreateAssetMenu(fileName = "GridSettings", menuName = "CircuitCraft/Settings/Grid Settings")]
     public class GridSettings : ScriptableObject
@@ -19,14 +21,16 @@ namespace CircuitCraft.Data
         [Tooltip("World position of the grid's origin (0,0).")]
         private Vector3 _gridOrigin = Vector3.zero;
         
-        [Header("Grid Dimensions")]
+        [Header("Suggested Area")]
         [SerializeField]
-        [Tooltip("Width of the grid (number of cells).")]
-        private int _boardWidth = 20;
+        [FormerlySerializedAs("_boardWidth")]
+        [Tooltip("Suggested width of the playable area (not a hard limit).")]
+        private int _suggestedWidth = 20;
         
         [SerializeField]
-        [Tooltip("Height of the grid (number of cells).")]
-        private int _boardHeight = 20;
+        [FormerlySerializedAs("_boardHeight")]
+        [Tooltip("Suggested height of the playable area (not a hard limit).")]
+        private int _suggestedHeight = 20;
         
         /// <summary>
         /// Size of each grid cell in world units.
@@ -39,13 +43,27 @@ namespace CircuitCraft.Data
         public Vector3 GridOrigin => _gridOrigin;
         
         /// <summary>
+        /// Suggested width of the playable area (number of cells).
+        /// This is a UI hint only - placement is not restricted to this area.
+        /// </summary>
+        public int SuggestedWidth => _suggestedWidth;
+        
+        /// <summary>
+        /// Suggested height of the playable area (number of cells).
+        /// This is a UI hint only - placement is not restricted to this area.
+        /// </summary>
+        public int SuggestedHeight => _suggestedHeight;
+        
+        /// <summary>
         /// Width of the grid (number of cells).
         /// </summary>
-        public int BoardWidth => _boardWidth;
+        [System.Obsolete("Use SuggestedWidth instead")]
+        public int BoardWidth => _suggestedWidth;
         
         /// <summary>
         /// Height of the grid (number of cells).
         /// </summary>
-        public int BoardHeight => _boardHeight;
+        [System.Obsolete("Use SuggestedHeight instead")]
+        public int BoardHeight => _suggestedHeight;
     }
 }
