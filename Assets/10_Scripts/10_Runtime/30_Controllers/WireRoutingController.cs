@@ -7,6 +7,7 @@ using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using CircuitCraft.Utils;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace CircuitCraft.Controllers
 {
@@ -17,10 +18,12 @@ namespace CircuitCraft.Controllers
     {
         [Header("Dependencies")]
         [SerializeField] private GameManager _gameManager;
+        [SerializeField] private StageManager _stageManager;
         [SerializeField] private GridSettings _gridSettings;
         [SerializeField] private Camera _mainCamera;
 
         private CommandHistory _commandHistory;
+        private UIDocument[] _uiDocuments;
 
         [Header("Raycast Settings")]
         [SerializeField] private float _raycastDistance = 100f;
@@ -57,8 +60,19 @@ namespace CircuitCraft.Controllers
                 _commandHistory = _gameManager.CommandHistory;
             }
 
+            // Cache UIDocuments for UI click-through detection
+            _uiDocuments = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+
             EnsurePreviewLine();
             HidePreview();
+        }
+
+        private void Start()
+        {
+            if (_stageManager == null)
+                _stageManager = FindFirstObjectByType<StageManager>();
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded += HandleBoardReset;
         }
 
         private void Update()
@@ -100,6 +114,10 @@ namespace CircuitCraft.Controllers
         private void HandleLeftClick()
         {
             if (!Input.GetMouseButtonDown(0))
+                return;
+
+            // Skip if pointer is over UI
+            if (IsPointerOverUI())
                 return;
 
             if (TryGetClickedPin(out var clickedPin))
@@ -332,6 +350,18 @@ namespace CircuitCraft.Controllers
             HidePreview();
         }
 
+        private void HandleBoardReset()
+        {
+            CancelRouting();
+            _selectedTraceSegmentId = -1;
+
+            if (_gameManager != null)
+            {
+                _boardState = _gameManager.BoardState;
+                _commandHistory = _gameManager.CommandHistory;
+            }
+        }
+
         private void EnsurePreviewLine()
         {
             var previewObject = new GameObject("WirePreview");
@@ -369,6 +399,9 @@ namespace CircuitCraft.Controllers
 
         private void OnDestroy()
         {
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded -= HandleBoardReset;
+
             if (_previewLine != null && _previewLine.material != null)
             {
                 Destroy(_previewLine.material);
@@ -400,5 +433,31 @@ namespace CircuitCraft.Controllers
         /// Gets whether there is at least one command available to redo.
         /// </summary>
         public bool CanRedo => _commandHistory.CanRedo;
+        
+        /// <summary>
+        /// Checks if the mouse pointer is currently over any UI Toolkit panel.
+        /// </summary>
+        /// <returns>True if pointer is over UI, false otherwise.</returns>
+        private bool IsPointerOverUI()
+        {
+            if (_uiDocuments == null) return false;
+            
+            foreach (var doc in _uiDocuments)
+            {
+                if (doc == null || doc.rootVisualElement == null) continue;
+                var panel = doc.rootVisualElement.panel;
+                if (panel == null) continue;
+                
+                Vector2 screenPos = Input.mousePosition;
+                // Convert screen position to panel position (screen Y is inverted for UI Toolkit)
+                Vector2 panelPos = new Vector2(screenPos.x, Screen.height - screenPos.y);
+                panelPos = RuntimePanelUtils.ScreenToPanel(panel, panelPos);
+                
+                var picked = panel.Pick(panelPos);
+                if (picked != null && picked != doc.rootVisualElement)
+                    return true;
+            }
+            return false;
+        }
     }
 }

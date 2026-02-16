@@ -17,6 +17,8 @@ namespace CircuitCraft.Views
     {
         [Header("Dependencies")]
         [SerializeField] private GameManager _gameManager;
+        [SerializeField] private SimulationManager _simulationManager;
+        [SerializeField] private StageManager _stageManager;
 
         [Header("Prefabs")]
         [SerializeField]
@@ -66,6 +68,14 @@ namespace CircuitCraft.Views
                 Debug.LogError("BoardView: No GameManager assigned!");
             }
             
+            if (_simulationManager == null)
+                _simulationManager = FindFirstObjectByType<SimulationManager>();
+            
+            if (_stageManager == null)
+                _stageManager = FindFirstObjectByType<StageManager>();
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded += HandleBoardReset;
+            
             if (_gridSettings == null)
             {
                 Debug.LogError("BoardView: GridSettings reference is missing!");
@@ -75,6 +85,9 @@ namespace CircuitCraft.Views
         private void OnDestroy()
         {
             UnsubscribeFromBoardEvents();
+            
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded -= HandleBoardReset;
         }
 
         /// <summary>
@@ -99,6 +112,33 @@ namespace CircuitCraft.Views
 
             _boardState.OnComponentPlaced -= HandleComponentPlaced;
             _boardState.OnComponentRemoved -= HandleComponentRemoved;
+        }
+
+        /// <summary>
+        /// Handles board reset (e.g., when a new stage is loaded).
+        /// Unsubscribes from old BoardState, destroys all existing component views,
+        /// and re-subscribes to the new BoardState.
+        /// </summary>
+        private void HandleBoardReset()
+        {
+            // Unsubscribe from old BoardState
+            UnsubscribeFromBoardEvents();
+            
+            // Destroy all existing component views
+            foreach (var kvp in _componentViews)
+            {
+                if (kvp.Value != null)
+                    Destroy(kvp.Value.gameObject);
+            }
+            _componentViews.Clear();
+            
+            // Re-subscribe to new BoardState
+            if (_gameManager != null)
+            {
+                _boardState = _gameManager.BoardState;
+                if (_boardState != null)
+                    SubscribeToBoardEvents();
+            }
         }
 
         /// <summary>
@@ -166,10 +206,16 @@ namespace CircuitCraft.Views
             if (view != null)
             {
                 view.GridPosition = gridPos;
-                // Note: Full initialization with ComponentDefinition requires a definition
-                // lookup service (IComponentDefinitionProvider). PlacementController handles
-                // Initialize() when placing via UI interaction. BoardView provides automatic
-                // sync from BoardState events for programmatic placement.
+                
+                // Initialize with ComponentDefinition to set sprite, label, and pin dots
+                if (_simulationManager != null)
+                {
+                    var definition = _simulationManager.GetComponentDefinition(component.ComponentDefinitionId);
+                    if (definition != null)
+                    {
+                        view.Initialize(definition);
+                    }
+                }
 #if UNITY_EDITOR
                 Debug.Log($"BoardView: Spawned ComponentView for {component.ComponentDefinitionId} " +
                           $"(InstanceId: {component.InstanceId}) at grid ({gridPos.x}, {gridPos.y})");

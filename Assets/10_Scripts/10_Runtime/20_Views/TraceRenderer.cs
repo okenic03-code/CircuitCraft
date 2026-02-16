@@ -14,6 +14,7 @@ namespace CircuitCraft.Views
     {
         [Header("Dependencies")]
         [SerializeField] private GameManager _gameManager;
+        [SerializeField] private StageManager _stageManager;
         [SerializeField] private GridSettings _gridSettings;
 
         [Header("Visual Settings")]
@@ -55,11 +56,19 @@ namespace CircuitCraft.Views
             {
                 CreateTraceLine(trace);
             }
+
+            if (_stageManager == null)
+                _stageManager = FindFirstObjectByType<StageManager>();
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded += HandleBoardReset;
         }
 
         private void OnDestroy()
         {
             Unsubscribe();
+
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded -= HandleBoardReset;
 
             foreach (var pair in _traceLines)
             {
@@ -89,6 +98,29 @@ namespace CircuitCraft.Views
 
             _boardState.OnTraceAdded -= HandleTraceAdded;
             _boardState.OnTraceRemoved -= HandleTraceRemoved;
+        }
+
+        private void HandleBoardReset()
+        {
+            Unsubscribe();
+
+            foreach (var pair in _traceLines)
+            {
+                if (pair.Value != null)
+                    Destroy(pair.Value.gameObject);
+            }
+            _traceLines.Clear();
+
+            if (_gameManager != null)
+            {
+                _boardState = _gameManager.BoardState;
+                if (_boardState != null)
+                {
+                    Subscribe();
+                    foreach (var trace in _boardState.Traces)
+                        CreateTraceLine(trace);
+                }
+            }
         }
 
         private void HandleTraceAdded(TraceSegment trace)

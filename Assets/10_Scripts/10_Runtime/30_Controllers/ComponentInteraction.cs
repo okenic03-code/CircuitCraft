@@ -16,6 +16,9 @@ namespace CircuitCraft.Controllers
         [SerializeField]
         [Tooltip("Reference to the GameManager for accessing BoardState.")]
         private GameManager _gameManager;
+
+        [SerializeField]
+        private StageManager _stageManager;
         
         [SerializeField]
         [Tooltip("Camera used for raycasting (defaults to Camera.main if not set).")]
@@ -60,6 +63,17 @@ namespace CircuitCraft.Controllers
             {
                 Debug.LogError("ComponentInteraction: GameManager reference is missing.", this);
             }
+
+            if (_stageManager == null)
+                _stageManager = FindFirstObjectByType<StageManager>();
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded += HandleBoardReset;
+        }
+
+        private void OnDestroy()
+        {
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded -= HandleBoardReset;
         }
         
         private void Update()
@@ -144,6 +158,14 @@ namespace CircuitCraft.Controllers
                 _selectedComponent.SetSelected(false);
                 _selectedComponent = null;
             }
+        }
+
+        private void HandleBoardReset()
+        {
+            DeselectAll();
+
+            if (_gameManager != null)
+                _boardState = _gameManager.BoardState;
         }
         
         /// <summary>
