@@ -28,7 +28,9 @@ namespace CircuitCraft.UI
         private UIDocument _uiDocument;
         private VisualElement _panel;
         private Label _resultsText;
-        private Button _clearButton;
+        private Button _modifyButton;
+        private Button _retryButton;
+        private Button _nextStageButton;
         private Button _toggleButton;
 
         // New Score Elements
@@ -36,6 +38,9 @@ namespace CircuitCraft.UI
         private Label _resultStatus;
         private Label _scoreBreakdown;
         private Label _totalScore;
+
+        public event System.Action OnRetryRequested;
+        public event System.Action OnNextStageRequested;
         
         private void Awake() => Init();
 
@@ -68,7 +73,9 @@ namespace CircuitCraft.UI
             // Query elements
             _panel = root.Q<VisualElement>("results-panel");
             _resultsText = root.Q<Label>("results-text");
-            _clearButton = root.Q<Button>("btn-clear-results");
+            _modifyButton = root.Q<Button>("btn-modify-circuit");
+            _retryButton = root.Q<Button>("btn-retry-stage");
+            _nextStageButton = root.Q<Button>("btn-next-stage");
             _toggleButton = root.Q<Button>("btn-toggle-results");
 
             _starDisplay = root.Q<Label>("star-display");
@@ -77,8 +84,14 @@ namespace CircuitCraft.UI
             _totalScore = root.Q<Label>("total-score");
             
             // Bind events
-            if (_clearButton != null)
-                _clearButton.clicked += OnClearClicked;
+            if (_modifyButton != null)
+                _modifyButton.clicked += OnModifyCircuit;
+
+            if (_retryButton != null)
+                _retryButton.clicked += OnRetryStage;
+
+            if (_nextStageButton != null)
+                _nextStageButton.clicked += OnNextStage;
             
             if (_toggleButton != null)
                 _toggleButton.clicked += OnToggleClicked;
@@ -95,8 +108,14 @@ namespace CircuitCraft.UI
         
         private void OnDisable()
         {
-            if (_clearButton != null)
-                _clearButton.clicked -= OnClearClicked;
+            if (_modifyButton != null)
+                _modifyButton.clicked -= OnModifyCircuit;
+
+            if (_retryButton != null)
+                _retryButton.clicked -= OnRetryStage;
+
+            if (_nextStageButton != null)
+                _nextStageButton.clicked -= OnNextStage;
             
             if (_toggleButton != null)
                 _toggleButton.clicked -= OnToggleClicked;
@@ -110,6 +129,9 @@ namespace CircuitCraft.UI
         
         private void OnStageCompleted(ScoreBreakdown breakdown)
         {
+            if (_nextStageButton != null)
+                _nextStageButton.style.display = breakdown.Passed ? DisplayStyle.Flex : DisplayStyle.None;
+
             DisplayScoreBreakdown(breakdown);
             ShowPanel();
         }
@@ -167,6 +189,7 @@ namespace CircuitCraft.UI
             if (_starDisplay != null) _starDisplay.text = "";
             if (_scoreBreakdown != null) _scoreBreakdown.text = "";
             if (_totalScore != null) _totalScore.text = "";
+            if (_nextStageButton != null) _nextStageButton.style.display = DisplayStyle.None;
         }
         
         private void DisplayResults(SimulationResult result)
@@ -211,13 +234,21 @@ namespace CircuitCraft.UI
             _resultsText.text = sb.ToString();
         }
         
-        private void OnClearClicked()
+        private void OnModifyCircuit()
         {
-            if (_resultsText != null)
-            {
-                _resultsText.text = "";
-            }
             HidePanel();
+        }
+
+        private void OnRetryStage()
+        {
+            HidePanel();
+            OnRetryRequested?.Invoke();
+        }
+
+        private void OnNextStage()
+        {
+            HidePanel();
+            OnNextStageRequested?.Invoke();
         }
         
         private void OnToggleClicked()

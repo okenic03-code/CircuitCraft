@@ -1,4 +1,3 @@
-using System.Collections;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
@@ -24,6 +23,7 @@ namespace CircuitCraft.UI
         [SerializeField] private StageManager _stageManager;
         [SerializeField] private ProgressionManager _progressionManager;
         [SerializeField] private ComponentPaletteController _paletteController;
+        [SerializeField] private ResultsPanelController _resultsPanelController;
 
         [Header("Main Menu")]
         [SerializeField] private UIDocument _mainMenuDocument;
@@ -32,12 +32,6 @@ namespace CircuitCraft.UI
         [SerializeField]
         [Tooltip("Ordered stage definitions matching StageSelectController's stage list.")]
         private StageDefinition[] _stages;
-
-        [Header("Transition Settings")]
-        [SerializeField]
-        [Tooltip("Seconds to wait after stage completion before returning to stage select.")]
-        private float _completionDelay = 2.0f;
-        private WaitForSeconds _waitForCompletion;
 
         private enum GameScreen { MainMenu, StageSelect, GamePlay }
 
@@ -49,7 +43,7 @@ namespace CircuitCraft.UI
             WireMainMenuButtons();
             WireStageSelectEvents();
             WireStageManagerEvents();
-            _waitForCompletion = new WaitForSeconds(_completionDelay);
+            WireResultsPanelEvents();
 
             ShowScreen(GameScreen.MainMenu);
         }
@@ -59,6 +53,7 @@ namespace CircuitCraft.UI
             UnwireMainMenuButtons();
             UnwireStageSelectEvents();
             UnwireStageManagerEvents();
+            UnwireResultsPanelEvents();
         }
 
         // ─── Wiring ───────────────────────────────────────────────────────
@@ -116,6 +111,20 @@ namespace CircuitCraft.UI
             _stageManager.OnStageCompleted -= HandleStageCompleted;
         }
 
+        private void WireResultsPanelEvents()
+        {
+            if (_resultsPanelController == null) return;
+            _resultsPanelController.OnRetryRequested += HandleRetry;
+            _resultsPanelController.OnNextStageRequested += HandleNextStage;
+        }
+
+        private void UnwireResultsPanelEvents()
+        {
+            if (_resultsPanelController == null) return;
+            _resultsPanelController.OnRetryRequested -= HandleRetry;
+            _resultsPanelController.OnNextStageRequested -= HandleNextStage;
+        }
+
         // ─── Event Handlers ───────────────────────────────────────────────
 
         private void HandlePlayClicked()
@@ -137,10 +146,17 @@ namespace CircuitCraft.UI
 
         private void HandleStageCompleted(ScoreBreakdown breakdown)
         {
-            // ProgressionManager auto-records completion via its own OnStageCompleted subscription
-            // (it subscribes in OnEnable, which runs before Start, so it fires first).
-            // We delay briefly so the player can see the results panel, then navigate back.
-            StartCoroutine(TransitionAfterCompletion());
+            if (_progressionManager == null || _stageManager.CurrentStage == null || breakdown == null)
+                return;
+
+            if (breakdown.Stars <= 0)
+                return;
+
+            string stageId = _stageManager.CurrentStage.StageId;
+            if (_progressionManager.GetBestStars(stageId) >= breakdown.Stars)
+                return;
+
+            _progressionManager.RecordStageCompletion(stageId, breakdown.Stars);
         }
 
         private void HandleStageLoaded()
@@ -151,9 +167,23 @@ namespace CircuitCraft.UI
             }
         }
 
-        private IEnumerator TransitionAfterCompletion()
+        private void HandleRetry()
         {
-            yield return _waitForCompletion;
+            if (_stageManager.CurrentStage != null)
+                _stageManager.LoadStage(_stageManager.CurrentStage);
+        }
+
+        private void HandleNextStage()
+        {
+            if (_stages != null && _stageManager.CurrentStage != null)
+            {
+                int currentIndex = System.Array.IndexOf(_stages, _stageManager.CurrentStage);
+                if (currentIndex >= 0 && currentIndex < _stages.Length - 1)
+                {
+                    _stageManager.LoadStage(_stages[currentIndex + 1]);
+                    return;
+                }
+            }
 
             SyncProgressionToStageSelect();
             ShowScreen(GameScreen.StageSelect);

@@ -91,12 +91,18 @@
             <!-- Center Game View (Transparent & Click-through) -->
             <ui:VisualElement name="GameView" class="game-view" picking-mode="Ignore">
                 <ui:Label name="simulation-status" text="SIMULATING..." style="display: none;" />
+                <ui:VisualElement name="stage-objectives" class="stage-objectives" picking-mode="Ignore">
+                    <ui:Label name="stage-title" class="stage-title" text="Stage 1-1" />
+                    <ui:Label name="stage-targets" class="stage-targets" text="Target: VOUT = 3.33V" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Bottom Status Bar -->
         <ui:VisualElement name="StatusBar" class="status-bar">
             <ui:Label name="StatusText" text="Ready" class="status-label" />
+            <ui:VisualElement class="status-separator" />
+            <ui:Label name="StatusBudget" text="Budget: --" class="status-label status-budget" />
             
             <ui:VisualElement style="flex-grow: 1;" /> <!-- Flexible Spacer -->
             
@@ -122,7 +128,11 @@
                 <ui:Label name="results-text" class="results-text" text="Simulation successful." />
             </ui:ScrollView>
             
-            <ui:Button name="btn-clear-results" text="Close Panel" class="close-button" />
+            <ui:VisualElement class="results-button-row">
+                <ui:Button name="btn-modify-circuit" text="Modify Circuit" class="results-nav-button" />
+                <ui:Button name="btn-retry-stage" text="Retry" class="results-nav-button" />
+                <ui:Button name="btn-next-stage" text="Next Stage" class="results-nav-button results-nav-primary" style="display: none;" />
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
