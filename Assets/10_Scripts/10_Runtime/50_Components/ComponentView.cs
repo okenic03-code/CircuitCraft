@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using CircuitCraft.Data;
 
@@ -46,7 +47,13 @@ namespace CircuitCraft.Components
         private Material _spriteMaterial;
 
         private static readonly int _ColorProperty = Shader.PropertyToID("_Color");
+        private static readonly Color _pinDotColor = new Color(0f, 0.83f, 1f, 0.6f);
+        private const float PinDotRadius = 0.18f;
+        private const int PinDotTextureSize = 32;
+
+        private static Sprite _pinDotSprite;
         private MaterialPropertyBlock _materialPropertyBlock;
+        private readonly List<GameObject> _pinDots = new List<GameObject>();
         
         // State
         private ComponentDefinition _definition;
@@ -64,6 +71,8 @@ namespace CircuitCraft.Components
         public Vector2Int GridPosition { get; set; }
         
         private void Awake() => Init();
+
+        private void OnDestroy() => ClearPinDots();
 
         private void Init()
         {
@@ -111,6 +120,7 @@ namespace CircuitCraft.Components
         /// <param name="definition">ComponentDefinition to visualize.</param>
         public void Initialize(ComponentDefinition definition)
         {
+            ClearPinDots();
             _definition = definition;
             
             if (_definition == null)
@@ -139,6 +149,8 @@ namespace CircuitCraft.Components
                 string label = FormatComponentLabel(_definition);
                 _labelText.text = label;
             }
+
+            CreatePinDots();
             
             // Apply normal color initially
             UpdateVisualState();
@@ -209,6 +221,105 @@ namespace CircuitCraft.Components
             _spriteRenderer.GetPropertyBlock(_materialPropertyBlock);
             _materialPropertyBlock.SetColor(_ColorProperty, _normalColor);
             _spriteRenderer.SetPropertyBlock(_materialPropertyBlock);
+        }
+
+        private void CreatePinDots()
+        {
+            if (_definition?.Pins == null || _definition.Pins.Length == 0)
+                return;
+
+            float cellSize = ResolveGridCellSize();
+            Sprite pinDotSprite = GetPinDotSprite();
+            int dotSortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder + 1 : 1;
+            int sortingLayerId = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
+
+            for (int i = 0; i < _definition.Pins.Length; i++)
+            {
+                PinDefinition pinDef = _definition.Pins[i];
+                if (pinDef == null)
+                    continue;
+
+                GameObject pinDot = new GameObject($"PinDot_{pinDef.PinName}");
+                pinDot.transform.SetParent(transform, false);
+
+                Vector2 localGridOffset = pinDef.LocalPosition;
+                pinDot.transform.localPosition = new Vector3(
+                    localGridOffset.x * cellSize,
+                    0f,
+                    localGridOffset.y * cellSize
+                );
+                pinDot.transform.localScale = Vector3.one * (PinDotRadius * 2f);
+
+                SpriteRenderer dotRenderer = pinDot.AddComponent<SpriteRenderer>();
+                dotRenderer.sprite = pinDotSprite;
+                dotRenderer.color = _pinDotColor;
+                dotRenderer.sortingLayerID = sortingLayerId;
+                dotRenderer.sortingOrder = dotSortingOrder;
+
+                _pinDots.Add(pinDot);
+            }
+        }
+
+        private void ClearPinDots()
+        {
+            for (int i = 0; i < _pinDots.Count; i++)
+            {
+                if (_pinDots[i] != null)
+                {
+                    Destroy(_pinDots[i]);
+                }
+            }
+
+            _pinDots.Clear();
+        }
+
+        private float ResolveGridCellSize()
+        {
+            GridSettings[] settings = Resources.FindObjectsOfTypeAll<GridSettings>();
+            for (int i = 0; i < settings.Length; i++)
+            {
+                GridSettings gridSettings = settings[i];
+                if (gridSettings != null && gridSettings.CellSize > Mathf.Epsilon)
+                {
+                    return gridSettings.CellSize;
+                }
+            }
+
+            return 1f;
+        }
+
+        private static Sprite GetPinDotSprite()
+        {
+            if (_pinDotSprite != null)
+                return _pinDotSprite;
+
+            Texture2D texture = new Texture2D(PinDotTextureSize, PinDotTextureSize, TextureFormat.RGBA32, false);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.filterMode = FilterMode.Bilinear;
+
+            Vector2 center = new Vector2(PinDotTextureSize * 0.5f, PinDotTextureSize * 0.5f);
+            float radius = PinDotTextureSize * 0.5f;
+
+            for (int y = 0; y < PinDotTextureSize; y++)
+            {
+                for (int x = 0; x < PinDotTextureSize; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), center);
+                    float alpha = Mathf.Clamp01(1f - (dist - radius + 1f));
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            texture.Apply();
+
+            _pinDotSprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, PinDotTextureSize, PinDotTextureSize),
+                new Vector2(0.5f, 0.5f),
+                PinDotTextureSize
+            );
+
+            return _pinDotSprite;
         }
         
         /// <summary>
