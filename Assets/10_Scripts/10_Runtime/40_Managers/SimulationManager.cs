@@ -77,6 +77,17 @@ namespace CircuitCraft.Managers
         /// </summary>
         public async UniTask RunSimulationAsync(BoardState boardState, CancellationToken cancellationToken = default)
         {
+            await RunSimulationAsync(boardState, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Runs a DC operating point simulation on the provided board state.
+        /// </summary>
+        public async UniTask RunSimulationAsync(
+            BoardState boardState,
+            IEnumerable<ProbeDefinition> probes = null,
+            CancellationToken cancellationToken = default)
+        {
             if (_isSimulating)
             {
                 Debug.LogWarning("SimulationManager: Simulation already in progress.");
@@ -107,7 +118,7 @@ namespace CircuitCraft.Managers
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                CircuitNetlist netlist = _netlistConverter.Convert(boardState);
+                CircuitNetlist netlist = _netlistConverter.Convert(boardState, probes);
 
                 if (netlist.Elements.Count == 0)
                 {

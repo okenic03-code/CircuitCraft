@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
 using CircuitCraft.Commands;
 using CircuitCraft.Controllers;
+using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using CircuitCraft.Views;
@@ -22,6 +25,7 @@ namespace CircuitCraft.UI
         [SerializeField] private PlacementController _placementController;
         [SerializeField] private GridSettings _gridSettings;
         [SerializeField] private GameManager _gameManager;
+        [SerializeField] private StageManager _stageManager;
 
         private CommandHistory _commandHistory;
 
@@ -34,6 +38,9 @@ namespace CircuitCraft.UI
         private Label _statusCoords;
         private Label _statusGrid;
         private Label _statusZoom;
+        private Label _statusBudget;
+        private Label _stageTitle;
+        private Label _stageTargets;
 
         private Button _clearBoardButton;
         private Button _undoButton;
@@ -47,6 +54,9 @@ namespace CircuitCraft.UI
         private int _lastZoomPercent = int.MinValue;
         private bool _lastCanUndo = false;
         private bool _lastCanRedo = false;
+        private readonly Dictionary<string, float> _componentCostLookup = new Dictionary<string, float>();
+        private BoardState _subscribedBoardState;
+        private float _currentBudgetLimit;
 
         private void Awake()
         {
@@ -64,6 +74,9 @@ namespace CircuitCraft.UI
 
             if (_gameManager == null)
                 _gameManager = FindFirstObjectByType<GameManager>();
+
+            if (_stageManager == null)
+                _stageManager = FindFirstObjectByType<StageManager>();
         }
 
         private void OnEnable()
@@ -87,7 +100,9 @@ namespace CircuitCraft.UI
                 _commandHistory = _gameManager.CommandHistory;
 
             RegisterCallbacks();
+            RegisterDataSubscriptions();
             SetStatusText("Ready");
+            OnStageLoaded();
         }
 
         private void OnDisable()
@@ -100,6 +115,11 @@ namespace CircuitCraft.UI
 
             if (_redoButton != null)
                 _redoButton.clicked -= OnRedo;
+
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded -= OnStageLoaded;
+
+            UnregisterBoardStateSubscriptions();
         }
 
         private void Update()
@@ -114,9 +134,12 @@ namespace CircuitCraft.UI
             _statusBar = _root.Q<VisualElement>("StatusBar");
 
             _statusText = _root.Q<Label>("StatusText");
+            _statusBudget = _root.Q<Label>("StatusBudget");
             _statusCoords = _root.Q<Label>("StatusCoords");
             _statusGrid = _root.Q<Label>("StatusGrid");
             _statusZoom = _root.Q<Label>("StatusZoom");
+            _stageTitle = _root.Q<Label>("stage-title");
+            _stageTargets = _root.Q<Label>("stage-targets");
 
             _clearBoardButton = _root.Q<Button>("ClearBoardButton");
             _undoButton = _root.Q<Button>("UndoButton");
@@ -128,6 +151,14 @@ namespace CircuitCraft.UI
             if (_statusBar == null) Debug.LogWarning("UIController: StatusBar not found.");
             if (_undoButton == null) Debug.LogWarning("UIController: UndoButton not found.");
             if (_redoButton == null) Debug.LogWarning("UIController: RedoButton not found.");
+        }
+
+        private void RegisterDataSubscriptions()
+        {
+            if (_stageManager != null)
+                _stageManager.OnStageLoaded += OnStageLoaded;
+
+            RebindBoardStateSubscriptions();
         }
 
         private void RegisterCallbacks()
@@ -206,9 +237,155 @@ namespace CircuitCraft.UI
                 _statusText.text = text;
         }
 
+        public void UpdateBudget(float currentCost, float budgetLimit)
+        {
+            if (_statusBudget == null) return;
+
+            if (budgetLimit <= 0f)
+                _statusBudget.text = $"Cost: ${currentCost:F0}";
+            else
+                _statusBudget.text = $"Budget: ${currentCost:F0} / ${budgetLimit:F0}";
+        }
+
+        private void OnStageLoaded()
+        {
+            var stage = _stageManager?.CurrentStage;
+            if (stage == null)
+            {
+                _componentCostLookup.Clear();
+                _currentBudgetLimit = 0f;
+
+                if (_stageTitle != null)
+                    _stageTitle.text = "No Stage Loaded";
+
+                if (_stageTargets != null)
+                    _stageTargets.text = "No stage objectives.";
+
+                RebindBoardStateSubscriptions();
+                UpdateBudget(0f, 0f);
+                return;
+            }
+
+            if (_stageTitle != null)
+                _stageTitle.text = stage.DisplayName;
+
+            if (_stageTargets != null)
+                _stageTargets.text = BuildTargetsText(stage.TestCases);
+
+            RebuildComponentCostLookup(stage);
+            _currentBudgetLimit = stage.BudgetLimit;
+
+            RebindBoardStateSubscriptions();
+            RefreshBudgetDisplay();
+        }
+
+        private static string BuildTargetsText(StageTestCase[] testCases)
+        {
+            if (testCases == null || testCases.Length == 0)
+                return "No stage objectives.";
+
+            StringBuilder sb = new StringBuilder();
+            foreach (var testCase in testCases)
+            {
+                if (testCase == null) continue;
+                sb.AppendLine($"- {testCase.TestName}: {testCase.ExpectedVoltage:F2}V +/-{testCase.Tolerance:F2}V");
+            }
+
+            return sb.Length > 0 ? sb.ToString().TrimEnd() : "No stage objectives.";
+        }
+
+        private void RebuildComponentCostLookup(StageDefinition stage)
+        {
+            _componentCostLookup.Clear();
+
+            var allowedComponents = stage?.AllowedComponents;
+            if (allowedComponents == null)
+                return;
+
+            foreach (var component in allowedComponents)
+            {
+                if (component == null || string.IsNullOrEmpty(component.Id))
+                    continue;
+
+                _componentCostLookup[component.Id] = component.BaseCost;
+            }
+        }
+
+        private void RebindBoardStateSubscriptions()
+        {
+            var boardState = _gameManager != null ? _gameManager.BoardState : null;
+            if (ReferenceEquals(_subscribedBoardState, boardState))
+                return;
+
+            UnregisterBoardStateSubscriptions();
+            _subscribedBoardState = boardState;
+
+            if (_subscribedBoardState == null)
+                return;
+
+            _subscribedBoardState.OnComponentPlaced += OnBoardComponentPlaced;
+            _subscribedBoardState.OnComponentRemoved += OnBoardComponentRemoved;
+        }
+
+        private void UnregisterBoardStateSubscriptions()
+        {
+            if (_subscribedBoardState == null)
+                return;
+
+            _subscribedBoardState.OnComponentPlaced -= OnBoardComponentPlaced;
+            _subscribedBoardState.OnComponentRemoved -= OnBoardComponentRemoved;
+            _subscribedBoardState = null;
+        }
+
+        private void OnBoardComponentPlaced(PlacedComponent component)
+        {
+            RefreshBudgetDisplay();
+        }
+
+        private void OnBoardComponentRemoved(int instanceId)
+        {
+            RefreshBudgetDisplay();
+        }
+
+        private void RefreshBudgetDisplay()
+        {
+            float currentCost = 0f;
+            if (_subscribedBoardState != null)
+            {
+                foreach (var component in _subscribedBoardState.Components)
+                {
+                    if (component != null && _componentCostLookup.TryGetValue(component.ComponentDefinitionId, out var cost))
+                        currentCost += cost;
+                }
+            }
+
+            UpdateBudget(currentCost, _currentBudgetLimit);
+        }
+
         private void OnClearBoard()
         {
-            Debug.Log("UIController: Clear Board requested.");
+            if (_gameManager == null) return;
+            
+            // Use current stage grid size, or default
+            int width = 20, height = 15;
+            if (_stageManager != null && _stageManager.CurrentStage != null)
+            {
+                width = _stageManager.CurrentStage.GridSize.x;
+                height = _stageManager.CurrentStage.GridSize.y;
+            }
+            
+            _gameManager.ResetBoard(width, height);
+
+            RebindBoardStateSubscriptions();
+            RefreshBudgetDisplay();
+            
+            // Reset command history
+            if (_commandHistory != null)
+            {
+                _commandHistory.Clear();
+            }
+            
+            Debug.Log("UIController: Board cleared.");
             SetStatusText("Board cleared.");
         }
 

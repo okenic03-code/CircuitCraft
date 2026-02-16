@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UIElements;
 using CircuitCraft.Data;
 using CircuitCraft.Core;
 using CircuitCraft.Utils;
@@ -35,6 +36,7 @@ namespace CircuitCraft.Controllers
         private GridSettings _gridSettings;
 
         private CommandHistory _commandHistory;
+        private UIDocument[] _uiDocuments;
         
         // State
         private ComponentDefinition _selectedComponent;
@@ -58,6 +60,9 @@ namespace CircuitCraft.Controllers
             {
                 _commandHistory = _gameManager.CommandHistory;
             }
+            
+            // Cache UIDocuments for UI click-through detection
+            _uiDocuments = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
         }
         
         private void InitializeCamera()
@@ -235,6 +240,9 @@ namespace CircuitCraft.Controllers
         /// </summary>
         private void HandlePlacement()
         {
+            // Skip if pointer is over UI
+            if (IsPointerOverUI()) return;
+            
             // Only process input if we have a component selected
             if (_selectedComponent == null || _gridSettings == null)
                 return;
@@ -423,6 +431,32 @@ namespace CircuitCraft.Controllers
         public float? GetCustomValue()
         {
             return _customValue;
+        }
+        
+        /// <summary>
+        /// Checks if the mouse pointer is currently over any UI Toolkit panel.
+        /// </summary>
+        /// <returns>True if pointer is over UI, false otherwise.</returns>
+        private bool IsPointerOverUI()
+        {
+            if (_uiDocuments == null) return false;
+            
+            foreach (var doc in _uiDocuments)
+            {
+                if (doc == null || doc.rootVisualElement == null) continue;
+                var panel = doc.rootVisualElement.panel;
+                if (panel == null) continue;
+                
+                Vector2 screenPos = Input.mousePosition;
+                // Convert screen position to panel position (screen Y is inverted for UI Toolkit)
+                Vector2 panelPos = new Vector2(screenPos.x, Screen.height - screenPos.y);
+                panelPos = RuntimePanelUtils.ScreenToPanel(panel, panelPos);
+                
+                var picked = panel.Pick(panelPos);
+                if (picked != null && picked != doc.rootVisualElement)
+                    return true;
+            }
+            return false;
         }
     }
 }

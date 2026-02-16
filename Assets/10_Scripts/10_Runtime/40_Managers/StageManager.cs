@@ -120,7 +120,16 @@ namespace CircuitCraft.Managers
             }
 
             // 4. Run simulation and await completion
-            await _simulationManager.RunSimulationAsync(boardState);
+            var probes = new List<ProbeDefinition>();
+            if (_currentStage.TestCases != null)
+            {
+                foreach (var tc in _currentStage.TestCases)
+                {
+                    probes.Add(ProbeDefinition.Voltage($"V_{tc.TestName}", tc.TestName));
+                }
+            }
+
+            await _simulationManager.RunSimulationAsync(boardState, probes);
             var simResult = _simulationManager.LastSimulationResult;
 
             // Convert StageTestCase[] → TestCaseInput[] (domain DTO bridge)
