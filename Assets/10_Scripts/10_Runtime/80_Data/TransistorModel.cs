@@ -83,6 +83,24 @@ namespace CircuitCraft.Data
         /// <summary>Generic blue LED.</summary>
         LED_Blue,
         
+        /// <summary>1N4728A - 3.3V zener diode.</summary>
+        Zener_3V3,
+        
+        /// <summary>1N4733A - 5.1V zener diode.</summary>
+        Zener_5V1,
+        
+        /// <summary>1N4736A - 6.8V zener diode.</summary>
+        Zener_6V8,
+        
+        /// <summary>1N4739A - 9.1V zener diode.</summary>
+        Zener_9V1,
+        
+        /// <summary>1N4742A - 12V zener diode.</summary>
+        Zener_12V,
+        
+        /// <summary>1N4744A - 15V zener diode.</summary>
+        Zener_15V,
+        
         /// <summary>Custom model - use custom parameters.</summary>
         Custom
     }

@@ -121,11 +121,14 @@ namespace CircuitCraft.Systems
 
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
                     if (nodes.Length >= 2)
                         return NetlistElement.Diode(elementId, nodes[0], nodes[1],
                             GetDiodeModelName(definition),
                             definition.SaturationCurrent,
-                            definition.EmissionCoefficient);
+                            definition.EmissionCoefficient,
+                            definition.BreakdownVoltage,
+                            definition.BreakdownCurrent);
                     break;
 
                 case ComponentKind.BJT:
@@ -227,6 +230,7 @@ namespace CircuitCraft.Systems
                     return ElementType.CurrentSource;
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
                     return ElementType.Diode;
                 case ComponentKind.BJT:
                     return ElementType.BJT;
@@ -256,6 +260,7 @@ namespace CircuitCraft.Systems
                     return "I";
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
                     return "D";
                 case ComponentKind.BJT:
                     return "Q";
@@ -328,6 +333,12 @@ namespace CircuitCraft.Systems
                 case DiodeModel.LED_Red: return "LED_Red";
                 case DiodeModel.LED_Green: return "LED_Green";
                 case DiodeModel.LED_Blue: return "LED_Blue";
+                case DiodeModel.Zener_3V3: return "1N4728A";
+                case DiodeModel.Zener_5V1: return "1N4733A";
+                case DiodeModel.Zener_6V8: return "1N4736A";
+                case DiodeModel.Zener_9V1: return "1N4739A";
+                case DiodeModel.Zener_12V: return "1N4742A";
+                case DiodeModel.Zener_15V: return "1N4744A";
                 case DiodeModel.Generic: return "Generic_Diode";
                 case DiodeModel.Custom: return "Custom_Diode";
                 default: return "1N4148";

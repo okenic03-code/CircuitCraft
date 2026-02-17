@@ -115,10 +115,14 @@ namespace CircuitCraft.Simulation
         /// <param name="modelName">Model name (default: "D1N4148").</param>
         /// <param name="saturationCurrent">Is parameter - saturation current in amps.</param>
         /// <param name="emissionCoefficient">N parameter - emission coefficient.</param>
+        /// <param name="breakdownVoltage">BV parameter - reverse breakdown voltage in volts.</param>
+        /// <param name="breakdownCurrent">IBV parameter - reverse breakdown current in amps.</param>
         public static NetlistElement Diode(string id, string anode, string cathode,
             string modelName = "D1N4148",
             double? saturationCurrent = null,
-            double? emissionCoefficient = null)
+            double? emissionCoefficient = null,
+            double? breakdownVoltage = null,
+            double? breakdownCurrent = null)
         {
             var element = new NetlistElement
             {
@@ -133,6 +137,10 @@ namespace CircuitCraft.Simulation
                 element.Parameters["Is"] = saturationCurrent.Value;
             if (emissionCoefficient.HasValue)
                 element.Parameters["N"] = emissionCoefficient.Value;
+            if (breakdownVoltage.HasValue)
+                element.Parameters["BV"] = breakdownVoltage.Value;
+            if (breakdownCurrent.HasValue)
+                element.Parameters["IBV"] = breakdownCurrent.Value;
 
             return element;
         }

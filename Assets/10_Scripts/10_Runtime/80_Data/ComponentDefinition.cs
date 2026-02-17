@@ -123,6 +123,15 @@ namespace CircuitCraft.Data
         [Tooltip("Vf - Forward voltage in Volts (for LEDs)")]
         private float _forwardVoltage = 0.7f;
 
+        [Header("Semiconductor Parameters - Zener")]
+        [SerializeField]
+        [Tooltip("BV - Reverse breakdown voltage in Volts")]
+        private float _breakdownVoltage = 5.1f;
+
+        [SerializeField]
+        [Tooltip("IBV - Current at breakdown in Amperes")]
+        private float _breakdownCurrent = 0.001f;
+
         /// <summary>Unique internal identifier for the component.</summary>
         public string Id => _id;
 
@@ -199,5 +208,11 @@ namespace CircuitCraft.Data
 
         /// <summary>Vf - Forward voltage in Volts (for LEDs).</summary>
         public float ForwardVoltage => _forwardVoltage;
+
+        /// <summary>BV - Reverse breakdown voltage in Volts.</summary>
+        public float BreakdownVoltage => _breakdownVoltage;
+
+        /// <summary>IBV - Current at breakdown in Amperes.</summary>
+        public float BreakdownCurrent => _breakdownCurrent;
     }
 }

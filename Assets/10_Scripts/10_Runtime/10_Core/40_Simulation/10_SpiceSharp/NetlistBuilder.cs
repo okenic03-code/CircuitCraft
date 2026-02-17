@@ -171,6 +171,10 @@ namespace CircuitCraft.Simulation.SpiceSharp
                     model.Parameters.SaturationCurrent = satCurrent;
                 if (element.Parameters.TryGetValue("N", out var emissionCoeff))
                     model.Parameters.EmissionCoefficient = emissionCoeff;
+                if (element.Parameters.TryGetValue("BV", out var breakdownVoltage))
+                    model.Parameters.BreakdownVoltage = breakdownVoltage;
+                if (element.Parameters.TryGetValue("IBV", out var breakdownCurrent))
+                    model.Parameters.BreakdownCurrent = breakdownCurrent;
                 
                 yield return model;
             }

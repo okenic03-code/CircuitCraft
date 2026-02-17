@@ -24,6 +24,7 @@ namespace CircuitCraft.Data
                     return true;
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
                 case ComponentKind.BJT:
                 case ComponentKind.MOSFET:
                 case ComponentKind.Ground:
@@ -55,6 +56,7 @@ namespace CircuitCraft.Data
                     return "A";
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
                 case ComponentKind.BJT:
                 case ComponentKind.MOSFET:
                 case ComponentKind.Ground:
@@ -86,6 +88,7 @@ namespace CircuitCraft.Data
                     return "Current";
                 case ComponentKind.Diode:
                 case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
                 case ComponentKind.BJT:
                 case ComponentKind.MOSFET:
                 case ComponentKind.Ground:
