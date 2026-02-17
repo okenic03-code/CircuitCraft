@@ -17,9 +17,11 @@ namespace CircuitCraft.UI
         [SerializeField] private GameObject _mainMenuScreen;
         [SerializeField] private GameObject _stageSelectScreen;
         [SerializeField] private GameObject _gamePlayScreen;
+        [SerializeField] private GameObject _endingScreen;
 
         [Header("Controllers")]
         [SerializeField] private StageSelectController _stageSelectController;
+        [SerializeField] private EndingController _endingController;
         [SerializeField] private StageManager _stageManager;
         [SerializeField] private ProgressionManager _progressionManager;
         [SerializeField] private ComponentPaletteController _paletteController;
@@ -33,7 +35,7 @@ namespace CircuitCraft.UI
         [Tooltip("Ordered stage definitions matching StageSelectController's stage list.")]
         private StageDefinition[] _stages;
 
-        private enum GameScreen { MainMenu, StageSelect, GamePlay }
+        private enum GameScreen { MainMenu, StageSelect, GamePlay, Ending }
 
         private Button _playButton;
         private Button _quitButton;
@@ -42,6 +44,7 @@ namespace CircuitCraft.UI
         {
             WireMainMenuButtons();
             WireStageSelectEvents();
+            WireEndingEvents();
             WireStageManagerEvents();
             WireResultsPanelEvents();
 
@@ -52,6 +55,7 @@ namespace CircuitCraft.UI
         {
             UnwireMainMenuButtons();
             UnwireStageSelectEvents();
+            UnwireEndingEvents();
             UnwireStageManagerEvents();
             UnwireResultsPanelEvents();
         }
@@ -97,6 +101,18 @@ namespace CircuitCraft.UI
             _stageSelectController.OnBackToMenu -= HandleBackToMenu;
         }
 
+        private void WireEndingEvents()
+        {
+            if (_endingController == null) return;
+            _endingController.OnBackToMenu += HandleEndingBackToMenu;
+        }
+
+        private void UnwireEndingEvents()
+        {
+            if (_endingController == null) return;
+            _endingController.OnBackToMenu -= HandleEndingBackToMenu;
+        }
+
         private void WireStageManagerEvents()
         {
             if (_stageManager == null) return;
@@ -134,6 +150,11 @@ namespace CircuitCraft.UI
         }
 
         private void HandleBackToMenu()
+        {
+            ShowScreen(GameScreen.MainMenu);
+        }
+
+        private void HandleEndingBackToMenu()
         {
             ShowScreen(GameScreen.MainMenu);
         }
@@ -180,13 +201,37 @@ namespace CircuitCraft.UI
                 int currentIndex = System.Array.IndexOf(_stages, _stageManager.CurrentStage);
                 if (currentIndex >= 0 && currentIndex < _stages.Length - 1)
                 {
+                    // Not the last stage: advance to next stage
                     _stageManager.LoadStage(_stages[currentIndex + 1]);
+                    return;
+                }
+
+                // Last stage completed → show Ending screen
+                if (currentIndex == _stages.Length - 1)
+                {
+                    ShowEndingScreen();
                     return;
                 }
             }
 
             SyncProgressionToStageSelect();
             ShowScreen(GameScreen.StageSelect);
+        }
+
+        private void ShowEndingScreen()
+        {
+            if (_endingController != null && _progressionManager != null && _stages != null)
+            {
+                int totalEarned = 0;
+                int totalMax = _stages.Length * 3;
+                foreach (var stage in _stages)
+                {
+                    if (stage != null)
+                        totalEarned += _progressionManager.GetBestStars(stage.StageId);
+                }
+                _endingController.SetTotalStars(totalEarned, totalMax);
+            }
+            ShowScreen(GameScreen.Ending);
         }
 
         private void HandleQuitClicked()
@@ -210,6 +255,9 @@ namespace CircuitCraft.UI
 
             if (_gamePlayScreen != null)
                 _gamePlayScreen.SetActive(screen == GameScreen.GamePlay);
+
+            if (_endingScreen != null)
+                _endingScreen.SetActive(screen == GameScreen.Ending);
 
 #if UNITY_EDITOR
             Debug.Log($"SceneFlowManager: Showing {screen}");

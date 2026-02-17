@@ -1,0 +1,66 @@
+/* ============================================================
+   CircuitCraft Ending Screen — Professional CAD Theme
+   Matching MainMenu / StageSelect aesthetic
+   ============================================================ */
+
+/* === Root Container === */
+.ending-root {
+    flex-grow: 1;
+    background-color: rgb(30, 30, 30);
+    justify-content: center;
+    align-items: center;
+    color: rgb(220, 220, 220);
+}
+
+/* === Title === */
+.ending-title {
+    font-size: 48px;
+    color: rgb(255, 255, 255);
+    -unity-font-style: bold;
+    margin-bottom: 16px;
+    -unity-text-align: middle-center;
+}
+
+/* === Subtitle === */
+.ending-subtitle {
+    font-size: 18px;
+    color: rgb(180, 180, 180);
+    margin-bottom: 48px;
+    -unity-text-align: middle-center;
+}
+
+/* === Stats === */
+.ending-stats {
+    font-size: 36px;
+    color: #FFD700; /* Gold */
+    -unity-font-style: bold;
+    margin-bottom: 64px;
+    -unity-text-align: middle-center;
+}
+
+/* === Buttons === */
+.ending-button-primary {
+    width: 240px;
+    height: 48px;
+    background-color: rgb(55, 148, 255);
+    color: rgb(255, 255, 255);
+    border-radius: 4px;
+    border-width: 0;
+    font-size: 16px;
+    -unity-font-style: bold;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    transition-property: background-color, scale;
+    transition-duration: 0.1s;
+}
+
+.ending-button-primary:hover {
+    background-color: rgb(75, 163, 255);
+    scale: 1.02;
+}
+
+.ending-button-primary:active {
+    background-color: rgb(30, 120, 220);
+    scale: 0.98;
+}
