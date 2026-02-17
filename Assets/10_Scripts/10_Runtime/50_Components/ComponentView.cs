@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using CircuitCraft.Data;
 
@@ -46,15 +47,51 @@ namespace CircuitCraft.Components
         [Tooltip("Optional material override for sprite rendering.")]
         private Material _spriteMaterial;
 
+        [Header("Simulation Visualization")]
+        [SerializeField]
+        [Tooltip("Offset for voltage/current overlay text.")]
+        private Vector3 _simulationOverlayOffset = new Vector3(0f, 0.55f, 0f);
+
+        [SerializeField]
+        [Tooltip("Scale multiplier for the simulation overlay text object.")]
+        private float _simulationOverlayScale = 0.12f;
+
+        [SerializeField]
+        [Tooltip("Color used for simulation overlay text.")]
+        private Color _simulationOverlayColor = Color.white;
+
+        [SerializeField]
+        [Tooltip("Glow scale used for active LEDs.")]
+        private float _ledGlowScale = 1.35f;
+
+        [SerializeField]
+        [Tooltip("Glow alpha used for active LEDs.")]
+        private float _ledGlowAlpha = 0.65f;
+
+        [SerializeField]
+        [Tooltip("Default LED glow color when current is flowing.")]
+        private Color _ledGlowDefaultColor = new Color(1f, 0.7f, 0.05f, 1f);
+
         private static readonly int _ColorProperty = Shader.PropertyToID("_Color");
         private static readonly Color _pinDotColor = new Color(0f, 0.83f, 1f, 0.6f);
         private const float PinDotRadius = 0.18f;
         private const int PinDotTextureSize = 32;
+        private static readonly int _ledGlowTextureSize = 64;
 
         private static Sprite _pinDotSprite;
+        private static Sprite _ledGlowSprite;
         private MaterialPropertyBlock _materialPropertyBlock;
         private readonly List<GameObject> _pinDots = new List<GameObject>();
-        
+        private GameObject _simulationOverlayObject;
+        private GameObject _ledGlowObject;
+        private SpriteRenderer _ledGlowRenderer;
+
+    #if UNITY_TEXTMESHPRO
+        private TextMeshPro _simulationOverlayText;
+    #else
+        private TextMesh _simulationOverlayText;
+    #endif
+
         // State
         private ComponentDefinition _definition;
         private bool _isHovered;
@@ -72,7 +109,12 @@ namespace CircuitCraft.Components
         
         private void Awake() => Init();
 
-        private void OnDestroy() => ClearPinDots();
+        private void OnDestroy()
+        {
+            ClearPinDots();
+            ClearSimulationOverlay();
+            ClearLEDGlow();
+        }
 
         private void Init()
         {
@@ -221,6 +263,183 @@ namespace CircuitCraft.Components
             _spriteRenderer.GetPropertyBlock(_materialPropertyBlock);
             _materialPropertyBlock.SetColor(_ColorProperty, _normalColor);
             _spriteRenderer.SetPropertyBlock(_materialPropertyBlock);
+        }
+
+        /// <summary>
+        /// Shows a simulation overlay label with voltage/current values.
+        /// </summary>
+        public void ShowSimulationOverlay(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                HideSimulationOverlay();
+                return;
+            }
+
+            EnsureSimulationOverlayText();
+            if (_simulationOverlayText == null)
+            {
+                return;
+            }
+
+            _simulationOverlayText.text = text;
+            _simulationOverlayText.color = _simulationOverlayColor;
+            _simulationOverlayObject.SetActive(true);
+        }
+
+        /// <summary>
+        /// Hides any existing simulation overlay label.
+        /// </summary>
+        public void HideSimulationOverlay()
+        {
+            if (_simulationOverlayObject != null)
+            {
+                _simulationOverlayObject.SetActive(false);
+            }
+        }
+
+        /// <summary>
+        /// Shows or hides an LED glow effect.
+        /// </summary>
+        public void ShowLEDGlow(bool glow, Color glowColor)
+        {
+            if (!glow)
+            {
+                HideLEDGlow();
+                return;
+            }
+
+            EnsureLEDGlowObject();
+            if (_ledGlowRenderer == null)
+            {
+                return;
+            }
+
+            var color = glowColor == default ? _ledGlowDefaultColor : glowColor;
+            _ledGlowRenderer.color = new Color(color.r, color.g, color.b, _ledGlowAlpha);
+            _ledGlowObject.SetActive(true);
+        }
+
+        /// <summary>
+        /// Hides active LED glow effect.
+        /// </summary>
+        public void HideLEDGlow()
+        {
+            if (_ledGlowObject != null)
+            {
+                _ledGlowObject.SetActive(false);
+            }
+        }
+
+        private void EnsureSimulationOverlayText()
+        {
+            if (_simulationOverlayObject != null)
+            {
+                return;
+            }
+
+            _simulationOverlayObject = new GameObject("SimulationOverlay");
+            _simulationOverlayObject.transform.SetParent(transform, false);
+            _simulationOverlayObject.transform.localPosition = _simulationOverlayOffset;
+            _simulationOverlayObject.transform.localScale = Vector3.one * _simulationOverlayScale;
+
+        #if UNITY_TEXTMESHPRO
+            var overlayText = _simulationOverlayObject.AddComponent<TextMeshPro>();
+            overlayText.alignment = TMPro.TextAlignmentOptions.Center;
+            overlayText.fontSize = 4f;
+            overlayText.sortingLayerID = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
+            overlayText.sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder + 2 : 0;
+            overlayText.autoSizeTextContainer = false;
+            _simulationOverlayText = overlayText;
+        #else
+            var overlayText = _simulationOverlayObject.AddComponent<TextMesh>();
+            overlayText.alignment = TextAlignment.Center;
+            overlayText.anchor = TextAnchor.MiddleCenter;
+            overlayText.characterSize = 0.08f;
+            overlayText.fontSize = 28;
+            overlayText.GetComponent<MeshRenderer>().sortingLayerID =
+                _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
+            overlayText.GetComponent<MeshRenderer>().sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder + 2 : 0;
+            _simulationOverlayText = overlayText;
+        #endif
+
+            _simulationOverlayObject.SetActive(false);
+        }
+
+        private void EnsureLEDGlowObject()
+        {
+            if (_ledGlowObject != null)
+            {
+                _ledGlowObject.SetActive(true);
+                return;
+            }
+
+            _ledGlowObject = new GameObject("LEDGlow");
+            _ledGlowObject.transform.SetParent(transform, false);
+            _ledGlowObject.transform.localPosition = new Vector3(0f, 0f, 0.02f);
+            _ledGlowObject.transform.localScale = Vector3.one * _ledGlowScale;
+
+            _ledGlowRenderer = _ledGlowObject.AddComponent<SpriteRenderer>();
+            _ledGlowRenderer.sprite = GetLedGlowSprite();
+            _ledGlowRenderer.sortingLayerID = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
+            _ledGlowRenderer.sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder - 1 : 0;
+            _ledGlowRenderer.material = _spriteRenderer != null ? _spriteRenderer.sharedMaterial : null;
+        }
+
+        private void ClearSimulationOverlay()
+        {
+            if (_simulationOverlayObject != null)
+            {
+                Destroy(_simulationOverlayObject);
+                _simulationOverlayObject = null;
+                _simulationOverlayText = null;
+            }
+        }
+
+        private void ClearLEDGlow()
+        {
+            if (_ledGlowObject != null)
+            {
+                Destroy(_ledGlowObject);
+                _ledGlowObject = null;
+                _ledGlowRenderer = null;
+            }
+        }
+
+        private static Sprite GetLedGlowSprite()
+        {
+            if (_ledGlowSprite != null)
+            {
+                return _ledGlowSprite;
+            }
+
+            var texture = new Texture2D(_ledGlowTextureSize, _ledGlowTextureSize, TextureFormat.RGBA32, false);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.filterMode = FilterMode.Bilinear;
+
+            var center = new Vector2(_ledGlowTextureSize * 0.5f, _ledGlowTextureSize * 0.5f);
+            float radius = _ledGlowTextureSize * 0.5f;
+
+            for (int y = 0; y < _ledGlowTextureSize; y++)
+            {
+                for (int x = 0; x < _ledGlowTextureSize; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), center);
+                    float alpha = 1f - Mathf.Clamp01(dist / radius);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            texture.Apply();
+
+            _ledGlowSprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, _ledGlowTextureSize, _ledGlowTextureSize),
+                new Vector2(0.5f, 0.5f),
+                _ledGlowTextureSize
+            );
+
+            return _ledGlowSprite;
         }
 
         private void CreatePinDots()

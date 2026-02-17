@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
@@ -69,7 +70,7 @@ namespace CircuitCraft.Managers
         /// </summary>
         public void RunSimulation(BoardState boardState)
         {
-            RunSimulationAsync(boardState, this.GetCancellationTokenOnDestroy()).Forget();
+            RunSimulationAsync(boardState, CancellationToken.None).Forget();
         }
 
         /// <summary>
@@ -77,7 +78,40 @@ namespace CircuitCraft.Managers
         /// </summary>
         public async UniTask RunSimulationAsync(BoardState boardState, CancellationToken cancellationToken = default)
         {
-            await RunSimulationAsync(boardState, null, cancellationToken);
+            await RunSimulationAsync(boardState, null, false, false, cancellationToken);
+        }
+
+        /// <summary>
+        /// Runs a DC operating point simulation and optionally captures node voltages and currents.
+        /// </summary>
+        public async UniTask RunSimulationAsync(
+            BoardState boardState,
+            bool captureAllNodeVoltages,
+            bool captureAllComponentCurrents,
+            CancellationToken cancellationToken = default)
+        {
+            await RunSimulationAsync(boardState, null, captureAllNodeVoltages, captureAllComponentCurrents, cancellationToken);
+        }
+
+        /// <summary>
+        /// Runs a DC operating point simulation with optional auto probes while preserving
+        /// caller-provided probes.
+        /// </summary>
+        public async UniTask RunSimulationAsync(
+            BoardState boardState,
+            IEnumerable<ProbeDefinition> probes,
+            bool captureAllNodeVoltages,
+            bool captureAllComponentCurrents = false,
+            CancellationToken cancellationToken = default)
+        {
+            await RunSimulationAsync(
+                boardState,
+                AddVisualizationProbes(
+                    boardState,
+                    probes,
+                    captureAllNodeVoltages,
+                    captureAllComponentCurrents),
+                cancellationToken);
         }
 
         /// <summary>
@@ -118,7 +152,8 @@ namespace CircuitCraft.Managers
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                CircuitNetlist netlist = _netlistConverter.Convert(boardState, probes);
+                var allProbes = AddVisualizationProbes(boardState, probes, false, false);
+                CircuitNetlist netlist = _netlistConverter.Convert(boardState, allProbes);
 
                 if (netlist.Elements.Count == 0)
                 {
@@ -200,6 +235,97 @@ namespace CircuitCraft.Managers
         public ComponentDefinition GetDefinition(string componentDefId)
         {
             return GetComponentDefinition(componentDefId);
+        }
+
+        private IEnumerable<ProbeDefinition> AddVisualizationProbes(
+            BoardState boardState,
+            IEnumerable<ProbeDefinition> additionalProbes,
+            bool addAllNodeVoltages,
+            bool addAllComponentCurrents)
+        {
+            if (boardState == null)
+            {
+                return additionalProbes?.ToList() ?? new List<ProbeDefinition>();
+            }
+
+            var probes = new List<ProbeDefinition>();
+            if (additionalProbes != null)
+            {
+                probes.AddRange(additionalProbes);
+            }
+
+            if (!addAllNodeVoltages && !addAllComponentCurrents)
+            {
+                return probes;
+            }
+
+            if (addAllNodeVoltages)
+            {
+                foreach (var net in boardState.Nets)
+                {
+                    if (net == null || string.IsNullOrWhiteSpace(net.NetName))
+                    {
+                        continue;
+                    }
+
+                    var safeNetName = SanitizeIdentifier(net.NetName);
+                    probes.Add(ProbeDefinition.Voltage($"V_NET_{net.NetId}_{safeNetName}", net.NetName));
+                }
+            }
+
+            if (addAllComponentCurrents)
+            {
+                foreach (var component in boardState.Components)
+                {
+                    var definition = GetComponentDefinition(component.ComponentDefinitionId);
+                    if (definition == null)
+                    {
+                        continue;
+                    }
+
+                    if (definition.Kind == ComponentKind.Ground || definition.Kind == ComponentKind.Probe)
+                    {
+                        continue;
+                    }
+
+                    var elementId = GetNetlistElementId(definition.Kind, component.InstanceId);
+                    if (!string.IsNullOrEmpty(elementId))
+                    {
+                        probes.Add(ProbeDefinition.Current($"I_COMP_{component.InstanceId}", elementId));
+                    }
+                }
+            }
+
+            return probes;
+        }
+
+        private static string GetNetlistElementId(ComponentKind kind, int instanceId)
+        {
+            try
+            {
+                return $"{BoardToNetlistConverter.GetElementPrefix(kind)}{instanceId}";
+            }
+            catch (NotSupportedException)
+            {
+                return null;
+            }
+        }
+
+        private static string SanitizeIdentifier(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+
+            var output = new char[input.Length];
+            for (int i = 0; i < input.Length; i++)
+            {
+                var c = input[i];
+                output[i] = char.IsLetterOrDigit(c) || c == '_' ? c : '_';
+            }
+
+            return new string(output);
         }
 
         private void RebuildComponentDefinitionLookup()

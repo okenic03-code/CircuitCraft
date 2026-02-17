@@ -38,6 +38,7 @@ namespace CircuitCraft.UI
         private Label _resultStatus;
         private Label _scoreBreakdown;
         private Label _totalScore;
+        private Label _rechallengePrompt;
 
         public event System.Action OnRetryRequested;
         public event System.Action OnNextStageRequested;
@@ -82,6 +83,7 @@ namespace CircuitCraft.UI
             _resultStatus = root.Q<Label>("result-status");
             _scoreBreakdown = root.Q<Label>("score-breakdown");
             _totalScore = root.Q<Label>("total-score");
+            _rechallengePrompt = root.Q<Label>("rechallenge-prompt");
             
             // Bind events
             if (_modifyButton != null)
@@ -163,6 +165,19 @@ namespace CircuitCraft.UI
             {
                 _totalScore.text = $"Total Score: {breakdown.TotalScore}";
             }
+
+            if (_rechallengePrompt != null)
+            {
+                _rechallengePrompt.text = breakdown.Stars switch
+                {
+                    0 => "Tip: Check your connections and try again!",
+                    1 => "Tip: Can you solve it with fewer components?",
+                    2 => "Tip: Stay under budget for a perfect score!",
+                    3 => "Perfect! You're a circuit master!",
+                    _ => ""
+                };
+                _rechallengePrompt.style.display = DisplayStyle.Flex;
+            }
         }
 
         private string GetStarString(int starCount)
@@ -189,6 +204,7 @@ namespace CircuitCraft.UI
             if (_starDisplay != null) _starDisplay.text = "";
             if (_scoreBreakdown != null) _scoreBreakdown.text = "";
             if (_totalScore != null) _totalScore.text = "";
+            if (_rechallengePrompt != null) _rechallengePrompt.style.display = DisplayStyle.None;
             if (_nextStageButton != null) _nextStageButton.style.display = DisplayStyle.None;
         }
         

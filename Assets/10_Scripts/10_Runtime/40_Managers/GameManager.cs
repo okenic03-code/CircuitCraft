@@ -93,6 +93,8 @@ namespace CircuitCraft.Managers
             _suggestedWidth = width;
             _suggestedHeight = height;
             _boardState = new BoardState(width, height);
+            _commandHistory.Clear();
+            OnBoardLoaded?.Invoke(string.Empty);
             Debug.Log($"GameManager: Board reset with suggested area ({width}x{height})");
         }
 

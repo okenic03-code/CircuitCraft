@@ -447,3 +447,16 @@
     background-color: var(--color-accent);
     color: #000000;
 }
+
+.rechallenge-prompt {
+    font-size: 13px;
+    color: var(--color-warning);
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background-color: rgba(255, 215, 64, 0.08);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgba(255, 215, 64, 0.2);
+    width: 100%;
+}

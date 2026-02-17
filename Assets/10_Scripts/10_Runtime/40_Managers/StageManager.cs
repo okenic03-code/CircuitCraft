@@ -129,7 +129,7 @@ namespace CircuitCraft.Managers
                 }
             }
 
-            await _simulationManager.RunSimulationAsync(boardState, probes);
+            await _simulationManager.RunSimulationAsync(boardState, probes, true, true);
             var simResult = _simulationManager.LastSimulationResult;
 
             // Convert StageTestCase[] → TestCaseInput[] (domain DTO bridge)

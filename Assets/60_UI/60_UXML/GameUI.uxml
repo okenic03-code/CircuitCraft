@@ -21,52 +21,6 @@
             <!-- Left Component Palette -->
             <ui:VisualElement name="ComponentPalette" class="component-palette">
                 <ui:ScrollView class="palette-scroll">
-                    <!-- Sources -->
-                    <ui:Label text="Sources" class="section-header" />
-                    <ui:Button name="btn-voltage_source" class="component-button">
-                        <ui:Label text="Voltage Source" />
-                    </ui:Button>
-                    <ui:Button name="btn-ground" class="component-button">
-                        <ui:Label text="Ground" />
-                    </ui:Button>
-
-                    <!-- Passive Components -->
-                    <ui:Label text="Passive" class="section-header" />
-                    <ui:Button name="btn-resistor" class="component-button">
-                        <ui:Label text="Resistor" />
-                    </ui:Button>
-                    <ui:Button name="btn-capacitor" class="component-button">
-                        <ui:Label text="Capacitor" />
-                    </ui:Button>
-                    <ui:Button name="btn-inductor" class="component-button">
-                        <ui:Label text="Inductor" />
-                    </ui:Button>
-
-                    <!-- Semiconductors -->
-                    <ui:Label text="Semiconductors" class="section-header" />
-                    <ui:Button name="btn-led_red" class="component-button">
-                        <ui:Label text="Red LED" />
-                    </ui:Button>
-                    <ui:Button name="btn-diode_1n4148" class="component-button">
-                        <ui:Label text="1N4148 Diode" />
-                    </ui:Button>
-                    <ui:Button name="btn-diode-1n4001" class="component-button">
-                        <ui:Label text="1N4001 Rectifier" />
-                    </ui:Button>
-                    
-                    <ui:Label text="Transistors" class="sub-section-header" />
-                    <ui:Button name="btn-bjt-2n2222" class="component-button">
-                        <ui:Label text="2N2222 NPN" />
-                    </ui:Button>
-                    <ui:Button name="btn-bjt-2n3906" class="component-button">
-                        <ui:Label text="2N3906 PNP" />
-                    </ui:Button>
-                    <ui:Button name="btn-mosfet-2n7000" class="component-button">
-                        <ui:Label text="2N7000 NMOS" />
-                    </ui:Button>
-                    <ui:Button name="btn-mosfet-irf9540" class="component-button">
-                        <ui:Label text="IRF9540 PMOS" />
-                    </ui:Button>
                 </ui:ScrollView>
                 
                 <!-- Property Editor (below palette scroll) -->
@@ -127,6 +81,8 @@
             <ui:ScrollView class="results-log-scroll">
                 <ui:Label name="results-text" class="results-text" text="Simulation successful." />
             </ui:ScrollView>
+            
+            <ui:Label name="rechallenge-prompt" class="rechallenge-prompt" text="" />
             
             <ui:VisualElement class="results-button-row">
                 <ui:Button name="btn-modify-circuit" text="Modify Circuit" class="results-nav-button" />

@@ -23,6 +23,10 @@ namespace CircuitCraft.Views
         [SerializeField] private float _wireY = 0.05f;
         [SerializeField] private Shader _lineShader;
 
+        [Header("Voltage Colors")]
+        [SerializeField] private Color _voltageMinColor = Color.blue;
+        [SerializeField] private Color _voltageMaxColor = Color.yellow;
+
         private BoardState _boardState;
         private Material _lineMaterial;
         private readonly Dictionary<int, LineRenderer> _traceLines = new Dictionary<int, LineRenderer>();
@@ -121,6 +125,95 @@ namespace CircuitCraft.Views
                         CreateTraceLine(trace);
                 }
             }
+        }
+
+        /// <summary>
+        /// Applies voltage-based colors to each trace using per-LineRenderer color values.
+        /// </summary>
+        /// <param name="nodeVoltages">Node name -> voltage lookup map.</param>
+        /// <param name="minVoltage">Lowest voltage in the map used for normalization.</param>
+        /// <param name="maxVoltage">Highest voltage in the map used for normalization.</param>
+        public void ApplyVoltageColors(Dictionary<string, double> nodeVoltages, float minVoltage, float maxVoltage)
+        {
+            if (_boardState == null)
+            {
+                return;
+            }
+
+            if (nodeVoltages == null)
+            {
+                ResetColors();
+                return;
+            }
+
+            foreach (var pair in _traceLines)
+            {
+                if (pair.Value == null)
+                    continue;
+
+                TraceSegment targetTrace = null;
+                foreach (var trace in _boardState.Traces)
+                {
+                    if (trace.SegmentId == pair.Key)
+                    {
+                        targetTrace = trace;
+                        break;
+                    }
+                }
+
+                if (targetTrace == null)
+                {
+                    pair.Value.startColor = _wireColor;
+                    pair.Value.endColor = _wireColor;
+                    continue;
+                }
+
+                var net = _boardState.GetNet(targetTrace.NetId);
+                if (net == null || string.IsNullOrWhiteSpace(net.NetName))
+                {
+                    pair.Value.startColor = _wireColor;
+                    pair.Value.endColor = _wireColor;
+                    continue;
+                }
+
+                if (!nodeVoltages.TryGetValue(net.NetName, out var voltage))
+                {
+                    pair.Value.startColor = _wireColor;
+                    pair.Value.endColor = _wireColor;
+                    continue;
+                }
+
+                var color = Color.Lerp(_voltageMinColor, _voltageMaxColor,
+                    NormalizeVoltage((float)voltage, minVoltage, maxVoltage));
+                pair.Value.startColor = color;
+                pair.Value.endColor = color;
+            }
+        }
+
+        /// <summary>
+        /// Restores all trace colors to their default wire color.
+        /// </summary>
+        public void ResetColors()
+        {
+            foreach (var line in _traceLines.Values)
+            {
+                if (line == null)
+                    continue;
+
+                line.startColor = _wireColor;
+                line.endColor = _wireColor;
+            }
+        }
+
+        private static float NormalizeVoltage(float voltage, float minVoltage, float maxVoltage)
+        {
+            float range = maxVoltage - minVoltage;
+            if (range <= float.Epsilon)
+            {
+                return 0f;
+            }
+
+            return Mathf.Clamp01((voltage - minVoltage) / range);
         }
 
         private void HandleTraceAdded(TraceSegment trace)
