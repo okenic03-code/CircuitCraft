@@ -1,0 +1,170 @@
+/* ============================================================
+   CircuitCraft Settings — Professional CAD Theme
+   Matching MainMenu.uss
+   ============================================================ */
+
+.settings-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(30, 30, 30, 0.95);
+    display: flex;
+    flex-direction: column;
+    padding: 32px;
+}
+
+.header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(70, 70, 70);
+    padding-bottom: 16px;
+}
+
+.title-text {
+    font-size: 24px;
+    color: rgb(220, 220, 220);
+    -unity-font-style: bold;
+}
+
+.tabs-container {
+    flex-direction: row;
+    margin-bottom: 24px;
+    background-color: rgb(40, 40, 40);
+    border-radius: 3px;
+    padding: 2px;
+}
+
+.tab-button {
+    flex-grow: 1;
+    height: 32px;
+    background-color: transparent;
+    border-width: 0;
+    color: rgb(150, 150, 150);
+    font-size: 14px;
+    -unity-font-style: bold;
+    border-radius: 2px;
+    transition-duration: 0.1s;
+}
+
+.tab-button:hover {
+    background-color: rgb(60, 60, 60);
+    color: rgb(220, 220, 220);
+}
+
+.tab-button.active {
+    background-color: rgb(55, 148, 255);
+    color: white;
+}
+
+.content-area {
+    flex-grow: 1;
+    background-color: rgb(40, 40, 40);
+    border-radius: 3px;
+    padding: 24px;
+}
+
+.tab-content {
+    display: none;
+    flex-grow: 1;
+}
+
+.tab-content.active {
+    display: flex;
+}
+
+.setting-row {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    height: 40px;
+}
+
+.setting-label {
+    color: rgb(200, 200, 200);
+    font-size: 14px;
+}
+
+.control-container {
+    width: 250px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Specific Controls */
+.unity-base-field {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+.unity-base-field__label {
+    display: none; /* We use our own labels */
+}
+
+.unity-base-popup-field__input {
+    background-color: rgb(30, 30, 30);
+    border-color: rgb(70, 70, 70);
+    border-radius: 3px;
+    color: rgb(220, 220, 220);
+}
+
+.unity-toggle__input {
+    background-color: transparent;
+}
+
+.unity-toggle__checkmark {
+    background-color: rgb(30, 30, 30);
+    border-color: rgb(70, 70, 70);
+    border-radius: 3px;
+    width: 20px;
+    height: 20px;
+}
+
+.unity-toggle__checkmark--checked {
+    background-color: rgb(55, 148, 255);
+    border-color: rgb(55, 148, 255);
+}
+
+.unity-slider {
+    min-width: 150px;
+}
+
+.unity-base-slider__tracker {
+    background-color: rgb(30, 30, 30);
+    border-color: rgb(70, 70, 70);
+    height: 4px;
+}
+
+.unity-base-slider__dragger {
+    background-color: rgb(55, 148, 255);
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    border-width: 0;
+    margin-top: -6px;
+}
+
+.back-button {
+    width: 100px;
+    height: 32px;
+    background-color: transparent;
+    border-width: 1px;
+    border-color: rgb(70, 70, 70);
+    color: rgb(200, 200, 200);
+    border-radius: 3px;
+    font-size: 13px;
+    transition-duration: 0.15s;
+}
+
+.back-button:hover {
+    background-color: rgb(50, 50, 50);
+    border-color: rgb(100, 100, 100);
+    color: white;
+}

@@ -11,6 +11,7 @@ namespace CircuitCraft.UI
     public class MainMenuController : MonoBehaviour
     {
         [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private GameObject _settingsScreen;
 
         private Button _playButton;
         private Button _settingsButton;
@@ -48,6 +49,15 @@ namespace CircuitCraft.UI
             _playButton?.RegisterCallback<ClickEvent>(OnPlayClicked);
             _settingsButton?.RegisterCallback<ClickEvent>(OnSettingsClicked);
             _quitButton?.RegisterCallback<ClickEvent>(OnQuitClicked);
+
+            if (_settingsScreen != null)
+            {
+                var settingsCtrl = _settingsScreen.GetComponent<SettingsController>();
+                if (settingsCtrl != null)
+                {
+                    settingsCtrl.OnBackRequested += OnSettingsBackRequested;
+                }
+            }
         }
 
         private void OnDisable()
@@ -55,6 +65,15 @@ namespace CircuitCraft.UI
             _playButton?.UnregisterCallback<ClickEvent>(OnPlayClicked);
             _settingsButton?.UnregisterCallback<ClickEvent>(OnSettingsClicked);
             _quitButton?.UnregisterCallback<ClickEvent>(OnQuitClicked);
+
+            if (_settingsScreen != null)
+            {
+                var settingsCtrl = _settingsScreen.GetComponent<SettingsController>();
+                if (settingsCtrl != null)
+                {
+                    settingsCtrl.OnBackRequested -= OnSettingsBackRequested;
+                }
+            }
         }
 
         private void OnPlayClicked(ClickEvent evt)
@@ -65,11 +84,29 @@ namespace CircuitCraft.UI
         private void OnSettingsClicked(ClickEvent evt)
         {
             OnSettingsRequested?.Invoke();
+            if (_settingsScreen != null)
+            {
+                _settingsScreen.SetActive(true);
+            }
+        }
+
+        private void OnSettingsBackRequested()
+        {
+            if (_settingsScreen != null)
+            {
+                _settingsScreen.SetActive(false);
+            }
         }
 
         private void OnQuitClicked(ClickEvent evt)
         {
             OnQuitRequested?.Invoke();
+
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
     }
 }
