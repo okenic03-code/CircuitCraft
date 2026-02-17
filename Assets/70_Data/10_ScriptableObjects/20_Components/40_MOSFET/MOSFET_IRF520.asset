@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 60c684b44d897ec448ff093554857a02, type: 3}
-  m_Name: BJT_TIP31_NPN
+  m_Name: MOSFET_IRF520
   m_EditorClassIdentifier: 
-  _id: bjt-tip31
-  _displayName: TIP31C NPN Power Transistor
-  _kind: 5
+  _id: mosfet-irf520
+  _displayName: IRF520 N-Channel Power MOSFET
+  _kind: 6
   _pins: []
   _footprint:
     _size: {x: 0, y: 0}
-  _baseCost: 50
+  _baseCost: 45
   _prefab: {fileID: 0}
   _resistanceOhms: 0
   _voltageVolts: 0
@@ -26,13 +26,13 @@ MonoBehaviour:
   _inductanceHenrys: 0
   _currentAmps: 0
   _bjtPolarity: 0
-  _bjtModel: 12
-  _beta: 25
-  _earlyVoltage: 100
+  _bjtModel: 0
+  _beta: 100
+  _earlyVoltage: 75
   _fetPolarity: 0
-  _mosfetModel: 0
-  _thresholdVoltage: 2
-  _transconductance: 0.3
+  _mosfetModel: 11
+  _thresholdVoltage: 4
+  _transconductance: 5.5
   _diodeModel: 0
   _saturationCurrent: 0.000000001
   _emissionCoefficient: 1.8

@@ -26,7 +26,7 @@ MonoBehaviour:
   _inductanceHenrys: 0
   _currentAmps: 0
   _bjtPolarity: 1
-  _bjtModel: 7
+  _bjtModel: 13
   _beta: 25
   _earlyVoltage: 100
   _fetPolarity: 0

@@ -33,7 +33,7 @@ MonoBehaviour:
   _mosfetModel: 0
   _thresholdVoltage: 2
   _transconductance: 0.3
-  _diodeModel: 2
+  _diodeModel: 14
   _saturationCurrent: 5e-10
   _emissionCoefficient: 2
   _forwardVoltage: 1.1

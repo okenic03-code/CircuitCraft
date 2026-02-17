@@ -30,7 +30,7 @@ MonoBehaviour:
   _beta: 100
   _earlyVoltage: 75
   _fetPolarity: 0
-  _mosfetModel: 6
+  _mosfetModel: 8
   _thresholdVoltage: 4
   _transconductance: 40
   _diodeModel: 0
