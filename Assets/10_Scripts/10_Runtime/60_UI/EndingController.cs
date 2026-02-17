@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace CircuitCraft.UI
@@ -47,6 +48,9 @@ namespace CircuitCraft.UI
         private void HandleBackClicked()
         {
             OnBackToMenu?.Invoke();
+            // Fallback: if SceneFlowManager handles this, great.
+            // But also ensure we go back to MainMenu scene
+            SceneManager.LoadScene(0);
         }
 
         /// <summary>

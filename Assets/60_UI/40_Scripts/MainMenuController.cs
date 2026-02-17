@@ -1,12 +1,12 @@
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UIElements;
 
 namespace CircuitCraft.UI
 {
     /// <summary>
     /// Lightweight main menu button controller that raises events for external consumers.
-    /// Note: SceneFlowManager also handles main menu buttons directly.
     /// </summary>
     public class MainMenuController : MonoBehaviour
     {
@@ -79,6 +79,7 @@ namespace CircuitCraft.UI
         private void OnPlayClicked(ClickEvent evt)
         {
             OnPlayRequested?.Invoke();
+            SceneManager.LoadScene(1);
         }
 
         private void OnSettingsClicked(ClickEvent evt)

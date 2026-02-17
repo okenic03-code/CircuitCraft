@@ -1,0 +1,93 @@
+.pause-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+    display: none; /* Hidden by default, toggled by controller */
+}
+
+.pause-panel {
+    width: 300px;
+    background-color: rgb(30, 30, 30);
+    border-left-color: rgb(70, 70, 70);
+    border-right-color: rgb(70, 70, 70);
+    border-top-color: rgb(70, 70, 70);
+    border-bottom-color: rgb(70, 70, 70);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding-left: 32px;
+    padding-right: 32px;
+    padding-top: 32px;
+    padding-bottom: 32px;
+    align-items: center;
+}
+
+.pause-title {
+    font-size: 24px;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+    margin-bottom: 24px;
+    -unity-text-align: middle-center;
+}
+
+.pause-button {
+    width: 100%; /* Fill the panel padding area */
+    height: 40px;
+    margin-bottom: 12px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    font-size: 13px;
+    color: rgb(220, 220, 220);
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgb(70, 70, 70);
+    border-right-color: rgb(70, 70, 70);
+    border-top-color: rgb(70, 70, 70);
+    border-bottom-color: rgb(70, 70, 70);
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    transition-duration: 0.1s;
+}
+
+.pause-button:hover {
+    background-color: rgb(50, 50, 50);
+    border-left-color: rgb(100, 100, 100);
+    border-right-color: rgb(100, 100, 100);
+    border-top-color: rgb(100, 100, 100);
+    border-bottom-color: rgb(100, 100, 100);
+}
+
+.pause-button:active {
+    background-color: rgb(70, 70, 70);
+}
+
+.pause-button-primary {
+    background-color: rgb(55, 148, 255);
+    border-left-width: 0;
+    border-right-width: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    -unity-font-style: bold;
+    color: rgb(255, 255, 255);
+}
+
+.pause-button-primary:hover {
+    background-color: rgb(75, 163, 255);
+}
+
+.pause-button-primary:active {
+    background-color: rgb(30, 120, 220);
+}

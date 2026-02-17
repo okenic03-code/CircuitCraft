@@ -2,19 +2,18 @@ using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.SceneManagement;
 
 namespace CircuitCraft.UI
 {
     /// <summary>
-    /// Manages screen transitions in the single-scene game.
-    /// Navigates between MainMenu → StageSelect → GamePlay by
-    /// enabling/disabling UIDocument GameObjects.
+    /// Manages screen transitions in the gameplay scene.
+    /// Navigates between StageSelect → GamePlay → Ending by
+    /// enabling/disabling screen root GameObjects.
     /// </summary>
     public class SceneFlowManager : MonoBehaviour
     {
         [Header("Screen References")]
-        [SerializeField] private GameObject _mainMenuScreen;
         [SerializeField] private GameObject _stageSelectScreen;
         [SerializeField] private GameObject _gamePlayScreen;
         [SerializeField] private GameObject _endingScreen;
@@ -26,65 +25,75 @@ namespace CircuitCraft.UI
         [SerializeField] private ProgressionManager _progressionManager;
         [SerializeField] private ComponentPaletteController _paletteController;
         [SerializeField] private ResultsPanelController _resultsPanelController;
-
-        [Header("Main Menu")]
-        [SerializeField] private UIDocument _mainMenuDocument;
+        [SerializeField] private PauseMenuController _pauseMenuController;
 
         [Header("Stage Data")]
         [SerializeField]
         [Tooltip("Ordered stage definitions matching StageSelectController's stage list.")]
         private StageDefinition[] _stages;
 
-        private enum GameScreen { MainMenu, StageSelect, GamePlay, Ending }
-
-        private Button _playButton;
-        private Button _quitButton;
+        private enum GameScreen { StageSelect, GamePlay, Ending }
 
         private void Start()
         {
-            WireMainMenuButtons();
+            ResolveSceneReferences();
             WireStageSelectEvents();
             WireEndingEvents();
             WireStageManagerEvents();
             WireResultsPanelEvents();
+            WirePauseMenuEvents();
 
-            ShowScreen(GameScreen.MainMenu);
+            SyncProgressionToStageSelect();
+            ShowScreen(GameScreen.StageSelect);
         }
 
         private void OnDestroy()
         {
-            UnwireMainMenuButtons();
             UnwireStageSelectEvents();
             UnwireEndingEvents();
             UnwireStageManagerEvents();
             UnwireResultsPanelEvents();
+            UnwirePauseMenuEvents();
         }
 
         // ─── Wiring ───────────────────────────────────────────────────────
 
-        private void WireMainMenuButtons()
+        private void ResolveSceneReferences()
         {
-            if (_mainMenuDocument == null) return;
+            if (_stageSelectController == null)
+                _stageSelectController = FindFirstObjectByType<StageSelectController>(FindObjectsInactive.Include);
 
-            var root = _mainMenuDocument.rootVisualElement;
-            if (root == null) return;
+            if (_endingController == null)
+                _endingController = FindFirstObjectByType<EndingController>(FindObjectsInactive.Include);
 
-            _playButton = root.Q<Button>("btn-play");
-            if (_playButton != null)
-                _playButton.clicked += HandlePlayClicked;
+            if (_stageManager == null)
+                _stageManager = FindFirstObjectByType<StageManager>(FindObjectsInactive.Include);
 
-            _quitButton = root.Q<Button>("btn-quit");
-            if (_quitButton != null)
-                _quitButton.clicked += HandleQuitClicked;
-        }
+            if (_progressionManager == null)
+                _progressionManager = FindFirstObjectByType<ProgressionManager>(FindObjectsInactive.Include);
 
-        private void UnwireMainMenuButtons()
-        {
-            if (_playButton != null)
-                _playButton.clicked -= HandlePlayClicked;
+            if (_paletteController == null)
+                _paletteController = FindFirstObjectByType<ComponentPaletteController>(FindObjectsInactive.Include);
 
-            if (_quitButton != null)
-                _quitButton.clicked -= HandleQuitClicked;
+            if (_resultsPanelController == null)
+                _resultsPanelController = FindFirstObjectByType<ResultsPanelController>(FindObjectsInactive.Include);
+
+            if (_pauseMenuController == null)
+                _pauseMenuController = FindFirstObjectByType<PauseMenuController>(FindObjectsInactive.Include);
+
+            // Auto-discover screen GameObjects from controllers
+            if (_stageSelectScreen == null && _stageSelectController != null)
+                _stageSelectScreen = _stageSelectController.gameObject;
+
+            if (_gamePlayScreen == null)
+            {
+                var uiController = FindFirstObjectByType<UIController>(FindObjectsInactive.Include);
+                if (uiController != null)
+                    _gamePlayScreen = uiController.gameObject;
+            }
+
+            if (_endingScreen == null && _endingController != null)
+                _endingScreen = _endingController.gameObject;
         }
 
         private void WireStageSelectEvents()
@@ -141,26 +150,37 @@ namespace CircuitCraft.UI
             _resultsPanelController.OnNextStageRequested -= HandleNextStage;
         }
 
-        // ─── Event Handlers ───────────────────────────────────────────────
-
-        private void HandlePlayClicked()
+        private void WirePauseMenuEvents()
         {
-            SyncProgressionToStageSelect();
-            ShowScreen(GameScreen.StageSelect);
+            if (_pauseMenuController == null) return;
+            _pauseMenuController.OnRestartRequested += HandleRetry;
+            _pauseMenuController.OnStageSelectRequested += HandlePauseStageSelect;
         }
+
+        private void UnwirePauseMenuEvents()
+        {
+            if (_pauseMenuController == null) return;
+            _pauseMenuController.OnRestartRequested -= HandleRetry;
+            _pauseMenuController.OnStageSelectRequested -= HandlePauseStageSelect;
+        }
+
+        // ─── Event Handlers ───────────────────────────────────────────────
 
         private void HandleBackToMenu()
         {
-            ShowScreen(GameScreen.MainMenu);
+            SceneManager.LoadScene(0);
         }
 
         private void HandleEndingBackToMenu()
         {
-            ShowScreen(GameScreen.MainMenu);
+            SceneManager.LoadScene(0);
         }
 
         private void HandleStageSelected(StageDefinition stage)
         {
+            if (_stageManager == null || stage == null)
+                return;
+
             _stageManager.LoadStage(stage);
             ShowScreen(GameScreen.GamePlay);
         }
@@ -192,6 +212,12 @@ namespace CircuitCraft.UI
         {
             if (_stageManager.CurrentStage != null)
                 _stageManager.LoadStage(_stageManager.CurrentStage);
+        }
+
+        private void HandlePauseStageSelect()
+        {
+            SyncProgressionToStageSelect();
+            ShowScreen(GameScreen.StageSelect);
         }
 
         private void HandleNextStage()
@@ -234,22 +260,10 @@ namespace CircuitCraft.UI
             ShowScreen(GameScreen.Ending);
         }
 
-        private void HandleQuitClicked()
-        {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
-        }
-
         // ─── Screen Management ────────────────────────────────────────────
 
         private void ShowScreen(GameScreen screen)
         {
-            if (_mainMenuScreen != null)
-                _mainMenuScreen.SetActive(screen == GameScreen.MainMenu);
-
             if (_stageSelectScreen != null)
                 _stageSelectScreen.SetActive(screen == GameScreen.StageSelect);
 

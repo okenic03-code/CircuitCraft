@@ -41,7 +41,7 @@ namespace CircuitCraft.UI
             
             // Initialize default state if not set externally
             // Default: 5 stages supported by UI
-            int capacity = _stages != null ? _stages.Length : 5;
+            int capacity = (_stages != null && _stages.Length > 0) ? _stages.Length : 5;
             _unlockedStages = new bool[capacity];
             _stageStars = new int[capacity];
 
@@ -104,7 +104,10 @@ namespace CircuitCraft.UI
         /// </summary>
         public void UpdateStageDisplay()
         {
-            if (_root == null || _stages == null) return;
+            if (_root == null) return;
+
+            // If no stage data is assigned, leave UXML defaults visible
+            if (_stages == null || _stages.Length == 0) return;
 
             for (int i = 0; i < _stageCards.Count; i++)
             {

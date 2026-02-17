@@ -2,25 +2,24 @@
 
 /* Variables */
 :root {
-    --color-background: #1A1A2E;
-    --color-surface: #16213E;
-    --color-surface-lighter: #1F2D50;
-    --color-toolbar: #0F3460;
-    --color-accent: #00D4FF;
-    --color-accent-hover: #33DDFF;
-    --color-accent-active: #00A3CC;
-    --color-text-primary: #E0E0E0;
-    --color-text-secondary: #8892A0;
-    --color-border: #2A3A5C;
-    --color-success: #00E676;
-    --color-error: #FF5252;
+    --color-background: #1E1E1E;
+    --color-surface: #252525;
+    --color-surface-lighter: #333333;
+    --color-toolbar: #2D2D2D;
+    --color-accent: #3794FF;
+    --color-accent-hover: #4BA3FF;
+    --color-accent-active: #1E78DC;
+    --color-text-primary: #DCDCDC;
+    --color-text-secondary: #888888;
+    --color-border: #3C3C3C;
+    --color-success: #4CAF50;
+    --color-error: #F44336;
     --color-warning: #FFD740;
     --color-star: #FFD700;
 }
 
 /* Global Reset */
 * {
-    -unity-font-definition: initial;
     color: var(--color-text-primary);
 }
 
@@ -79,7 +78,7 @@
 
 /* Simulate Button Special Style */
 #simulate-button {
-    background-color: rgba(0, 212, 255, 0.15);
+    background-color: rgba(55, 148, 255, 0.15);
     border-color: var(--color-accent);
     color: var(--color-accent);
     -unity-font-style: bold;
@@ -149,12 +148,12 @@
 
 .component-button:hover {
     border-color: var(--color-accent);
-    background-color: rgba(0, 212, 255, 0.05);
+    background-color: rgba(55, 148, 255, 0.05);
 }
 
 .component-button.selected {
     border-color: var(--color-accent);
-    background-color: rgba(0, 212, 255, 0.1);
+    background-color: rgba(55, 148, 255, 0.1);
 }
 
 .component-button Label {
@@ -249,7 +248,7 @@
     top: 20px;
     left: 50%;
     translate: -50% 0;
-    background-color: rgba(15, 52, 96, 0.9);
+    background-color: rgba(45, 45, 45, 0.9);
     padding: 8px 16px;
     border-radius: 20px;
     border-width: 1px;
@@ -391,7 +390,7 @@
     position: absolute;
     top: 8px;
     right: 8px;
-    background-color: rgba(22, 33, 62, 0.85);
+    background-color: rgba(37, 37, 37, 0.85);
     border-width: 1px;
     border-color: var(--color-border);
     border-radius: 8px;
@@ -439,7 +438,7 @@
 }
 
 .results-nav-primary {
-    background-color: rgba(0, 212, 255, 0.15);
+    background-color: rgba(55, 148, 255, 0.15);
     border-color: var(--color-accent);
     color: var(--color-accent);
 }
