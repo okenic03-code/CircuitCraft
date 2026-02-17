@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg">
+	<rect width="700" height="300" fill="#fff"/>
+	<g fill="none" stroke="#000" stroke-width="2">
+		<rect x="74" y="114" width="81" height="80"/>
+		<path d="m389 102 106 53-106 53z"/>
+		<path d="m409 181h-10"/>
+		<path d="m403 124v10"/>
+		<path d="m408 129h-10"/>
+		<path d="m495 155h14"/>
+		<path d="m442 102v26"/>
+		<path d="m442 181v26"/>
+		<path d="m316 142h44v-13h29"/>
+		<path d="m316 167h44v14h29"/>
+		<path d="m228 142h18v-18h17v18h17"/>
+		<path d="m228 167h18v18h17v-18h17"/>
+		<path d="m539 155h25v-50h24v50h25"/>
+		<path d="m154 142h38"/>
+		<path d="m154 167h38"/>
+	</g>
+	<g font-family="sans" font-size="18">
+		<text x="85" y="160">Source</text>
+		<text x="207" y="76">Input Pulse</text>
+		<text x="366" y="75">Subtractor</text>
+		<text x="522" y="75">Output Pulse</text>
+	</g>
+</svg>
