@@ -366,12 +366,13 @@ namespace CircuitCraft.UI
         {
             if (_gameManager == null) return;
             
-            // Use current stage grid size, or default
+            // Use current stage target area to derive board size, or default
             int width = 20, height = 15;
             if (_stageManager != null && _stageManager.CurrentStage != null)
             {
-                width = _stageManager.CurrentStage.GridSize.x;
-                height = _stageManager.CurrentStage.GridSize.y;
+                int side = (int)Math.Ceiling(Math.Sqrt(_stageManager.CurrentStage.TargetArea));
+                width = side;
+                height = side;
             }
             
             _gameManager.ResetBoard(width, height);
