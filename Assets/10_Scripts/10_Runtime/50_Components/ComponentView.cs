@@ -72,19 +72,35 @@ namespace CircuitCraft.Components
         [Tooltip("Default LED glow color when current is flowing.")]
         private Color _ledGlowDefaultColor = new Color(1f, 0.7f, 0.05f, 1f);
 
+        [SerializeField]
+        [Tooltip("Glow scale used for resistor heat effects.")]
+        private float _heatGlowScale = 1.45f;
+
+        [SerializeField]
+        [Tooltip("Glow alpha used for resistor heat at max intensity.")]
+        private float _heatGlowMaxAlpha = 0.65f;
+
+        [SerializeField]
+        [Tooltip("Default resistor heat glow color.")]
+        private Color _heatGlowColor = new Color(1f, 0.35f, 0.05f, 1f);
+
         private static readonly int _ColorProperty = Shader.PropertyToID("_Color");
         private static readonly Color _pinDotColor = new Color(0f, 0.83f, 1f, 0.6f);
         private const float PinDotRadius = 0.18f;
         private const int PinDotTextureSize = 32;
         private static readonly int _ledGlowTextureSize = 64;
+        private static readonly int _heatGlowTextureSize = 64;
 
         private static Sprite _pinDotSprite;
         private static Sprite _ledGlowSprite;
+        private static Sprite _heatGlowSprite;
         private MaterialPropertyBlock _materialPropertyBlock;
         private readonly List<GameObject> _pinDots = new List<GameObject>();
         private GameObject _simulationOverlayObject;
         private GameObject _ledGlowObject;
         private SpriteRenderer _ledGlowRenderer;
+        private GameObject _heatGlowObject;
+        private SpriteRenderer _heatGlowRenderer;
 
     #if UNITY_TEXTMESHPRO
         private TextMeshPro _simulationOverlayText;
@@ -114,6 +130,7 @@ namespace CircuitCraft.Components
             ClearPinDots();
             ClearSimulationOverlay();
             ClearLEDGlow();
+            ClearHeatGlow();
         }
 
         private void Init()
@@ -386,6 +403,97 @@ namespace CircuitCraft.Components
             _ledGlowRenderer.material = _spriteRenderer != null ? _spriteRenderer.sharedMaterial : null;
         }
 
+        /// <summary>
+        /// Shows or hides a resistor heat glow effect.
+        /// </summary>
+        public void ShowResistorHeatGlow(bool glow, float normalizedPower)
+        {
+            if (!glow)
+            {
+                HideResistorHeatGlow();
+                return;
+            }
+
+            EnsureHeatGlowObject();
+            if (_heatGlowRenderer == null)
+            {
+                return;
+            }
+
+            var safePower = Mathf.Clamp01(normalizedPower);
+            var color = _heatGlowColor;
+            color.a = _heatGlowMaxAlpha * safePower;
+            _heatGlowRenderer.color = color;
+            _heatGlowObject.SetActive(true);
+        }
+
+        /// <summary>
+        /// Hides active resistor heat glow effect.
+        /// </summary>
+        public void HideResistorHeatGlow()
+        {
+            if (_heatGlowObject != null)
+            {
+                _heatGlowObject.SetActive(false);
+            }
+        }
+
+        private void EnsureHeatGlowObject()
+        {
+            if (_heatGlowObject != null)
+            {
+                _heatGlowObject.SetActive(true);
+                return;
+            }
+
+            _heatGlowObject = new GameObject("HeatGlow");
+            _heatGlowObject.transform.SetParent(transform, false);
+            _heatGlowObject.transform.localPosition = new Vector3(0f, 0f, 0.03f);
+            _heatGlowObject.transform.localScale = Vector3.one * _heatGlowScale;
+
+            _heatGlowRenderer = _heatGlowObject.AddComponent<SpriteRenderer>();
+            _heatGlowRenderer.sprite = GetHeatGlowSprite();
+            _heatGlowRenderer.sortingLayerID = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
+            _heatGlowRenderer.sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder - 2 : 0;
+            _heatGlowRenderer.material = _spriteRenderer != null ? _spriteRenderer.sharedMaterial : null;
+        }
+
+        private static Sprite GetHeatGlowSprite()
+        {
+            if (_heatGlowSprite != null)
+            {
+                return _heatGlowSprite;
+            }
+
+            var texture = new Texture2D(_heatGlowTextureSize, _heatGlowTextureSize, TextureFormat.RGBA32, false);
+            texture.wrapMode = TextureWrapMode.Clamp;
+            texture.filterMode = FilterMode.Bilinear;
+
+            var center = new Vector2(_heatGlowTextureSize * 0.5f, _heatGlowTextureSize * 0.5f);
+            float radius = _heatGlowTextureSize * 0.5f;
+
+            for (int y = 0; y < _heatGlowTextureSize; y++)
+            {
+                for (int x = 0; x < _heatGlowTextureSize; x++)
+                {
+                    float dist = Vector2.Distance(new Vector2(x, y), center);
+                    float alpha = 1f - Mathf.Clamp01(dist / radius);
+                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+            }
+
+            texture.Apply();
+
+            _heatGlowSprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, _heatGlowTextureSize, _heatGlowTextureSize),
+                new Vector2(0.5f, 0.5f),
+                _heatGlowTextureSize
+            );
+
+            return _heatGlowSprite;
+        }
+
         private void ClearSimulationOverlay()
         {
             if (_simulationOverlayObject != null)
@@ -403,6 +511,16 @@ namespace CircuitCraft.Components
                 Destroy(_ledGlowObject);
                 _ledGlowObject = null;
                 _ledGlowRenderer = null;
+            }
+        }
+
+        private void ClearHeatGlow()
+        {
+            if (_heatGlowObject != null)
+            {
+                Destroy(_heatGlowObject);
+                _heatGlowObject = null;
+                _heatGlowRenderer = null;
             }
         }
 
