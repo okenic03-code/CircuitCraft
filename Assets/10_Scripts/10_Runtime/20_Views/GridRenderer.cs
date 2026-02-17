@@ -16,14 +16,9 @@ namespace CircuitCraft.Views
         [SerializeField] private Material _lineMaterial;
         [SerializeField] private Shader _defaultShader;
 
-        [Header("Suggested Area")]
-        [SerializeField] private Color _suggestedAreaBorderColor = new Color(0.3f, 0.5f, 0.8f, 1f);
-        [SerializeField] private float _suggestedAreaBorderWidth = 0.06f;
-
         private GameObject _gridContainer;
         private readonly List<LineRenderer> _horizontalLines = new List<LineRenderer>();
         private readonly List<LineRenderer> _verticalLines = new List<LineRenderer>();
-        private readonly List<LineRenderer> _suggestedAreaLines = new List<LineRenderer>(4);
 
         private Vector3 _cachedCamPos;
         private float _cachedOrthoSize;
@@ -89,7 +84,6 @@ namespace CircuitCraft.Views
 
                 UpdateHorizontalLines(gridMinY, gridMaxY, gridMinX, gridMaxX, origin, cellSize);
                 UpdateVerticalLines(gridMinX, gridMaxX, gridMinY, gridMaxY, origin, cellSize);
-                UpdateSuggestedAreaBorder(origin, cellSize);
             }
 
             if (_visualsDirty)
@@ -187,30 +181,6 @@ namespace CircuitCraft.Views
             DisableUnusedLines(_verticalLines, neededCount);
         }
 
-        private void UpdateSuggestedAreaBorder(Vector3 origin, float cellSize)
-        {
-            EnsureLinePoolSize(_suggestedAreaLines, 4, "SuggestedBorder", _suggestedAreaBorderColor, _suggestedAreaBorderWidth);
-
-            float x0 = origin.x;
-            float z0 = origin.z;
-            float x1 = origin.x + (_gridSettings.SuggestedWidth * cellSize);
-            float z1 = origin.z + (_gridSettings.SuggestedHeight * cellSize);
-            float y = origin.y;
-
-            SetBorderLine(_suggestedAreaLines[0], new Vector3(x0, y, z0), new Vector3(x1, y, z0));
-            SetBorderLine(_suggestedAreaLines[1], new Vector3(x1, y, z0), new Vector3(x1, y, z1));
-            SetBorderLine(_suggestedAreaLines[2], new Vector3(x1, y, z1), new Vector3(x0, y, z1));
-            SetBorderLine(_suggestedAreaLines[3], new Vector3(x0, y, z1), new Vector3(x0, y, z0));
-        }
-
-        private void SetBorderLine(LineRenderer line, Vector3 start, Vector3 end)
-        {
-            line.enabled = true;
-            line.positionCount = 2;
-            line.SetPosition(0, start);
-            line.SetPosition(1, end);
-        }
-
         private void EnsureLinePoolSize(List<LineRenderer> pool, int requiredCount, string linePrefix, Color lineColor, float lineWidth)
         {
             while (pool.Count < requiredCount)
@@ -239,10 +209,6 @@ namespace CircuitCraft.Views
                 SetLineVisual(_verticalLines[i], _gridColor, _lineWidth);
             }
 
-            for (int i = 0; i < _suggestedAreaLines.Count; i++)
-            {
-                SetLineVisual(_suggestedAreaLines[i], _suggestedAreaBorderColor, _suggestedAreaBorderWidth);
-            }
         }
 
         private void DisableUnusedLines(List<LineRenderer> pool, int usedCount)

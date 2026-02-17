@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,14 +11,14 @@ namespace CircuitCraft.Core
     /// Star logic:
     ///   0★ = circuit didn't pass
     ///   1★ = circuit works (base score)
-    ///   2★ = circuit works + (under budget OR within component limit)
-    ///   3★ = circuit works + under budget + within component limit
+    ///   2★ = circuit works + (under budget OR within area target)
+    ///   3★ = circuit works + under budget + within area target
     /// </summary>
     public class ScoringSystem
     {
         private const int BASE_SCORE = 1000;
         private const int BUDGET_BONUS = 500;
-        private const int COMPACT_BONUS = 300;
+        private const int AREA_BONUS = 300;
 
         /// <summary>
         /// Calculates score breakdown from the given scoring input.
@@ -38,7 +39,7 @@ namespace CircuitCraft.Core
             else
             {
                 lineItems.Add(new ScoreLineItem("Circuit Failed", 0));
-                return BuildResult(baseScore, 0, 0, false, lineItems);
+                return BuildResult(baseScore, 0, 0, false, lineItems, false);
             }
 
             // --- Budget bonus ---
@@ -61,27 +62,15 @@ namespace CircuitCraft.Core
                     0));
             }
 
-            // --- Compact bonus ---
-            bool withinComponentLimit = IsWithinComponentLimit(input);
-            int compactBonus = 0;
-            if (withinComponentLimit)
-            {
-                compactBonus = COMPACT_BONUS;
-                if (input.MaxComponentCount > 0)
-                    lineItems.Add(new ScoreLineItem(
-                        $"Compact Build ({input.ComponentCount}/{input.MaxComponentCount})",
-                        COMPACT_BONUS));
-                else
-                    lineItems.Add(new ScoreLineItem("Components: No Limit", COMPACT_BONUS));
-            }
-            else
-            {
-                lineItems.Add(new ScoreLineItem(
-                    $"Too Many Components ({input.ComponentCount}/{input.MaxComponentCount})",
-                    0));
-            }
+            // --- Area bonus ---
+            bool withinTarget = IsWithinAreaTarget(input);
+            int areaBonus = CalculateAreaBonus(input);
+            string areaLabel = withinTarget
+                ? $"Small Footprint ({input.BoardArea}/{input.TargetArea})"
+                : $"Over Footprint Target ({input.BoardArea}/{input.TargetArea})";
+            lineItems.Add(new ScoreLineItem(areaLabel, areaBonus));
 
-            return BuildResult(baseScore, budgetBonus, compactBonus, true, lineItems);
+            return BuildResult(baseScore, budgetBonus, areaBonus, true, lineItems, withinTarget);
         }
 
         /// <summary>
@@ -94,24 +83,37 @@ namespace CircuitCraft.Core
         }
 
         /// <summary>
-        /// Within component limit if no limit is set (0) or count &lt;= max.
+        /// Within target area if no target is set (0) or board area is within target.
         /// </summary>
-        private static bool IsWithinComponentLimit(ScoringInput input)
+        private static bool IsWithinAreaTarget(ScoringInput input)
         {
-            if (input.MaxComponentCount <= 0) return true; // no limit → auto-pass
-            return input.ComponentCount <= input.MaxComponentCount;
+            float targetArea = Math.Max(1f, input.TargetArea);
+            float boardArea = Math.Max(1f, input.BoardArea);
+            return boardArea <= targetArea;
+        }
+
+        /// <summary>
+        /// Compute linear area bonus points from board-to-target area ratio.
+        /// </summary>
+        private static int CalculateAreaBonus(ScoringInput input)
+        {
+            float targetArea = Math.Max(1f, input.TargetArea);
+            float boardArea = Math.Max(1, input.BoardArea);
+            float areaRatio = boardArea / targetArea;
+            float areaFactor = Math.Max(0f, Math.Min(1f, 2f - areaRatio));
+            return (int)Math.Round(AREA_BONUS * areaFactor);
         }
 
         /// <summary>
         /// Calculates star count from bonus flags.
         /// </summary>
-        private static int CalculateStars(bool passed, bool underBudget, bool withinComponentLimit)
+        private static int CalculateStars(bool passed, bool underBudget, bool withinTarget)
         {
             if (!passed) return 0;
 
             int bonusCount = 0;
             if (underBudget) bonusCount++;
-            if (withinComponentLimit) bonusCount++;
+            if (withinTarget) bonusCount++;
 
             // 1★ base + bonuses (max 3★)
             return 1 + bonusCount;
@@ -120,21 +122,21 @@ namespace CircuitCraft.Core
         private static ScoreBreakdown BuildResult(
             int baseScore,
             int budgetBonus,
-            int compactBonus,
+            int areaBonus,
             bool passed,
-            List<ScoreLineItem> lineItems)
+            List<ScoreLineItem> lineItems,
+            bool withinTarget)
         {
-            int totalScore = baseScore + budgetBonus + compactBonus;
+            int totalScore = baseScore + budgetBonus + areaBonus;
             bool underBudget = budgetBonus > 0;
-            bool withinLimit = compactBonus > 0;
-            int stars = CalculateStars(passed, underBudget, withinLimit);
+            int stars = CalculateStars(passed, underBudget, withinTarget);
 
             string summary = BuildSummary(passed, stars, totalScore, lineItems);
 
             return new ScoreBreakdown(
                 baseScore,
                 budgetBonus,
-                compactBonus,
+                areaBonus,
                 totalScore,
                 stars,
                 passed,

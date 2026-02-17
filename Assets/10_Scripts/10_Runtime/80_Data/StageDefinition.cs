@@ -34,8 +34,14 @@ namespace CircuitCraft.Data
         [Header("Grid Configuration")]
         [SerializeField]
         [Tooltip("The dimensions of the playable grid.")]
+        [HideInInspector]
         [FormerlySerializedAs("gridSize")]
         private Vector2Int _gridSize;
+
+        [Header("Footprint Target")]
+        [SerializeField]
+        [Tooltip("Target footprint area for scoring. 0 falls back to legacy grid area.")]
+        private int _targetArea;
 
         [Header("Allowed Components")]
         [SerializeField]
@@ -54,12 +60,6 @@ namespace CircuitCraft.Data
         [FormerlySerializedAs("budgetLimit")]
         private float _budgetLimit;
 
-        [Header("Additional Constraints")]
-        [SerializeField]
-        [Tooltip("Extra constraints for this stage.")]
-        [FormerlySerializedAs("constraints")]
-        private StageConstraints _constraints;
-
         /// <summary>Unique internal identifier for the stage.</summary>
         public string StageId => _stageId;
 
@@ -72,8 +72,8 @@ namespace CircuitCraft.Data
         /// <summary>The sequential number of the stage within its world.</summary>
         public int StageNumber => _stageNumber;
 
-        /// <summary>The dimensions of the playable grid.</summary>
-        public Vector2Int GridSize => _gridSize;
+        /// <summary>Target footprint area used in scoring.</summary>
+        public int TargetArea => _targetArea > 0 ? _targetArea : Mathf.Max(1, _gridSize.x * _gridSize.y);
 
         /// <summary>The set of components the player is allowed to use in this stage.</summary>
         public ComponentDefinition[] AllowedComponents => _allowedComponents;
@@ -84,7 +84,5 @@ namespace CircuitCraft.Data
         /// <summary>Maximum budget allowed for the circuit. 0 means no limit.</summary>
         public float BudgetLimit => _budgetLimit;
 
-        /// <summary>Extra constraints for this stage.</summary>
-        public StageConstraints Constraints => _constraints;
     }
 }

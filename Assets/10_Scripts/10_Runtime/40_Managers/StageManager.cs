@@ -44,7 +44,7 @@ namespace CircuitCraft.Managers
         }
 
         /// <summary>
-        /// Loads a stage: resets the board to the stage grid size,
+        /// Loads a stage: resets the board to the derived suggested area,
         /// populates the palette with allowed components, and fires OnStageLoaded.
         /// </summary>
         /// <param name="stage">The stage definition to load.</param>
@@ -55,10 +55,11 @@ namespace CircuitCraft.Managers
 
             _currentStage = stage;
 
-            // Reset board to stage grid dimensions
-            _gameManager.ResetBoard(stage.GridSize.x, stage.GridSize.y);
+            // Derive a square suggested board from the stage target area.
+            int side = (int)Math.Ceiling(Math.Sqrt(stage.TargetArea));
+            _gameManager.ResetBoard(side, side);
 
-            Debug.Log($"StageManager: Loaded stage '{stage.DisplayName}' (suggested area {stage.GridSize.x}x{stage.GridSize.y})");
+            Debug.Log($"StageManager: Loaded stage '{stage.DisplayName}' (suggested area {side}x{side})");
             OnStageLoaded?.Invoke();
         }
 
@@ -159,17 +160,17 @@ namespace CircuitCraft.Managers
                 }
             }
 
-            // Build scoring input from evaluation + board data + stage constraints
-            int maxComponentCount = _currentStage.Constraints != null
-                ? _currentStage.Constraints.MaxComponentCount
-                : 0;
+            // Build scoring input from evaluation + board size + stage target.
+            var contentBounds = _gameManager.BoardState.ComputeContentBounds();
+            int boardArea = Math.Max(1, contentBounds.Width * contentBounds.Height);
+            int targetArea = _currentStage.TargetArea;
 
             var scoringInput = new ScoringInput(
                 circuitPassed: evalResult.Passed,
                 totalComponentCost: totalCost,
                 budgetLimit: _currentStage.BudgetLimit,
-                componentCount: boardState.Components.Count,
-                maxComponentCount: maxComponentCount,
+                boardArea: boardArea,
+                targetArea: targetArea,
                 traceCount: boardState.Traces.Count
             );
 
@@ -202,7 +203,7 @@ namespace CircuitCraft.Managers
             return new ScoreBreakdown(
                 baseScore: 0,
                 budgetBonus: 0,
-                compactBonus: 0,
+                areaBonus: 0,
                 totalScore: 0,
                 stars: 0,
                 passed: false,

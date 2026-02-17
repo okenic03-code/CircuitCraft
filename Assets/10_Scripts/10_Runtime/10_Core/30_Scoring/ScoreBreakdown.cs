@@ -18,11 +18,11 @@ namespace CircuitCraft.Core
         /// <summary>Budget limit from StageDefinition. 0 = no limit (auto-pass).</summary>
         public float BudgetLimit { get; }
 
-        /// <summary>Number of components placed on the board.</summary>
-        public int ComponentCount { get; }
+        /// <summary>Total board area covered by the placed components.</summary>
+        public int BoardArea { get; }
 
-        /// <summary>Max component count from StageConstraints. 0 = no limit (auto-pass).</summary>
-        public int MaxComponentCount { get; }
+        /// <summary>Target board area used for scoring.</summary>
+        public int TargetArea { get; }
 
         /// <summary>Number of traces (wires) on the board.</summary>
         public int TraceCount { get; }
@@ -31,15 +31,15 @@ namespace CircuitCraft.Core
             bool circuitPassed,
             float totalComponentCost,
             float budgetLimit,
-            int componentCount,
-            int maxComponentCount,
+            int boardArea,
+            int targetArea,
             int traceCount)
         {
             CircuitPassed = circuitPassed;
             TotalComponentCost = totalComponentCost;
             BudgetLimit = budgetLimit;
-            ComponentCount = componentCount;
-            MaxComponentCount = maxComponentCount;
+            BoardArea = boardArea;
+            TargetArea = targetArea;
             TraceCount = traceCount;
         }
     }
@@ -76,10 +76,10 @@ namespace CircuitCraft.Core
         /// <summary>+500 if total component cost is within budget.</summary>
         public int BudgetBonus { get; }
 
-        /// <summary>+300 if component count is within the limit.</summary>
-        public int CompactBonus { get; }
+        /// <summary>+300 scaled by area ratio versus target area.</summary>
+        public int AreaBonus { get; }
 
-        /// <summary>Sum of BaseScore + BudgetBonus + CompactBonus.</summary>
+        /// <summary>Sum of BaseScore + BudgetBonus + AreaBonus.</summary>
         public int TotalScore { get; }
 
         /// <summary>0-3 star rating.</summary>
@@ -97,7 +97,7 @@ namespace CircuitCraft.Core
         public ScoreBreakdown(
             int baseScore,
             int budgetBonus,
-            int compactBonus,
+            int areaBonus,
             int totalScore,
             int stars,
             bool passed,
@@ -106,7 +106,7 @@ namespace CircuitCraft.Core
         {
             BaseScore = baseScore;
             BudgetBonus = budgetBonus;
-            CompactBonus = compactBonus;
+            AreaBonus = areaBonus;
             TotalScore = totalScore;
             Stars = stars;
             Passed = passed;

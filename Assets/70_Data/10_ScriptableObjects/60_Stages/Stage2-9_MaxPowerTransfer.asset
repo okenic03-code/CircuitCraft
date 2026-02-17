@@ -17,6 +17,7 @@ MonoBehaviour:
   _worldId: world2
   _stageNumber: 9
   _gridSize: {x: 10, y: 10}
+  _targetArea: 100
   _allowedComponents:
   - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
   - {fileID: 11400000, guid: cdc6bbd9197b5c04eae917d4e6c7de79, type: 2}
@@ -26,5 +27,3 @@ MonoBehaviour:
     _expectedVoltage: 4.5
     _tolerance: 0.1
   _budgetLimit: 12
-  _constraints:
-    _maxComponentCount: 4
