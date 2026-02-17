@@ -30,6 +30,11 @@ namespace CircuitCraft.UI
         private VisualElement _root;
         private List<VisualElement> _stageCards = new List<VisualElement>();
         
+        // Callback references for cleanup
+        private Button _btnBack;
+        private readonly List<(VisualElement card, EventCallback<ClickEvent> callback)> _cardCallbacks 
+            = new List<(VisualElement, EventCallback<ClickEvent>)>();
+        
         // Progression State (Simulated here until ProgressionManager is integrated)
         // Index matches _stages array.
         private bool[] _unlockedStages;
@@ -59,15 +64,23 @@ namespace CircuitCraft.UI
             UpdateStageDisplay();
         }
 
+        private void OnDisable()
+        {
+            UnregisterCallbacks();
+        }
+
         private void FindAndSetupUI()
         {
+            // Clean up previous callbacks
+            UnregisterCallbacks();
+            
             _stageCards.Clear();
 
             // Setup Back Button
-            var btnBack = _root.Q<Button>("btn-back");
-            if (btnBack != null)
+            _btnBack = _root.Q<Button>("btn-back");
+            if (_btnBack != null)
             {
-                btnBack.clicked += () => OnBackToMenu?.Invoke();
+                _btnBack.clicked += HandleBackClicked;
             }
 
             // Setup Stage Cards (assuming max 5 for now as per UXML)
@@ -81,10 +94,32 @@ namespace CircuitCraft.UI
                 {
                     _stageCards.Add(card);
                     
-                    // Register click event
-                    card.RegisterCallback<ClickEvent>(evt => HandleStageClick(stageIndex));
+                    // Create and register click event callback
+                    EventCallback<ClickEvent> callback = evt => HandleStageClick(stageIndex);
+                    card.RegisterCallback(callback);
+                    _cardCallbacks.Add((card, callback));
                 }
             }
+        }
+
+        private void UnregisterCallbacks()
+        {
+            if (_btnBack != null)
+            {
+                _btnBack.clicked -= HandleBackClicked;
+                _btnBack = null;
+            }
+            
+            foreach (var (card, callback) in _cardCallbacks)
+            {
+                card?.UnregisterCallback(callback);
+            }
+            _cardCallbacks.Clear();
+        }
+
+        private void HandleBackClicked()
+        {
+            OnBackToMenu?.Invoke();
         }
 
         private void HandleStageClick(int index)

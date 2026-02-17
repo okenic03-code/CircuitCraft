@@ -23,6 +23,13 @@ namespace CircuitCraft.Commands
         private int? _startPinPreviousNetId;
         private int? _endPinPreviousNetId;
 
+        private bool _didMerge;
+        private int _mergedSourceNetId;
+        private string _mergedSourceNetName;
+        private readonly List<(GridPosition start, GridPosition end)> _mergedSourceTraces = new List<(GridPosition, GridPosition)>();
+        private readonly List<PinReference> _mergedSourcePins = new List<PinReference>();
+        private readonly List<int> _mergedTargetTraceIds = new List<int>();
+
         public string Description => $"Route trace from {_startPin} to {_endPin}";
 
         /// <summary>
@@ -50,6 +57,9 @@ namespace CircuitCraft.Commands
             _startPinPreviousNetId = GetPinConnectedNetId(_startPin);
             _endPinPreviousNetId = GetPinConnectedNetId(_endPin);
 
+            _addedSegmentIds.Clear();
+            _didMerge = false;
+
             // Resolve which net to use (may create a new one)
             _netId = ResolveNetId();
 
@@ -58,7 +68,6 @@ namespace CircuitCraft.Commands
             _boardState.ConnectPinToNet(_netId, _endPin);
 
             // Add trace segments
-            _addedSegmentIds.Clear();
             foreach (var segment in _segments)
             {
                 var trace = _boardState.AddTrace(_netId, segment.start, segment.end);
@@ -97,6 +106,8 @@ namespace CircuitCraft.Commands
             // Restore previous pin connections if they were on different nets
             RestorePreviousPinConnection(_startPin, _startPinPreviousNetId);
             RestorePreviousPinConnection(_endPin, _endPinPreviousNetId);
+
+            UnmergeNets();
         }
 
         private int ResolveNetId()
@@ -142,15 +153,55 @@ namespace CircuitCraft.Commands
             if (sourceNet == null)
                 return;
 
-            foreach (var pin in sourceNet.ConnectedPins.ToList())
+            _didMerge = true;
+            _mergedSourceNetId = sourceNetId;
+            _mergedSourceNetName = sourceNet.NetName;
+
+            _mergedSourcePins.Clear();
+            _mergedSourcePins.AddRange(sourceNet.ConnectedPins.ToList());
+
+            _mergedSourceTraces.Clear();
+            foreach (var trace in _boardState.GetTraces(sourceNetId).ToList())
+            {
+                _mergedSourceTraces.Add((trace.Start, trace.End));
+            }
+
+            _mergedTargetTraceIds.Clear();
+            foreach (var pin in _mergedSourcePins)
             {
                 _boardState.ConnectPinToNet(targetNetId, pin);
             }
 
             foreach (var trace in _boardState.GetTraces(sourceNetId).ToList())
             {
-                _boardState.AddTrace(targetNetId, trace.Start, trace.End);
+                var newTrace = _boardState.AddTrace(targetNetId, trace.Start, trace.End);
+                _mergedTargetTraceIds.Add(newTrace.SegmentId);
                 _boardState.RemoveTrace(trace.SegmentId);
+            }
+        }
+
+        private void UnmergeNets()
+        {
+            if (!_didMerge)
+                return;
+
+            foreach (var traceId in _mergedTargetTraceIds)
+            {
+                _boardState.RemoveTrace(traceId);
+            }
+            _mergedTargetTraceIds.Clear();
+
+            var sourceNet = _boardState.CreateNet(_mergedSourceNetName);
+            int newSourceNetId = sourceNet.NetId;
+
+            foreach (var (start, end) in _mergedSourceTraces)
+            {
+                _boardState.AddTrace(newSourceNetId, start, end);
+            }
+
+            foreach (var pin in _mergedSourcePins)
+            {
+                _boardState.ConnectPinToNet(newSourceNetId, pin);
             }
         }
 

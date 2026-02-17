@@ -21,6 +21,10 @@ namespace CircuitCraft.Data
         private float _expectedVoltage;
 
         [SerializeField]
+        [Tooltip("The net/node name in the circuit netlist to probe (e.g., 'NET1'). Falls back to TestName if empty.")]
+        private string _probeNode;
+
+        [SerializeField]
         [Tooltip("The allowable error margin for the measured voltage.")]
         [FormerlySerializedAs("tolerance")]
         private float _tolerance;
@@ -30,6 +34,9 @@ namespace CircuitCraft.Data
 
         /// <summary>The expected voltage value at the measured point.</summary>
         public float ExpectedVoltage => _expectedVoltage;
+
+        /// <summary>The net/node name in the circuit netlist to probe.</summary>
+        public string ProbeNode => string.IsNullOrEmpty(_probeNode) ? _testName : _probeNode;
 
         /// <summary>The allowable error margin for the measured voltage.</summary>
         public float Tolerance => _tolerance;

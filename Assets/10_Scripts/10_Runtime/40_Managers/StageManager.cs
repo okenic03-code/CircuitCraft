@@ -125,7 +125,7 @@ namespace CircuitCraft.Managers
             {
                 foreach (var tc in _currentStage.TestCases)
                 {
-                    probes.Add(ProbeDefinition.Voltage($"V_{tc.TestName}", tc.TestName));
+                    probes.Add(ProbeDefinition.Voltage($"V_{tc.TestName}", tc.ProbeNode));
                 }
             }
 
@@ -139,7 +139,7 @@ namespace CircuitCraft.Managers
             {
                 var stc = stageTestCases[i];
                 testCaseInputs[i] = new TestCaseInput(
-                    stc.TestName,
+                    stc.ProbeNode,
                     stc.ExpectedVoltage,
                     stc.Tolerance
                 );

@@ -308,11 +308,19 @@ namespace CircuitCraft.Controllers
             
             // Create pin instances from component definition
             List<PinInstance> pinInstances = new List<PinInstance>();
-            if (_selectedComponent.Pins != null)
+            var pins = _selectedComponent.Pins;
+
+            // Fallback to standard pin definitions for components without explicit pins.
+            if (pins == null || pins.Length == 0)
             {
-                for (int i = 0; i < _selectedComponent.Pins.Length; i++)
+                pins = GetStandardPins(_selectedComponent.Kind);
+            }
+
+            if (pins != null)
+            {
+                for (int i = 0; i < pins.Length; i++)
                 {
-                    var pinDef = _selectedComponent.Pins[i];
+                    var pinDef = pins[i];
                     
                     // Convert PinDefinition local position to GridPosition
                     GridPosition pinLocalPos = new GridPosition(pinDef.LocalPosition.x, pinDef.LocalPosition.y);
@@ -326,7 +334,7 @@ namespace CircuitCraft.Controllers
                     pinInstances.Add(pinInstance);
                 }
             }
-            
+
             // Place component in BoardState
             GridPosition position = new GridPosition(gridPos.x, gridPos.y);
             var placeCommand = new PlaceComponentCommand(
@@ -342,6 +350,23 @@ namespace CircuitCraft.Controllers
 #if UNITY_EDITOR
             Debug.Log($"PlacementController: Placed {_selectedComponent.DisplayName} at {position}");
 #endif
+        }
+
+        private static PinDefinition[] GetStandardPins(ComponentKind kind)
+        {
+            switch (kind)
+            {
+                case ComponentKind.BJT:
+                    return StandardPinDefinitions.BJT;
+                case ComponentKind.MOSFET:
+                    return StandardPinDefinitions.MOSFET;
+                case ComponentKind.Diode:
+                case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
+                    return StandardPinDefinitions.Diode;
+                default:
+                    return StandardPinDefinitions.TwoPin;
+            }
         }
         
         /// <summary>
