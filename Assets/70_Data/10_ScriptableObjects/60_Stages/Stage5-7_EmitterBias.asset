@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage5-7_EmitterBias
+  m_EditorClassIdentifier: 
+  _stageId: 5-7
+  _displayName: "\uC774\uBBF8\uD130 \uBC14\uC774\uC5B4\uC2A4"
+  _worldId: world5
+  _stageNumber: 7
+  _gridSize: {x: 12, y: 10}
+  _allowedComponents:
+  - {fileID: 11400000, guid: a1b2c3d4e5f6789012345678abcdef01, type: 2}
+  - {fileID: 11400000, guid: 4c9aab249654aaa44b48d4d47e732456, type: 2}
+  - {fileID: 11400000, guid: ebc16846293594d4db0feea5af68ab84, type: 2}
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: b03b4a56d58e03b4087fc1f1ea898d17, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: Vc
+    _expectedVoltage: 6.0
+    _tolerance: 1.0
+  _budgetLimit: 18
+  _constraints:
+    _maxComponentCount: 6

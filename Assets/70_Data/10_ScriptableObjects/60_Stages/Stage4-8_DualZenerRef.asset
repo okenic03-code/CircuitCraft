@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage4-8_DualZenerRef
+  m_EditorClassIdentifier: 
+  _stageId: 4-8
+  _displayName: "\uC774\uC911 \uAE30\uC900 \uC804\uC555"
+  _worldId: world4
+  _stageNumber: 8
+  _gridSize: {x: 14, y: 12}
+  _allowedComponents:
+  - {fileID: 11400000, guid: 028768e5281d1e94a82d1237161f4c3e, type: 2}
+  - {fileID: 11400000, guid: 032bfde7a86163443bc08af30d22eef8, type: 2}
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: 750562e6434ddb941b62ba6e951fa594, type: 2}
+  - {fileID: 11400000, guid: 0ca229090fa0bb148bb3f13a27dba1c3, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: V1
+    _expectedVoltage: 12.0
+    _tolerance: 0.2
+  _budgetLimit: 22
+  _constraints:
+    _maxComponentCount: 7

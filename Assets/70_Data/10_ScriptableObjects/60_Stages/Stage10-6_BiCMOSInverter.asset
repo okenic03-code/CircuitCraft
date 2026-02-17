@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage10-6_BiCMOSInverter
+  m_EditorClassIdentifier: 
+  _stageId: 10-6
+  _displayName: "BiCMOS \uC778\uBC84\uD130"
+  _worldId: world10
+  _stageNumber: 6
+  _gridSize: {x: 14, y: 14}
+  _allowedComponents:
+  - {fileID: 11400000, guid: a1b80d670bf44f30a08c63c5d44fd416, type: 2}
+  - {fileID: 11400000, guid: b87f30b1ef7c4dea86d22af6425edaab, type: 2}
+  - {fileID: 11400000, guid: 5eb27cee7de638343b29ef84e57f4a0d, type: 2}
+  - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: Vout
+    _expectedVoltage: 0.0
+    _tolerance: 0.2
+  _budgetLimit: 25
+  _constraints:
+    _maxComponentCount: 6

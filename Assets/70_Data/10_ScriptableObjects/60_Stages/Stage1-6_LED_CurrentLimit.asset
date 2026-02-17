@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage1-6_LED_CurrentLimit
+  m_EditorClassIdentifier: 
+  _stageId: 1-6
+  _displayName: "LED \uC804\uB958 \uC81C\uD55C \uD68C\uB85C"
+  _worldId: world1
+  _stageNumber: 6
+  _gridSize: {x: 10, y: 10}
+  _allowedComponents:
+  - {fileID: 11400000, guid: 750562e6434ddb941b62ba6e951fa594, type: 2}
+  - {fileID: 11400000, guid: adbd9050ec83469bbe3f4926739eb08e, type: 2}
+  - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: V_R
+    _expectedVoltage: 3.0
+    _tolerance: 0.3
+  _budgetLimit: 10
+  _constraints:
+    _maxComponentCount: 3

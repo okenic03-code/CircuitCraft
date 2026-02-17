@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage9-6_ClassABVbe
+  m_EditorClassIdentifier: 
+  _stageId: 9-6
+  _displayName: "AB\uAE09 Vbe \uBC14\uC774\uC5B4\uC2A4"
+  _worldId: world9
+  _stageNumber: 6
+  _gridSize: {x: 16, y: 14}
+  _allowedComponents:
+  - {fileID: 11400000, guid: a1b80d670bf44f30a08c63c5d44fd416, type: 2}
+  - {fileID: 11400000, guid: 9b692629bff19d04782aef9e060c7dbe, type: 2}
+  - {fileID: 11400000, guid: b204b5e036dee3d4a9bcf33b27903ce9, type: 2}
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: 0c79e726dffe59d4280ecdf78eb557df, type: 2}
+  - {fileID: 11400000, guid: b03b4a56d58e03b4087fc1f1ea898d17, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: Vout
+    _expectedVoltage: 0.0
+    _tolerance: 0.5
+  _budgetLimit: 35
+  _constraints:
+    _maxComponentCount: 8

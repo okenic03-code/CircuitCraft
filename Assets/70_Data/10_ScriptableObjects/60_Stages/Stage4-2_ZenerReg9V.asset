@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage4-2_ZenerReg9V
+  m_EditorClassIdentifier: 
+  _stageId: 4-2
+  _displayName: "9V \uC81C\uB108 \uB808\uADE4\uB808\uC774\uD130"
+  _worldId: world4
+  _stageNumber: 2
+  _gridSize: {x: 12, y: 10}
+  _allowedComponents:
+  - {fileID: 11400000, guid: 2cae3343fbe3c9940a094dd213019447, type: 2}
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: 0ca229090fa0bb148bb3f13a27dba1c3, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: Vout
+    _expectedVoltage: 9.1
+    _tolerance: 0.2
+  _budgetLimit: 15
+  _constraints:
+    _maxComponentCount: 4
