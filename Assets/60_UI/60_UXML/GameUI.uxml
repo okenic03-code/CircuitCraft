@@ -1,6 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <ui:Style src="../50_USS/Theme.uss" />
     <ui:Style src="../50_USS/GameUI.uss" />
-    <ui:VisualElement name="Root" class="root">
+    <ui:VisualElement name="Root" class="root" picking-mode="Ignore">
         <!-- Top Toolbar -->
         <ui:VisualElement name="Toolbar" class="toolbar">
             <ui:VisualElement class="toolbar-group">
@@ -11,13 +12,13 @@
             </ui:VisualElement>
             
             <ui:VisualElement class="toolbar-group">
-                <ui:Button name="simulate-button" class="toolbar-button" text="RUN SIMULATION" />
+                <ui:Button name="simulate-button" class="toolbar-button" text="▶ RUN SIMULATION" />
                 <ui:Button name="btn-toggle-results" class="toolbar-button" text="Results" />
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- Main Content Area -->
-        <ui:VisualElement name="MainContainer" class="main-container">
+        <ui:VisualElement name="MainContainer" class="main-container" picking-mode="Ignore">
             <!-- Left Component Palette -->
             <ui:VisualElement name="ComponentPalette" class="component-palette">
                 <ui:ScrollView class="palette-scroll">

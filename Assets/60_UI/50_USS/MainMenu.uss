@@ -1,67 +1,98 @@
 /* ============================================================
-   CircuitCraft MainMenu — Professional CAD Theme
-   Matching Fusion 360 / GameHUD aesthetic
+   CircuitCraft MainMenu — Sci-Fi Engineering Blueprint Theme
    ============================================================ */
 
-/* === Root Container === */
 .main-menu-container {
     flex-grow: 1;
-    background-color: rgb(30, 30, 30);
+    background-color: var(--bg-void);
     justify-content: center;
     align-items: center;
-    color: rgb(220, 220, 220);
 }
 
-/* === Title === */
+/* === Centered Panel === */
+.main-panel {
+    width: 380px;
+    padding: 40px;
+    background-color: var(--bg-panel);
+    border-width: 1px;
+    border-color: var(--border-primary);
+    border-radius: var(--radius-lg);
+    align-items: center;
+}
+
+/* === Typography === */
 .title-container {
     align-items: center;
-    margin-bottom: 48px;
+    width: 100%;
+    margin-bottom: 24px;
 }
 
 .title-text {
-    font-size: 36px;
-    color: rgb(255, 255, 255);
+    font-size: 32px;
     -unity-font-style: bold;
+    color: var(--text-primary);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 0;
+}
+
+.subtitle-text {
+    font-size: 10px;
+    color: var(--text-muted);
     letter-spacing: 2px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    -unity-font-style: normal;
+}
+
+.panel-divider {
+    width: 100%;
+    height: 1px;
+    background-color: var(--border-subtle);
+    margin-top: 16px;
+    margin-bottom: 8px;
 }
 
 /* === Buttons === */
 .menu-button-primary {
-    width: 240px;
-    height: 40px;
-    background-color: rgb(55, 148, 255);
-    color: rgb(255, 255, 255);
-    border-radius: 3px;
-    border-width: 0;
-    font-size: 13px;
+    width: 100%;
+    height: 44px;
+    background-color: rgba(90, 141, 171, 0.15);
+    border-width: 1px;
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
     -unity-font-style: bold;
-    margin-bottom: 8px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    transition-property: background-color, scale;
-    transition-duration: 0.1s;
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.15s;
 }
 
 .menu-button-primary:hover {
-    background-color: rgb(75, 163, 255);
-    scale: 1.02;
+    background-color: var(--accent-blue);
+    color: #000000;
 }
 
 .menu-button-primary:active {
-    background-color: rgb(30, 120, 220);
-    scale: 0.98;
+    background-color: rgba(90, 141, 171, 0.3);
 }
 
 .menu-button-secondary {
-    width: 240px;
+    width: 100%;
     height: 40px;
     background-color: transparent;
-    color: rgb(200, 200, 200);
     border-width: 1px;
-    border-color: rgb(70, 70, 70);
-    border-radius: 3px;
+    border-color: var(--border-primary);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
     font-size: 13px;
+    text-transform: uppercase;
     margin-bottom: 8px;
     flex-direction: row;
     align-items: center;
@@ -71,20 +102,33 @@
 }
 
 .menu-button-secondary:hover {
-    background-color: rgb(50, 50, 50);
-    border-color: rgb(100, 100, 100);
-    color: rgb(255, 255, 255);
+    background-color: var(--bg-surface);
+    border-color: var(--border-focus);
+    color: var(--text-primary);
 }
 
 .menu-button-secondary:active {
-    background-color: rgb(70, 70, 70);
+    background-color: var(--bg-input);
 }
 
-/* === Button Icons === */
+/* Danger Button Variation */
+.menu-button-danger {
+    border-color: var(--border-primary);
+}
+
+.menu-button-danger:hover {
+    background-color: rgba(217, 126, 74, 0.15);
+    border-color: var(--accent-orange);
+    color: var(--accent-orange);
+}
+
+/* === Icons === */
 .button-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     margin-right: 8px;
+    -unity-background-scale-mode: scale-to-fit;
+    -unity-background-image-tint-color: currentColor; 
 }
 
 .icon-play {
@@ -101,6 +145,8 @@
 
 .button-label {
     -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
 }
 
 /* === Version Text === */
@@ -108,6 +154,7 @@
     position: absolute;
     bottom: 16px;
     right: 16px;
-    color: rgb(100, 100, 100);
+    color: var(--text-muted);
     font-size: 11px;
+    letter-spacing: 1px;
 }

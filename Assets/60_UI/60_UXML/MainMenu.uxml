@@ -1,28 +1,37 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="../50_USS/Theme.uss" />
     <Style src="../50_USS/MainMenu.uss" />
     <ui:VisualElement name="MainMenuContainer" class="main-menu-container">
         
-        <!-- Title -->
-        <ui:VisualElement name="title-container" class="title-container">
-            <ui:Label text="CircuitCraft" class="title-text" />
+        <!-- Centered Panel -->
+        <ui:VisualElement class="sci-fi-panel main-panel">
+            
+            <!-- Title Section -->
+            <ui:VisualElement class="title-container">
+                <ui:Label text="CIRCUITCRAFT" class="title-text" />
+                <ui:Label text="ENGINEERING SIMULATOR" class="subtitle-text" />
+                <ui:VisualElement class="panel-divider" />
+            </ui:VisualElement>
+            
+            <!-- Buttons -->
+            <ui:Button name="btn-play" class="menu-button-primary">
+                <ui:VisualElement name="icon-play" class="button-icon icon-play" />
+                <ui:Label text="PLAY" class="button-label" />
+            </ui:Button>
+            
+            <ui:Button name="btn-settings" class="menu-button-secondary">
+                <ui:VisualElement name="icon-settings" class="button-icon icon-settings" />
+                <ui:Label text="SETTINGS" class="button-label" />
+            </ui:Button>
+            
+            <ui:Button name="btn-quit" class="menu-button-secondary menu-button-danger">
+                <ui:VisualElement name="icon-quit" class="button-icon icon-quit" />
+                <ui:Label text="QUIT" class="button-label" />
+            </ui:Button>
+            
         </ui:VisualElement>
-        
-        <!-- Buttons with icons -->
-        <ui:Button name="btn-play" class="menu-button-primary">
-            <ui:VisualElement name="icon-play" class="button-icon icon-play" />
-            <ui:Label text="Play" class="button-label" />
-        </ui:Button>
-        
-        <ui:Button name="btn-settings" class="menu-button-secondary">
-            <ui:VisualElement name="icon-settings" class="button-icon icon-settings" />
-            <ui:Label text="Settings" class="button-label" />
-        </ui:Button>
-        
-        <ui:Button name="btn-quit" class="menu-button-secondary">
-            <ui:VisualElement name="icon-quit" class="button-icon icon-quit" />
-            <ui:Label text="Quit" class="button-label" />
-        </ui:Button>
-        
+
+        <!-- Version Footer -->
         <ui:Label name="version-text" text="v0.1.0" class="version-text" />
     </ui:VisualElement>
 </ui:UXML>

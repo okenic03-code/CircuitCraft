@@ -1,89 +1,92 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="../50_USS/Theme.uss" />
     <Style src="../50_USS/Settings.uss" />
 
     <ui:VisualElement name="settings-root" class="settings-container">
         
-        <!-- Header -->
-        <ui:VisualElement class="header">
-            <ui:Label text="SETTINGS" class="title-text" />
-            <ui:Button name="btn-back" text="Back" class="back-button" />
-        </ui:VisualElement>
-
-        <!-- Tabs -->
-        <ui:VisualElement class="tabs-container">
-            <ui:Button name="tab-display" text="Display" class="tab-button active" />
-            <ui:Button name="tab-audio" text="Audio" class="tab-button" />
-            <ui:Button name="tab-game" text="Game" class="tab-button" />
-        </ui:VisualElement>
-
-        <!-- Content Area -->
-        <ui:VisualElement class="content-area">
-            
-            <!-- Display Tab -->
-            <ui:VisualElement name="content-display" class="tab-content active">
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="Resolution" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:DropdownField name="dropdown-resolution" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="Fullscreen Mode" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:Toggle name="toggle-fullscreen" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="Quality" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:DropdownField name="dropdown-quality" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
+        <ui:VisualElement class="settings-modal">
+            <!-- Header -->
+            <ui:VisualElement class="header">
+                <ui:Label text="SYSTEM CONFIGURATION" class="title-text" />
+                <ui:Button name="btn-back" text="← CLOSE" class="back-button" />
             </ui:VisualElement>
-
-            <!-- Audio Tab -->
-            <ui:VisualElement name="content-audio" class="tab-content">
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="Master Volume" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:Slider name="slider-master" low-value="0" high-value="1" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="Music Volume" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:Slider name="slider-bgm" low-value="0" high-value="1" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
-
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="SFX Volume" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:Slider name="slider-sfx" low-value="0" high-value="1" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
+    
+            <!-- Tabs -->
+            <ui:VisualElement class="tabs-container">
+                <ui:Button name="tab-display" text="DISPLAY" class="tab-button active" />
+                <ui:Button name="tab-audio" text="AUDIO" class="tab-button" />
+                <ui:Button name="tab-game" text="GAME" class="tab-button" />
             </ui:VisualElement>
-
-            <!-- Game Tab -->
-            <ui:VisualElement name="content-game" class="tab-content">
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="Auto-Save" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:Toggle name="toggle-autosave" />
+    
+            <!-- Content Area -->
+            <ui:VisualElement class="content-area">
+                
+                <!-- Display Tab -->
+                <ui:VisualElement name="content-display" class="tab-content active">
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Resolution" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:DropdownField name="dropdown-resolution" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+    
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Fullscreen Mode" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:Toggle name="toggle-fullscreen" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+    
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Quality" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:DropdownField name="dropdown-quality" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-
-                <ui:VisualElement class="setting-row">
-                    <ui:Label text="Show Tutorial Hints" class="setting-label" />
-                    <ui:VisualElement class="control-container">
-                        <ui:Toggle name="toggle-hints" />
+    
+                <!-- Audio Tab -->
+                <ui:VisualElement name="content-audio" class="tab-content">
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Master Volume" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:Slider name="slider-master" low-value="0" high-value="1" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+    
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Music Volume" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:Slider name="slider-bgm" low-value="0" high-value="1" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+    
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="SFX Volume" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:Slider name="slider-sfx" low-value="0" high-value="1" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
+    
+                <!-- Game Tab -->
+                <ui:VisualElement name="content-game" class="tab-content">
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Auto-Save" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:Toggle name="toggle-autosave" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+    
+                    <ui:VisualElement class="setting-row">
+                        <ui:Label text="Show Tutorial Hints" class="setting-label" />
+                        <ui:VisualElement class="control-container">
+                            <ui:Toggle name="toggle-hints" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+    
             </ui:VisualElement>
-
         </ui:VisualElement>
 
     </ui:VisualElement>

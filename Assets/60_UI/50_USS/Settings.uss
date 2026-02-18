@@ -1,6 +1,5 @@
 /* ============================================================
-   CircuitCraft Settings — Professional CAD Theme
-   Matching MainMenu.uss
+   CircuitCraft Settings — Sci-Fi System Configuration
    ============================================================ */
 
 .settings-container {
@@ -9,63 +8,104 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(30, 30, 30, 0.95);
+    background-color: rgba(21, 25, 28, 0.92);
     display: flex;
-    flex-direction: column;
-    padding: 32px;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
 }
 
+.settings-modal {
+    width: 700px;
+    max-height: 80%;
+    background-color: var(--bg-panel);
+    border-width: 1px;
+    border-color: var(--border-primary);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+    flex-direction: column;
+}
+
+/* Header */
 .header {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    background-color: var(--bg-header);
+    padding: 16px 24px;
     border-bottom-width: 1px;
-    border-bottom-color: rgb(70, 70, 70);
-    padding-bottom: 16px;
+    border-bottom-color: var(--border-primary);
 }
 
 .title-text {
-    font-size: 24px;
-    color: rgb(220, 220, 220);
+    font-size: 18px;
+    color: var(--text-primary);
     -unity-font-style: bold;
+    letter-spacing: 2px;
+    text-transform: uppercase;
 }
 
+.back-button {
+    width: auto;
+    min-width: 80px;
+    height: 32px;
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--border-primary);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    text-transform: uppercase;
+    transition-duration: 0.15s;
+}
+
+.back-button:hover {
+    background-color: var(--bg-surface);
+    border-color: var(--border-focus);
+    color: var(--text-primary);
+}
+
+/* Tabs */
 .tabs-container {
     flex-direction: row;
-    margin-bottom: 24px;
-    background-color: rgb(40, 40, 40);
-    border-radius: 3px;
-    padding: 2px;
+    background-color: var(--bg-tab-bar);
+    padding: 0 16px;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--border-primary);
 }
 
 .tab-button {
     flex-grow: 1;
-    height: 32px;
+    height: 40px;
     background-color: transparent;
     border-width: 0;
-    color: rgb(150, 150, 150);
+    color: var(--text-secondary);
     font-size: 14px;
     -unity-font-style: bold;
-    border-radius: 2px;
-    transition-duration: 0.1s;
+    text-transform: uppercase;
+    border-bottom-width: 2px;
+    border-bottom-color: transparent;
+    transition-duration: 0.15s;
+    border-radius: 0;
+    margin: 0;
 }
 
 .tab-button:hover {
-    background-color: rgb(60, 60, 60);
-    color: rgb(220, 220, 220);
+    color: var(--text-primary);
+    background-color: rgba(95, 168, 114, 0.05);
 }
 
 .tab-button.active {
-    background-color: rgb(55, 148, 255);
-    color: white;
+    color: var(--text-active);
+    border-bottom-color: var(--accent-green);
+    background-color: transparent;
 }
 
+/* Content Area */
 .content-area {
     flex-grow: 1;
-    background-color: rgb(40, 40, 40);
-    border-radius: 3px;
     padding: 24px;
+    background-color: var(--bg-panel);
 }
 
 .tab-content {
@@ -81,23 +121,25 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
     height: 40px;
+    padding: 0 8px;
 }
 
 .setting-label {
-    color: rgb(200, 200, 200);
+    color: var(--text-secondary);
     font-size: 14px;
+    text-transform: uppercase;
 }
 
 .control-container {
-    width: 250px;
+    width: 280px;
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
 }
 
-/* Specific Controls */
+/* Unity Controls Overrides */
 .unity-base-field {
     margin: 0;
     padding: 0;
@@ -105,66 +147,80 @@
 }
 
 .unity-base-field__label {
-    display: none; /* We use our own labels */
+    display: none;
 }
 
+/* Dropdowns & Text Fields */
 .unity-base-popup-field__input {
-    background-color: rgb(30, 30, 30);
-    border-color: rgb(70, 70, 70);
-    border-radius: 3px;
-    color: rgb(220, 220, 220);
+    background-color: var(--bg-input);
+    border-color: var(--border-primary);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
+    border-width: 1px;
 }
 
+.unity-base-popup-field__text {
+    color: var(--text-primary);
+}
+
+.unity-base-popup-field__arrow {
+    -unity-background-image-tint-color: var(--text-secondary);
+}
+
+/* Toggles */
 .unity-toggle__input {
     background-color: transparent;
 }
 
 .unity-toggle__checkmark {
-    background-color: rgb(30, 30, 30);
-    border-color: rgb(70, 70, 70);
-    border-radius: 3px;
-    width: 20px;
-    height: 20px;
+    background-color: var(--bg-input);
+    border-color: var(--border-primary);
+    border-radius: var(--radius-sm);
+    border-width: 1px;
+    width: 22px;
+    height: 22px;
 }
 
 .unity-toggle__checkmark--checked {
-    background-color: rgb(55, 148, 255);
-    border-color: rgb(55, 148, 255);
+    background-color: var(--accent-green);
+    border-color: var(--accent-green);
+    -unity-background-image-tint-color: var(--bg-void);
 }
 
+/* Sliders */
 .unity-slider {
     min-width: 150px;
 }
 
 .unity-base-slider__tracker {
-    background-color: rgb(30, 30, 30);
-    border-color: rgb(70, 70, 70);
-    height: 4px;
+    background-color: var(--bg-void);
+    border-color: var(--border-primary);
+    border-width: 1px;
+    height: 6px;
+    border-radius: 3px;
+    margin-top: -3px;
 }
 
 .unity-base-slider__dragger {
-    background-color: rgb(55, 148, 255);
-    width: 16px;
-    height: 16px;
-    border-radius: 8px;
+    background-color: var(--text-muted);
+    width: 8px;
+    height: 20px;
+    border-radius: 2px;
     border-width: 0;
-    margin-top: -6px;
+    margin-top: -10px;
 }
 
-.back-button {
-    width: 100px;
-    height: 32px;
-    background-color: transparent;
-    border-width: 1px;
-    border-color: rgb(70, 70, 70);
-    color: rgb(200, 200, 200);
+.unity-base-slider__dragger:hover {
+    background-color: var(--text-primary);
+}
+
+.unity-base-slider__dragger:focus {
+    background-color: var(--accent-green);
+}
+
+/* Fill part of slider (Unity 2021+ feature, might not show on older versions but good to have) */
+.unity-base-slider__fill {
+    background-color: var(--accent-green);
+    height: 6px;
     border-radius: 3px;
-    font-size: 13px;
-    transition-duration: 0.15s;
-}
-
-.back-button:hover {
-    background-color: rgb(50, 50, 50);
-    border-color: rgb(100, 100, 100);
-    color: white;
 }

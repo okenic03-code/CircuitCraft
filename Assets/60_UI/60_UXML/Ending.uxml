@@ -1,16 +1,31 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="../50_USS/Theme.uss" />
     <Style src="../50_USS/Ending.uss" />
     <ui:VisualElement name="ending-root" class="ending-root">
-        
-        <!-- Title Section -->
-        <ui:Label text="Congratulations!" class="ending-title" />
-        <ui:Label text="You have completed all stages!" class="ending-subtitle" />
-        
-        <!-- Stats Section -->
-        <ui:Label name="total-stars" text="★★★★★ (15/15)" class="ending-stats" />
-        
-        <!-- Navigation -->
-        <ui:Button name="btn-back-menu" text="Back to Menu" class="ending-button-primary" />
-        
+        <ui:VisualElement class="ending-card">
+            <!-- Header strip -->
+            <ui:VisualElement class="ending-header">
+                <ui:Label text="MISSION COMPLETE" class="ending-header-text" />
+            </ui:VisualElement>
+            
+            <!-- Status section -->
+            <ui:VisualElement class="ending-status-section">
+                <ui:Label text="STATUS: ALL CIRCUITS VALIDATED" class="ending-title" />
+                <ui:Label text="Congratulations, Engineer!" class="ending-subtitle" />
+            </ui:VisualElement>
+            
+            <!-- Stars display -->
+            <ui:VisualElement class="ending-stars-section">
+                <ui:Label name="total-stars" text="★★★★★ (15/15)" class="ending-stats" />
+            </ui:VisualElement>
+            
+            <!-- Divider -->
+            <ui:VisualElement class="ending-divider" />
+            
+            <!-- Action section -->
+            <ui:VisualElement class="ending-actions">
+                <ui:Button name="btn-back-menu" text="RETURN TO BASE" class="ending-button-primary" />
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

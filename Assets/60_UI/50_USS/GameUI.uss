@@ -1,46 +1,23 @@
-/* GameUI.uss - Dark CAD/EDA Theme */
-
-/* Variables */
-:root {
-    --color-background: #1E1E1E;
-    --color-surface: #252525;
-    --color-surface-lighter: #333333;
-    --color-toolbar: #2D2D2D;
-    --color-accent: #3794FF;
-    --color-accent-hover: #4BA3FF;
-    --color-accent-active: #1E78DC;
-    --color-text-primary: #DCDCDC;
-    --color-text-secondary: #888888;
-    --color-border: #3C3C3C;
-    --color-success: #4CAF50;
-    --color-error: #F44336;
-    --color-warning: #FFD740;
-    --color-star: #FFD700;
-}
-
-/* Global Reset */
-* {
-    color: var(--color-text-primary);
-}
+/* GameUI.uss - Cyberpunk Engineering Workspace */
 
 /* Root Container */
 .root {
     flex-grow: 1;
-    background-color: var(--color-background);
+    background-color: var(--bg-void);
     font-size: 14px;
 }
 
 /* Toolbar */
 .toolbar {
     height: 48px;
-    background-color: var(--color-toolbar);
+    background-color: var(--bg-panel);
     border-bottom-width: 1px;
-    border-bottom-color: var(--color-border);
+    border-bottom-color: var(--border-primary);
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding-left: 12px;
-    padding-right: 12px;
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .toolbar-group {
@@ -49,43 +26,44 @@
 }
 
 .toolbar-button {
-    height: 32px;
+    height: 34px;
     background-color: transparent;
     border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: 4px;
+    border-color: var(--border-primary);
+    border-radius: var(--radius-sm);
     margin-right: 8px;
-    padding-left: 12px;
-    padding-right: 12px;
-    color: var(--color-text-primary);
-    -unity-text-align: middle-center;
-    transition: background-color 0.1s, border-color 0.1s;
+    padding-left: 14px;
+    padding-right: 14px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    font-size: 12px;
+    transition-property: background-color, border-color;
+    transition-duration: 0.1s;
 }
 
 .toolbar-button:hover {
-    background-color: var(--color-surface-lighter);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background-color: var(--bg-surface);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
 }
 
 .toolbar-button:active {
-    background-color: var(--color-surface);
+    background-color: var(--bg-panel);
 }
 
 .toolbar-button:disabled {
     opacity: 0.4;
 }
 
-/* Simulate Button Special Style */
 #simulate-button {
-    background-color: rgba(55, 148, 255, 0.15);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background-color: rgba(76, 175, 80, 0.12);
+    border-color: var(--accent-run-green);
+    color: var(--accent-run-green);
     -unity-font-style: bold;
 }
 
 #simulate-button:hover {
-    background-color: var(--color-accent);
+    background-color: var(--accent-run-green);
     color: #000000;
 }
 
@@ -99,9 +77,9 @@
 .component-palette {
     width: 240px;
     min-width: 240px;
-    background-color: var(--color-surface);
+    background-color: var(--bg-panel);
     border-right-width: 1px;
-    border-right-color: var(--color-border);
+    border-right-color: var(--border-primary);
     padding: 12px;
 }
 
@@ -110,72 +88,64 @@
 }
 
 .section-header {
-    font-size: 12px;
-    color: var(--color-text-secondary);
+    font-size: 11px;
+    color: var(--text-muted);
     -unity-font-style: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     margin-top: 16px;
     margin-bottom: 8px;
-    text-transform: uppercase;
     border-bottom-width: 1px;
-    border-bottom-color: var(--color-border);
+    border-bottom-color: var(--border-subtle);
     padding-bottom: 4px;
-}
-
-/* Note: :first-child not supported in Unity UI Toolkit */
-
-.sub-section-header {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    margin-top: 12px;
-    margin-bottom: 6px;
-    padding-left: 4px;
-    opacity: 0.8;
 }
 
 .component-button {
     height: 40px;
     flex-direction: row;
     align-items: center;
-    background-color: var(--color-surface-lighter);
-    border-radius: 4px;
+    background-color: var(--bg-surface);
+    border-radius: var(--radius-sm);
     margin-bottom: 6px;
     padding-left: 12px;
     padding-right: 12px;
     border-width: 1px;
     border-color: transparent;
-    transition: all 0.1s;
+    transition-property: all;
+    transition-duration: 0.1s;
 }
 
 .component-button:hover {
-    border-color: var(--color-accent);
-    background-color: rgba(55, 148, 255, 0.05);
+    border-color: var(--accent-blue);
+    background-color: rgba(90, 141, 171, 0.08);
 }
 
 .component-button.selected {
-    border-color: var(--color-accent);
-    background-color: rgba(55, 148, 255, 0.1);
+    border-color: var(--border-selected);
+    background-color: rgba(211, 84, 0, 0.1);
 }
 
 .component-button Label {
-    color: var(--color-text-primary);
+    color: var(--text-primary);
     font-size: 13px;
     white-space: normal;
 }
 
-/* Property Editor Panel */
+/* Property Editor */
 .property-editor {
     border-top-width: 1px;
-    border-top-color: var(--color-border);
+    border-top-color: var(--border-primary);
     padding: 12px;
-    background-color: var(--color-surface);
+    background-color: var(--bg-panel);
     flex-shrink: 0;
 }
 
 .prop-editor-title {
     font-size: 13px;
     -unity-font-style: bold;
-    color: var(--color-accent);
+    color: var(--accent-blue);
     margin-bottom: 8px;
+    text-transform: uppercase;
 }
 
 .prop-editor-section {
@@ -184,7 +154,7 @@
 
 .prop-label {
     font-size: 11px;
-    color: var(--color-text-secondary);
+    color: var(--text-secondary);
     margin-bottom: 4px;
 }
 
@@ -195,45 +165,45 @@
 
 .prop-value-field {
     flex-grow: 1;
-    height: 28px;
-    background-color: var(--color-surface-lighter);
+    height: 30px;
+    background-color: var(--bg-input);
     border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: 4px;
-    color: var(--color-text-primary);
+    border-color: var(--border-primary);
+    border-radius: var(--radius-sm);
+    color: var(--text-primary);
     font-size: 13px;
     padding-left: 8px;
     padding-right: 8px;
 }
 
 .prop-value-field:focus {
-    border-color: var(--color-accent);
+    border-color: var(--accent-green);
 }
 
 .prop-unit-label {
     font-size: 13px;
-    color: var(--color-accent);
+    color: var(--accent-cyan);
     margin-left: 8px;
-    min-width: 20px;
     -unity-font-style: bold;
+    min-width: 20px;
 }
 
 .prop-default-hint {
     font-size: 10px;
-    color: var(--color-text-secondary);
+    color: var(--text-secondary);
     opacity: 0.6;
     margin-top: 4px;
 }
 
 .prop-specs-text {
     font-size: 12px;
-    color: var(--color-text-secondary);
+    color: var(--text-secondary);
     white-space: pre-wrap;
     padding: 8px;
     background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     border-width: 1px;
-    border-color: var(--color-border);
+    border-color: var(--border-primary);
 }
 
 /* Game View */
@@ -248,23 +218,50 @@
     top: 20px;
     left: 50%;
     translate: -50% 0;
-    background-color: rgba(45, 45, 45, 0.9);
-    padding: 8px 16px;
+    background-color: rgba(31, 36, 41, 0.92);
+    padding: 8px 20px;
     border-radius: 20px;
     border-width: 1px;
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
     font-size: 14px;
     -unity-font-style: bold;
+    text-transform: uppercase;
     display: none;
+}
+
+.stage-objectives {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background-color: rgba(31, 36, 41, 0.88);
+    border-width: 1px;
+    border-color: var(--border-primary);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    max-width: 280px;
+}
+
+.stage-title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    color: var(--accent-blue);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.stage-targets {
+    font-size: 12px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
 }
 
 /* Status Bar */
 .status-bar {
     height: 28px;
-    background-color: var(--color-toolbar);
+    background-color: var(--bg-panel);
     border-top-width: 1px;
-    border-top-color: var(--color-border);
+    border-top-color: var(--border-primary);
     flex-direction: row;
     align-items: center;
     padding-left: 12px;
@@ -273,22 +270,27 @@
 
 .status-label {
     font-size: 12px;
-    color: var(--color-text-secondary);
+    color: var(--text-muted);
     margin-right: 16px;
     -unity-text-align: middle-left;
 }
 
-#StatusText {
-    flex-grow: 1;
-    color: var(--color-text-primary);
+.status-budget {
+    color: var(--accent-blue);
+    -unity-font-style: bold;
 }
 
 .status-separator {
     width: 1px;
     height: 16px;
-    background-color: var(--color-border);
+    background-color: var(--border-subtle);
     margin-left: 8px;
     margin-right: 8px;
+}
+
+#StatusText {
+    flex-grow: 1;
+    color: var(--text-primary);
 }
 
 /* Results Panel Overlay */
@@ -297,16 +299,15 @@
     top: 50%;
     left: 50%;
     translate: -50% -50%;
-    width: 420px;
+    width: 440px;
     max-height: 85%;
-    background-color: var(--color-surface);
+    background-color: var(--bg-panel);
     border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: 12px;
-    padding: 24px;
+    border-color: var(--border-primary);
+    border-radius: var(--radius-xl);
+    padding: 28px;
     align-items: center;
     display: flex;
-    /* Box shadow is not fully supported in all Unity versions via USS standard property, using minimal approach */
 }
 
 .result-status {
@@ -314,7 +315,7 @@
     -unity-font-style: bold;
     margin-bottom: 12px;
     -unity-text-align: middle-center;
-    color: var(--color-success);
+    color: var(--text-primary);
 }
 
 .star-display {
@@ -329,10 +330,10 @@
     font-size: 13px;
     white-space: pre-wrap;
     margin-bottom: 16px;
-    color: var(--color-text-secondary);
+    color: var(--text-secondary);
     width: 100%;
     border-bottom-width: 1px;
-    border-bottom-color: var(--color-border);
+    border-bottom-color: var(--border-primary);
     padding-bottom: 12px;
 }
 
@@ -340,78 +341,43 @@
     font-size: 24px;
     -unity-font-style: bold;
     margin-bottom: 20px;
-    color: var(--color-text-primary);
-    width: 100%;
+    color: var(--text-primary);
     -unity-text-align: middle-center;
+    width: 100%;
 }
 
 .results-log-scroll {
     flex-grow: 1;
     width: 100%;
     margin-bottom: 16px;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 6px;
+    background-color: rgba(5, 5, 5, 0.4);
+    border-radius: var(--radius-md);
     padding: 8px;
     border-width: 1px;
-    border-color: var(--color-border);
+    border-color: var(--border-primary);
     min-height: 100px;
 }
 
 .results-text {
     font-size: 12px;
-    color: var(--color-text-secondary);
+    color: var(--text-secondary);
     white-space: pre-wrap;
-    -unity-font-definition: initial; /* Fallback to standard font if monospace not available easily */
+    -unity-font-definition: initial;
 }
 
-.close-button {
+.rechallenge-prompt {
+    font-size: 13px;
+    color: var(--color-star);
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background-color: rgba(255, 215, 0, 0.06);
+    border-radius: var(--radius-md);
+    border-width: 1px;
+    border-color: rgba(255, 215, 0, 0.15);
     width: 100%;
-    height: 36px;
-    background-color: var(--color-surface-lighter);
-    border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: 6px;
-    color: var(--color-text-primary);
-    -unity-font-style: bold;
-    transition: background-color 0.1s;
 }
 
-.close-button:hover {
-    background-color: var(--color-border);
-    color: #FFFFFF;
-}
-
-.status-budget {
-    color: var(--color-accent);
-    -unity-font-style: bold;
-}
-
-.stage-objectives {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background-color: rgba(37, 37, 37, 0.85);
-    border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: 8px;
-    padding: 12px 16px;
-    max-width: 280px;
-}
-
-.stage-title {
-    font-size: 14px;
-    -unity-font-style: bold;
-    color: var(--color-accent);
-    margin-bottom: 6px;
-}
-
-.stage-targets {
-    font-size: 12px;
-    color: var(--color-text-secondary);
-    white-space: pre-wrap;
-}
-
-/* Results Navigation Buttons */
 .results-button-row {
     flex-direction: row;
     width: 100%;
@@ -421,42 +387,51 @@
 
 .results-nav-button {
     flex-grow: 1;
-    height: 36px;
-    background-color: var(--color-surface-lighter);
+    height: 38px;
+    background-color: transparent;
     border-width: 1px;
-    border-color: var(--color-border);
-    border-radius: 6px;
-    color: var(--color-text-primary);
+    border-color: var(--border-primary);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
     margin-left: 4px;
     margin-right: 4px;
     -unity-font-style: bold;
-    transition: background-color 0.1s;
+    text-transform: uppercase;
+    transition-property: background-color;
+    transition-duration: 0.1s;
 }
 
 .results-nav-button:hover {
-    background-color: var(--color-border);
+    background-color: var(--bg-surface);
+    border-color: var(--border-focus);
 }
 
 .results-nav-primary {
-    background-color: rgba(55, 148, 255, 0.15);
-    border-color: var(--color-accent);
-    color: var(--color-accent);
+    background-color: rgba(90, 141, 171, 0.15);
+    border-color: var(--accent-blue);
+    color: var(--accent-blue);
 }
 
 .results-nav-primary:hover {
-    background-color: var(--color-accent);
+    background-color: var(--accent-blue);
     color: #000000;
 }
 
-.rechallenge-prompt {
-    font-size: 13px;
-    color: var(--color-warning);
-    -unity-text-align: middle-center;
-    margin-bottom: 12px;
-    padding: 8px 12px;
-    background-color: rgba(255, 215, 64, 0.08);
-    border-radius: 6px;
-    border-width: 1px;
-    border-color: rgba(255, 215, 64, 0.2);
+.close-button {
     width: 100%;
+    height: 38px;
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    -unity-font-style: bold;
+    text-transform: uppercase;
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+.close-button:hover {
+    background-color: var(--bg-surface);
+    color: var(--text-primary);
 }
