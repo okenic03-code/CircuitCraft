@@ -2,6 +2,7 @@ using UnityEngine;
 using CircuitCraft.Core;
 using CircuitCraft.Components;
 using CircuitCraft.Managers;
+using CircuitCraft.Commands;
 
 namespace CircuitCraft.Controllers
 {
@@ -32,6 +33,7 @@ namespace CircuitCraft.Controllers
         // State
         private ComponentView _selectedComponent;
         private BoardState _boardState;
+        private CommandHistory _commandHistory;
         
         private void Awake() => Init();
         
@@ -58,6 +60,7 @@ namespace CircuitCraft.Controllers
             if (_gameManager != null)
             {
                 _boardState = _gameManager.BoardState;
+                _commandHistory = _gameManager.CommandHistory;
             }
             else
             {
@@ -165,7 +168,10 @@ namespace CircuitCraft.Controllers
             DeselectAll();
 
             if (_gameManager != null)
+            {
                 _boardState = _gameManager.BoardState;
+                _commandHistory = _gameManager.CommandHistory;
+            }
         }
         
         /// <summary>
@@ -188,24 +194,15 @@ namespace CircuitCraft.Controllers
             {
                 int instanceId = placedComponent.InstanceId;
                 
-                // Remove from BoardState
-                bool isRemoved = _boardState.RemoveComponent(instanceId);
+                // Remove from BoardState via command history (enables undo)
+                _commandHistory.ExecuteCommand(new RemoveComponentCommand(_boardState, instanceId));
                 
-                if (isRemoved)
-                {
-                    // Destroy the GameObject
-                    GameObject componentObject = _selectedComponent.gameObject;
-                    _selectedComponent = null; // Clear reference before destroying
-                    Destroy(componentObject);
-                    
+                // BoardView handles GameObject destruction via OnComponentRemoved event
+                _selectedComponent = null;
+                
 #if UNITY_EDITOR
-                    Debug.Log($"ComponentInteraction: Deleted component {instanceId} at position {gridPos}");
+                Debug.Log($"ComponentInteraction: Deleted component {instanceId} at position {gridPos}");
 #endif
-                }
-                else
-                {
-                    Debug.LogWarning($"ComponentInteraction: Failed to remove component {instanceId} from BoardState.", this);
-                }
             }
             else
             {

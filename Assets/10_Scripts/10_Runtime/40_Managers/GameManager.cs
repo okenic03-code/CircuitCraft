@@ -193,6 +193,7 @@ namespace CircuitCraft.Managers
                 var newBoardState = new BoardState(data.boardWidth, data.boardHeight);
                 _saveLoadService.RestoreToBoard(newBoardState, data);
                 _boardState = newBoardState;
+                _commandHistory.Clear();
                 _suggestedWidth = data.boardWidth;
                 _suggestedHeight = data.boardHeight;
                 Debug.Log($"GameManager: Board loaded for stage '{stageId}' with suggested area ({data.boardWidth}x{data.boardHeight})");

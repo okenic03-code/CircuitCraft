@@ -125,7 +125,7 @@ namespace CircuitCraft.UI
         private void HandleStageClick(int index)
         {
             // Check bounds
-            if (index < 0 || index >= _stages.Length) return;
+            if (_stages == null || index < 0 || index >= _stages.Length) return;
             
             // Check locked state
             if (!_unlockedStages[index]) return;

@@ -238,6 +238,13 @@ namespace CircuitCraft.UI
         public void SetAvailableComponents(ComponentDefinition[] components)
         {
             _componentDefinitions = components;
+            
+            // Clear active placement when palette is replaced to prevent placing components from prior stage
+            if (_placementController != null)
+            {
+                _placementController.SetSelectedComponent(null);
+            }
+            _selectedButton = null;
 
             // Rebuild palette if UI has been initialized.
             if (_root != null)

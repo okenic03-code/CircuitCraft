@@ -160,10 +160,7 @@ namespace CircuitCraft.Controllers
                 return;
             }
 
-            foreach (var trace in _boardState.GetTraces(selectedTrace.NetId).ToList())
-            {
-                _boardState.RemoveTrace(trace.SegmentId);
-            }
+            _commandHistory.ExecuteCommand(new DeleteTraceNetCommand(_boardState, selectedTrace.NetId));
 
             _selectedTraceSegmentId = -1;
         }

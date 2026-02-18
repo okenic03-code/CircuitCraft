@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using CircuitCraft.Core;
@@ -10,6 +11,10 @@ namespace CircuitCraft.Commands
     /// </summary>
     public class RouteTraceCommand : ICommand
     {
+        private const string GroundNetName = "0";
+        private const string GroundNetAlias = "GND";
+        private const string GroundComponentDefinitionId = "ground";
+
         private readonly BoardState _boardState;
         private readonly PinReference _startPin;
         private readonly PinReference _endPin;
@@ -119,7 +124,12 @@ namespace CircuitCraft.Commands
             {
                 if (startNetId.Value != endNetId.Value)
                 {
-                    MergeNets(startNetId.Value, endNetId.Value);
+                    int targetNetId = GetPreferredMergeTargetNetId(startNetId.Value, endNetId.Value);
+                    int sourceNetId = targetNetId == startNetId.Value ? endNetId.Value : startNetId.Value;
+                    MergeNets(targetNetId, sourceNetId);
+
+                    _createdNewNet = false;
+                    return targetNetId;
                 }
 
                 _createdNewNet = false;
@@ -139,9 +149,48 @@ namespace CircuitCraft.Commands
             }
 
             // Neither pin connected — create a new net
-            string netName = $"NET{_boardState.Nets.Count + 1}";
+            string netName = IsGroundPin(_startPin) || IsGroundPin(_endPin)
+                ? GroundNetName
+                : $"NET{_boardState.Nets.Count + 1}";
             _createdNewNet = true;
             return _boardState.CreateNet(netName).NetId;
+        }
+
+        private int GetPreferredMergeTargetNetId(int firstNetId, int secondNetId)
+        {
+            var firstNet = _boardState.GetNet(firstNetId);
+            var secondNet = _boardState.GetNet(secondNetId);
+
+            bool firstIsGround = IsGroundNet(firstNet);
+            bool secondIsGround = IsGroundNet(secondNet);
+
+            if (firstIsGround && !secondIsGround)
+                return firstNetId;
+
+            if (!firstIsGround && secondIsGround)
+                return secondNetId;
+
+            return firstNetId;
+        }
+
+        private bool IsGroundPin(PinReference pinRef)
+        {
+            var component = _boardState.GetComponent(pinRef.ComponentInstanceId);
+            if (component == null)
+                return false;
+
+            return string.Equals(component.ComponentDefinitionId, GroundComponentDefinitionId, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsGroundNet(Net net)
+        {
+            return net != null && IsGroundNetName(net.NetName);
+        }
+
+        private static bool IsGroundNetName(string netName)
+        {
+            return string.Equals(netName, GroundNetName, StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(netName, GroundNetAlias, StringComparison.OrdinalIgnoreCase);
         }
 
         private void MergeNets(int targetNetId, int sourceNetId)
