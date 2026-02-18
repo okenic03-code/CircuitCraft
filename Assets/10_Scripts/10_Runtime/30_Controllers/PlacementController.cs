@@ -478,7 +478,10 @@ namespace CircuitCraft.Controllers
                 panelPos = RuntimePanelUtils.ScreenToPanel(panel, panelPos);
                 
                 var picked = panel.Pick(panelPos);
-                if (picked != null && picked != doc.rootVisualElement)
+                // Skip null, root, and TemplateContainer (Unity's implicit UXML wrapper)
+                if (picked != null 
+                    && picked != doc.rootVisualElement
+                    && !(picked is TemplateContainer))
                     return true;
             }
             return false;
