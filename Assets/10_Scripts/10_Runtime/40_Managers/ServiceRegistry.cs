@@ -14,5 +14,17 @@ namespace CircuitCraft.Managers
         {
             SimulationManager = simulationManager;
         }
+
+        public static void Unregister(GameManager gameManager)
+        {
+            if (GameManager == gameManager)
+                GameManager = null;
+        }
+
+        public static void Unregister(SimulationManager simulationManager)
+        {
+            if (SimulationManager == simulationManager)
+                SimulationManager = null;
+        }
     }
 }

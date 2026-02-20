@@ -29,6 +29,11 @@ namespace CircuitCraft.Managers
 
         private void Awake() => Init();
 
+        private void OnDestroy()
+        {
+            ServiceRegistry.Unregister(this);
+        }
+
         private void Init()
         {
             InitializeServiceRegistry();

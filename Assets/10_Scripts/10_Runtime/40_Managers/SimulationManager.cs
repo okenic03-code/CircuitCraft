@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
@@ -37,6 +36,11 @@ namespace CircuitCraft.Managers
 
         private void Awake() => Init();
 
+        private void OnDestroy()
+        {
+            ServiceRegistry.Unregister(this);
+        }
+
         private void Init()
         {
             InitializeSimulationService();
@@ -70,7 +74,7 @@ namespace CircuitCraft.Managers
         /// </summary>
         public void RunSimulation(BoardState boardState)
         {
-            RunSimulationAsync(boardState, CancellationToken.None).Forget();
+            RunSimulationAsync(boardState, this.GetCancellationTokenOnDestroy()).Forget();
         }
 
         /// <summary>
@@ -245,7 +249,7 @@ namespace CircuitCraft.Managers
         {
             if (boardState == null)
             {
-                return additionalProbes?.ToList() ?? new List<ProbeDefinition>();
+                return additionalProbes != null ? new List<ProbeDefinition>(additionalProbes) : new List<ProbeDefinition>();
             }
 
             var probes = new List<ProbeDefinition>();
