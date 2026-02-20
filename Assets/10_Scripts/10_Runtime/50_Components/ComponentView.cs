@@ -91,10 +91,7 @@ namespace CircuitCraft.Components
         private MaterialPropertyBlock _materialPropertyBlock;
         private readonly List<GameObject> _pinDots = new List<GameObject>();
         private GameObject _simulationOverlayObject;
-        private GameObject _ledGlowObject;
-        private SpriteRenderer _ledGlowRenderer;
-        private GameObject _heatGlowObject;
-        private SpriteRenderer _heatGlowRenderer;
+        private ComponentEffects _effects;
 
     #if UNITY_TEXTMESHPRO
         private TextMeshPro _simulationOverlayText;
@@ -123,8 +120,7 @@ namespace CircuitCraft.Components
         {
             ClearPinDots();
             ClearSimulationOverlay();
-            ClearLEDGlow();
-            ClearHeatGlow();
+            _effects?.Cleanup();
         }
 
         private void Init()
@@ -133,6 +129,15 @@ namespace CircuitCraft.Components
             InitializeLabelText();
             ApplySpriteMaterial();
             _materialPropertyBlock = new MaterialPropertyBlock();
+            _effects = new ComponentEffects(
+                transform,
+                _spriteRenderer,
+                _ledGlowScale,
+                _ledGlowAlpha,
+                _ledGlowDefaultColor,
+                _heatGlowScale,
+                _heatGlowMaxAlpha,
+                _heatGlowColor);
         }
 
         private void InitializeSpriteRenderer()
@@ -318,21 +323,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void ShowLEDGlow(bool glow, Color glowColor)
         {
-            if (!glow)
-            {
-                HideLEDGlow();
-                return;
-            }
-
-            EnsureLEDGlowObject();
-            if (_ledGlowRenderer == null)
-            {
-                return;
-            }
-
-            var color = glowColor == default ? _ledGlowDefaultColor : glowColor;
-            _ledGlowRenderer.color = new Color(color.r, color.g, color.b, _ledGlowAlpha);
-            _ledGlowObject.SetActive(true);
+            _effects?.ShowLEDGlow(glow, glowColor);
         }
 
         /// <summary>
@@ -340,10 +331,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void HideLEDGlow()
         {
-            if (_ledGlowObject != null)
-            {
-                _ledGlowObject.SetActive(false);
-            }
+            _effects?.HideLEDGlow();
         }
 
         private void EnsureSimulationOverlayText()
@@ -381,48 +369,12 @@ namespace CircuitCraft.Components
             _simulationOverlayObject.SetActive(false);
         }
 
-        private void EnsureLEDGlowObject()
-        {
-            if (_ledGlowObject != null)
-            {
-                _ledGlowObject.SetActive(true);
-                return;
-            }
-
-            _ledGlowObject = new GameObject("LEDGlow");
-            _ledGlowObject.transform.SetParent(transform, false);
-            _ledGlowObject.transform.localPosition = new Vector3(0f, 0f, 0.02f);
-            _ledGlowObject.transform.localScale = Vector3.one * _ledGlowScale;
-
-            _ledGlowRenderer = _ledGlowObject.AddComponent<SpriteRenderer>();
-            _ledGlowRenderer.sprite = ComponentSymbolGenerator.GetLedGlowSprite();
-            _ledGlowRenderer.sortingLayerID = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
-            _ledGlowRenderer.sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder - 1 : 0;
-            _ledGlowRenderer.material = _spriteRenderer != null ? _spriteRenderer.sharedMaterial : null;
-        }
-
         /// <summary>
         /// Shows or hides a resistor heat glow effect.
         /// </summary>
         public void ShowResistorHeatGlow(bool glow, float normalizedPower)
         {
-            if (!glow)
-            {
-                HideResistorHeatGlow();
-                return;
-            }
-
-            EnsureHeatGlowObject();
-            if (_heatGlowRenderer == null)
-            {
-                return;
-            }
-
-            var safePower = Mathf.Clamp01(normalizedPower);
-            var color = _heatGlowColor;
-            color.a = _heatGlowMaxAlpha * safePower;
-            _heatGlowRenderer.color = color;
-            _heatGlowObject.SetActive(true);
+            _effects?.ShowResistorHeatGlow(glow, normalizedPower);
         }
 
         /// <summary>
@@ -430,30 +382,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void HideResistorHeatGlow()
         {
-            if (_heatGlowObject != null)
-            {
-                _heatGlowObject.SetActive(false);
-            }
-        }
-
-        private void EnsureHeatGlowObject()
-        {
-            if (_heatGlowObject != null)
-            {
-                _heatGlowObject.SetActive(true);
-                return;
-            }
-
-            _heatGlowObject = new GameObject("HeatGlow");
-            _heatGlowObject.transform.SetParent(transform, false);
-            _heatGlowObject.transform.localPosition = new Vector3(0f, 0f, 0.03f);
-            _heatGlowObject.transform.localScale = Vector3.one * _heatGlowScale;
-
-            _heatGlowRenderer = _heatGlowObject.AddComponent<SpriteRenderer>();
-            _heatGlowRenderer.sprite = ComponentSymbolGenerator.GetHeatGlowSprite();
-            _heatGlowRenderer.sortingLayerID = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
-            _heatGlowRenderer.sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder - 2 : 0;
-            _heatGlowRenderer.material = _spriteRenderer != null ? _spriteRenderer.sharedMaterial : null;
+            _effects?.HideResistorHeatGlow();
         }
 
 
@@ -464,26 +393,6 @@ namespace CircuitCraft.Components
                 Destroy(_simulationOverlayObject);
                 _simulationOverlayObject = null;
                 _simulationOverlayText = null;
-            }
-        }
-
-        private void ClearLEDGlow()
-        {
-            if (_ledGlowObject != null)
-            {
-                Destroy(_ledGlowObject);
-                _ledGlowObject = null;
-                _ledGlowRenderer = null;
-            }
-        }
-
-        private void ClearHeatGlow()
-        {
-            if (_heatGlowObject != null)
-            {
-                Destroy(_heatGlowObject);
-                _heatGlowObject = null;
-                _heatGlowRenderer = null;
             }
         }
 
