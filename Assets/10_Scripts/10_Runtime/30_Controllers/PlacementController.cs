@@ -239,7 +239,7 @@ namespace CircuitCraft.Controllers
         private void HandlePlacement()
         {
             // Skip if pointer is over UI
-            if (IsPointerOverUI()) return;
+            if (UIInputHelper.IsPointerOverUI(_uiDocuments)) return;
             
             // Only process input if we have a component selected
             if (_selectedComponent == null || _gridSettings == null)
@@ -413,33 +413,5 @@ namespace CircuitCraft.Controllers
             return _customValue;
         }
         
-        /// <summary>
-        /// Checks if the mouse pointer is currently over any UI Toolkit panel.
-        /// </summary>
-        /// <returns>True if pointer is over UI, false otherwise.</returns>
-        private bool IsPointerOverUI()
-        {
-            if (_uiDocuments == null) return false;
-            
-            foreach (var doc in _uiDocuments)
-            {
-                if (doc == null || doc.rootVisualElement == null) continue;
-                var panel = doc.rootVisualElement.panel;
-                if (panel == null) continue;
-                
-                Vector2 screenPos = Input.mousePosition;
-                // Convert screen position to panel position (screen Y is inverted for UI Toolkit)
-                Vector2 panelPos = new Vector2(screenPos.x, Screen.height - screenPos.y);
-                panelPos = RuntimePanelUtils.ScreenToPanel(panel, panelPos);
-                
-                var picked = panel.Pick(panelPos);
-                // Skip null, root, and TemplateContainer (Unity's implicit UXML wrapper)
-                if (picked != null 
-                    && picked != doc.rootVisualElement
-                    && !(picked is TemplateContainer))
-                    return true;
-            }
-            return false;
-        }
     }
 }

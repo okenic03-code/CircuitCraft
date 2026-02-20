@@ -151,7 +151,7 @@ namespace CircuitCraft.Controllers
 
             if (_wiringModeActive)
             {
-                if (IsPointerOverRealUI())
+                if (UIInputHelper.IsPointerOverRealUI(_uiDocuments))
                     return;
 
                 if (TryGetClickedPinByGrid(out var clickedPinByGrid))
@@ -170,7 +170,7 @@ namespace CircuitCraft.Controllers
             }
 
             // Skip if pointer is over UI
-            if (IsPointerOverUI())
+            if (UIInputHelper.IsPointerOverUI(_uiDocuments))
                 return;
 
             if (TryGetClickedPin(out var clickedPin))
@@ -588,79 +588,5 @@ namespace CircuitCraft.Controllers
         /// </summary>
         public bool CanRedo => _commandHistory.CanRedo;
         
-        /// <summary>
-        /// Checks if the mouse pointer is currently over any UI Toolkit panel.
-        /// </summary>
-        /// <returns>True if pointer is over UI, false otherwise.</returns>
-        private bool IsPointerOverUI()
-        {
-            if (_uiDocuments == null) return false;
-            
-            foreach (var doc in _uiDocuments)
-            {
-                if (doc == null || doc.rootVisualElement == null) continue;
-                var panel = doc.rootVisualElement.panel;
-                if (panel == null) continue;
-                
-                Vector2 screenPos = Input.mousePosition;
-                // Convert screen position to panel position (screen Y is inverted for UI Toolkit)
-                Vector2 panelPos = new Vector2(screenPos.x, Screen.height - screenPos.y);
-                panelPos = RuntimePanelUtils.ScreenToPanel(panel, panelPos);
-                
-                var picked = panel.Pick(panelPos);
-                // Skip null, root, and TemplateContainer (Unity's implicit UXML wrapper)
-                if (picked != null 
-                    && picked != doc.rootVisualElement
-                    && !(picked is TemplateContainer))
-                    return true;
-            }
-            return false;
-        }
-
-        private bool IsPointerOverRealUI()
-        {
-            if (_uiDocuments == null)
-                return false;
-
-            foreach (var doc in _uiDocuments)
-            {
-                if (doc == null || doc.rootVisualElement == null)
-                    continue;
-
-                var panel = doc.rootVisualElement.panel;
-                if (panel == null)
-                    continue;
-
-                Vector2 screenPos = Input.mousePosition;
-                Vector2 panelPos = new Vector2(screenPos.x, Screen.height - screenPos.y);
-                panelPos = RuntimePanelUtils.ScreenToPanel(panel, panelPos);
-
-                var picked = panel.Pick(panelPos);
-                if (picked == null || picked == doc.rootVisualElement || picked is TemplateContainer)
-                    continue;
-
-                var gameView = doc.rootVisualElement.Q<VisualElement>("GameView");
-                if (gameView != null && IsChildOf(picked, gameView))
-                    continue;
-
-                return true;
-            }
-
-            return false;
-        }
-
-        private static bool IsChildOf(VisualElement element, VisualElement parent)
-        {
-            var current = element;
-            while (current != null)
-            {
-                if (current == parent)
-                    return true;
-
-                current = current.parent;
-            }
-
-            return false;
-        }
     }
 }
