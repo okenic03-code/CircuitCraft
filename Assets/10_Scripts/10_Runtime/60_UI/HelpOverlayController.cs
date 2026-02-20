@@ -1,4 +1,5 @@
 using UnityEngine;
+using CircuitCraft.Controllers;
 using UnityEngine.UIElements;
 
 namespace CircuitCraft.UI
@@ -11,6 +12,8 @@ namespace CircuitCraft.UI
     public class HelpOverlayController : MonoBehaviour
     {
         private UIDocument _uiDocument;
+        private CameraController _cameraController;
+        private WireRoutingController _wireRoutingController;
         private VisualElement _modal;
         private Button _openButton;
         private Button _closeButton;
@@ -18,6 +21,8 @@ namespace CircuitCraft.UI
         private void Awake()
         {
             _uiDocument = GetComponent<UIDocument>();
+            _cameraController = FindFirstObjectByType<CameraController>();
+            _wireRoutingController = FindFirstObjectByType<WireRoutingController>();
         }
 
         private void OnEnable()
@@ -72,12 +77,22 @@ namespace CircuitCraft.UI
         {
             if (_modal != null)
                 _modal.style.display = DisplayStyle.Flex;
+
+            if (_cameraController != null)
+                _cameraController.enabled = false;
+            if (_wireRoutingController != null)
+                _wireRoutingController.enabled = false;
         }
 
         private void HideModal()
         {
             if (_modal != null)
                 _modal.style.display = DisplayStyle.None;
+
+            if (_cameraController != null)
+                _cameraController.enabled = true;
+            if (_wireRoutingController != null)
+                _wireRoutingController.enabled = true;
         }
     }
 }

@@ -24,6 +24,9 @@ namespace CircuitCraft.Controllers
 
         private CommandHistory _commandHistory;
         private UIDocument[] _uiDocuments;
+        private bool _wiringModeActive;
+        private PlacementController _placementController;
+        private Label _statusLabel;
 
         [Header("Raycast Settings")]
         [SerializeField] private float _raycastDistance = 100f;
@@ -62,6 +65,20 @@ namespace CircuitCraft.Controllers
 
             // Cache UIDocuments for UI click-through detection
             _uiDocuments = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            _placementController = FindFirstObjectByType<PlacementController>();
+
+            if (_uiDocuments != null)
+            {
+                foreach (var doc in _uiDocuments)
+                {
+                    if (doc == null || doc.rootVisualElement == null)
+                        continue;
+
+                    _statusLabel = doc.rootVisualElement.Q<Label>("StatusText");
+                    if (_statusLabel != null)
+                        break;
+                }
+            }
 
             EnsurePreviewLine();
             HidePreview();
@@ -79,6 +96,18 @@ namespace CircuitCraft.Controllers
         {
             if (_boardState == null || _gridSettings == null || _mainCamera == null)
                 return;
+
+            bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+            if (ctrl && Input.GetKeyDown(KeyCode.W))
+            {
+                ToggleWiringMode();
+                return;
+            }
+
+            if (_wiringModeActive && _placementController != null && _placementController.GetSelectedComponent() != null)
+            {
+                DeactivateWiringMode();
+            }
 
             HandleUndoRedoInput();
             HandleCancelInput();
@@ -116,6 +145,26 @@ namespace CircuitCraft.Controllers
             if (!Input.GetMouseButtonDown(0))
                 return;
 
+            if (_wiringModeActive)
+            {
+                if (IsPointerOverRealUI())
+                    return;
+
+                if (TryGetClickedPinByGrid(out var clickedPinByGrid))
+                {
+                    if (_state == RoutingState.Idle)
+                    {
+                        StartRouting(clickedPinByGrid);
+                    }
+                    else if (_state == RoutingState.Drawing || _state == RoutingState.PinSelected)
+                    {
+                        CommitRouting(clickedPinByGrid);
+                    }
+                }
+
+                return;
+            }
+
             // Skip if pointer is over UI
             if (IsPointerOverUI())
                 return;
@@ -144,7 +193,10 @@ namespace CircuitCraft.Controllers
         {
             if (Input.GetMouseButtonDown(1) || Input.GetKeyDown(KeyCode.Escape))
             {
-                CancelRouting();
+                if (_state != RoutingState.Idle)
+                    CancelRouting();
+                else if (_wiringModeActive)
+                    DeactivateWiringMode();
             }
         }
 
@@ -173,6 +225,9 @@ namespace CircuitCraft.Controllers
             _state = RoutingState.Drawing;
             ShowPreview();
             UpdatePreviewPath();
+
+            if (_statusLabel != null)
+                _statusLabel.text = "배선 중... (ESC: 취소)";
         }
 
         private void CommitRouting(PinReference endPin)
@@ -315,6 +370,45 @@ namespace CircuitCraft.Controllers
             return true;
         }
 
+        private bool TryGetClickedPinByGrid(out PinReference pinRef)
+        {
+            pinRef = default;
+
+            Vector2Int mouseGrid = GridUtility.ScreenToGridPosition(
+                Input.mousePosition,
+                _mainCamera,
+                _gridSettings.CellSize,
+                _gridSettings.GridOrigin
+            );
+
+            var mouseGridPos = new GridPosition(mouseGrid.x, mouseGrid.y);
+
+            PinReference? bestPin = null;
+            int bestDistance = int.MaxValue;
+
+            foreach (var component in _boardState.Components)
+            {
+                foreach (var pin in component.Pins)
+                {
+                    GridPosition pinWorld = component.GetPinWorldPosition(pin.PinIndex);
+                    int distance = pinWorld.ManhattanDistance(mouseGridPos);
+                    if (distance < bestDistance)
+                    {
+                        bestDistance = distance;
+                        bestPin = new PinReference(component.InstanceId, pin.PinIndex, pinWorld);
+                    }
+                }
+            }
+
+            if (bestPin.HasValue && bestDistance <= 1)
+            {
+                pinRef = bestPin.Value;
+                return true;
+            }
+
+            return false;
+        }
+
         private void TrySelectTraceAtMouse()
         {
             Vector2Int mouseGrid = GridUtility.ScreenToGridPosition(
@@ -361,6 +455,49 @@ namespace CircuitCraft.Controllers
             _state = RoutingState.Idle;
             _startPin = default;
             HidePreview();
+
+            if (_wiringModeActive)
+            {
+                UpdateStatusForWiringMode();
+            }
+            else if (_statusLabel != null)
+            {
+                _statusLabel.text = "Ready";
+            }
+        }
+
+        private void ToggleWiringMode()
+        {
+            if (_wiringModeActive)
+                DeactivateWiringMode();
+            else
+                ActivateWiringMode();
+        }
+
+        private void ActivateWiringMode()
+        {
+            _wiringModeActive = true;
+            CancelRouting();
+
+            if (_placementController != null)
+                _placementController.SetSelectedComponent(null);
+
+            UpdateStatusForWiringMode();
+        }
+
+        private void DeactivateWiringMode()
+        {
+            _wiringModeActive = false;
+            CancelRouting();
+
+            if (_statusLabel != null)
+                _statusLabel.text = "Ready";
+        }
+
+        private void UpdateStatusForWiringMode()
+        {
+            if (_statusLabel != null)
+                _statusLabel.text = "배선 모드 (Ctrl+W: 해제)";
         }
 
         private void HandleBoardReset()
@@ -473,6 +610,52 @@ namespace CircuitCraft.Controllers
                     && !(picked is TemplateContainer))
                     return true;
             }
+            return false;
+        }
+
+        private bool IsPointerOverRealUI()
+        {
+            if (_uiDocuments == null)
+                return false;
+
+            foreach (var doc in _uiDocuments)
+            {
+                if (doc == null || doc.rootVisualElement == null)
+                    continue;
+
+                var panel = doc.rootVisualElement.panel;
+                if (panel == null)
+                    continue;
+
+                Vector2 screenPos = Input.mousePosition;
+                Vector2 panelPos = new Vector2(screenPos.x, Screen.height - screenPos.y);
+                panelPos = RuntimePanelUtils.ScreenToPanel(panel, panelPos);
+
+                var picked = panel.Pick(panelPos);
+                if (picked == null || picked == doc.rootVisualElement || picked is TemplateContainer)
+                    continue;
+
+                var gameView = doc.rootVisualElement.Q<VisualElement>("GameView");
+                if (gameView != null && IsChildOf(picked, gameView))
+                    continue;
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private static bool IsChildOf(VisualElement element, VisualElement parent)
+        {
+            var current = element;
+            while (current != null)
+            {
+                if (current == parent)
+                    return true;
+
+                current = current.parent;
+            }
+
             return false;
         }
     }
