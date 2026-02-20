@@ -476,7 +476,7 @@ namespace CircuitCraft.Components
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = FilterMode.Point;
 
-            Color clear = new Color(0.1f, 0.1f, 0.15f, 0.7f);
+            Color clear = new Color(0f, 0f, 0f, 0f);
             for (int y = 0; y < FallbackSymbolTextureSize; y++)
             {
                 for (int x = 0; x < FallbackSymbolTextureSize; x++)

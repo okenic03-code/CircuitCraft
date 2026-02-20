@@ -63,6 +63,7 @@ namespace CircuitCraft.Managers
             Debug.Log($"StageManager: Loaded stage '{stage.DisplayName}' (suggested area {side}x{side})");
             OnStageLoaded?.Invoke();
             PlaceFixedComponents(stage);
+
         }
 
         /// <summary>
