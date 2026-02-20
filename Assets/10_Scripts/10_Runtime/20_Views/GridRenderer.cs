@@ -260,7 +260,7 @@ namespace CircuitCraft.Views
 
         private Material CreateDefaultMaterial()
         {
-            var shader = _defaultShader != null ? _defaultShader : Shader.Find("Unlit/Color");
+            var shader = _defaultShader != null ? _defaultShader : (Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color"));
             Material mat = new Material(shader);
             mat.color = _gridColor;
             return mat;

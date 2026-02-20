@@ -147,7 +147,7 @@ namespace CircuitCraft.Controllers
                     if (_previewInstance != null)
                     {
                         // Negative because Unity Z-rotation is counter-clockwise, we want clockwise visual
-                        _previewInstance.transform.rotation = Quaternion.Euler(0, 0, -_currentRotation);
+                        _previewInstance.transform.rotation = Quaternion.Euler(90f, _currentRotation, 0f);
                     }
                 }
             }
@@ -199,7 +199,7 @@ namespace CircuitCraft.Controllers
                 return;
             
             // Instantiate preview at origin (will be positioned in UpdatePreview)
-            _previewInstance = Instantiate(_componentViewPrefab, Vector3.zero, Quaternion.identity);
+            _previewInstance = Instantiate(_componentViewPrefab, Vector3.zero, Quaternion.Euler(90f, 0f, 0f));
             
             // Cache ComponentView reference
             _cachedPreviewView = _previewInstance.GetComponent<ComponentView>();

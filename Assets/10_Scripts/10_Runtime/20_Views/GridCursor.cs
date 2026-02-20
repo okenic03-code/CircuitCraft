@@ -64,6 +64,9 @@ namespace CircuitCraft.Views
 
         private void SetupInitialCursorState()
         {
+            // Lay cursor sprite flat on XZ plane for top-down camera
+            transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            
             // Initialize cursor with valid color
             if (_cursorSprite != null)
             {

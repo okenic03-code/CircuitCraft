@@ -476,7 +476,7 @@ namespace CircuitCraft.Components
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = FilterMode.Point;
 
-            Color clear = new Color(0f, 0f, 0f, 0f);
+            Color clear = new Color(0.1f, 0.1f, 0.15f, 0.7f);
             for (int y = 0; y < FallbackSymbolTextureSize; y++)
             {
                 for (int x = 0; x < FallbackSymbolTextureSize; x++)
@@ -970,8 +970,8 @@ namespace CircuitCraft.Components
                 Vector2 localGridOffset = pinDef.LocalPosition;
                 pinDot.transform.localPosition = new Vector3(
                     localGridOffset.x * cellSize,
-                    0f,
-                    localGridOffset.y * cellSize
+                    localGridOffset.y * cellSize,
+                    0f
                 );
                 pinDot.transform.localScale = Vector3.one * (PinDotRadius * 2f);
 

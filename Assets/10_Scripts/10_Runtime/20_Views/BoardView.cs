@@ -197,7 +197,7 @@ namespace CircuitCraft.Views
             Vector3 worldPos = GridUtility.GridToWorldPosition(gridPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
 
             // Instantiate prefab at world position with rotation, parented to BoardView
-            Quaternion rotation = Quaternion.Euler(0f, component.Rotation, 0f);
+            Quaternion rotation = Quaternion.Euler(90f, component.Rotation, 0f);
             GameObject instance = Instantiate(_componentViewPrefab, worldPos, rotation, transform);
             instance.name = $"Component_{component.InstanceId}_{component.ComponentDefinitionId}";
 

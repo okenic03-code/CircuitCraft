@@ -739,6 +739,12 @@ MonoBehaviour:
   _lineShader: {fileID: 0}
   _voltageMinColor: {r: 0, g: 0, b: 1, a: 1}
   _voltageMaxColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _flowAnimationBaseSpeed: 0.2
+  _flowAnimationSpeedScale: 2
+  _flowAnimationMaxSpeed: 2.2
+  _flowMinVisibleCurrent: 0.000001
+  _flowWidthMultiplier: 0.8
+  _flowColor: {r: 1, g: 1, b: 1, a: 0.85}
 --- !u!4 &827465219
 Transform:
   m_ObjectHideFlags: 0
@@ -791,7 +797,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.102, g: 0.102, b: 0.18, a: 1}
+  m_BackGroundColor: {r: 0.05, g: 0.06, b: 0.07, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -967,8 +973,6 @@ MonoBehaviour:
   _lineWidth: 0.02
   _lineMaterial: {fileID: 0}
   _defaultShader: {fileID: 0}
-  _suggestedAreaBorderColor: {r: 0.3, g: 0.5, b: 0.8, a: 1}
-  _suggestedAreaBorderWidth: 0.06
 --- !u!4 &1002792794
 Transform:
   m_ObjectHideFlags: 0
