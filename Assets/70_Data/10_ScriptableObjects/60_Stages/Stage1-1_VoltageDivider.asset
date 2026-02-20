@@ -19,12 +19,22 @@ MonoBehaviour:
   _gridSize: {x: 10, y: 10}
   _targetArea: 100
   _allowedComponents:
-  - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
   - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
-  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
   _testCases:
   - _testName: Ohms Law Node Voltage
     _expectedVoltage: 5
     _probeNode: NET1
     _tolerance: 0.1
   _budgetLimit: 0
+  _fixedPlacements:
+  - component: {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
+    position: {x: 1, y: 8}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  - component: {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+    position: {x: 1, y: 0}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  _circuitDiagramDescription: "V+(5V)\uc640 GND \uc0ac\uc774\uc5d0 1k\u03a9 \uc800\ud56d\uc744 \uc5f0\uacb0\ud558\uc138\uc694.\n\n\uc634\uc758 \ubc95\uce59: V = IR\n\uc804\ub958: I = 5V / 1k\u03a9 = 5mA\n\uce21\uc815\uc810(NET1)\uc5d0\uc11c 5.0V\uac00 \uce21\uc815\ub418\uc5b4\uc57c \ud569\ub2c8\ub2e4."

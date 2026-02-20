@@ -193,6 +193,8 @@ namespace CircuitCraft.Systems
             // Serialize components and their pins
             foreach (var comp in boardState.Components)
             {
+                if (comp.IsFixed) continue;
+
                 var compData = new ComponentSaveData
                 {
                     instanceId = comp.InstanceId,

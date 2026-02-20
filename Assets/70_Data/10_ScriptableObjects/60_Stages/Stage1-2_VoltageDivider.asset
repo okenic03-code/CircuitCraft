@@ -19,13 +19,23 @@ MonoBehaviour:
   _gridSize: {x: 10, y: 10}
   _targetArea: 100
   _allowedComponents:
-  - {fileID: 11400000, guid: cdc6bbd9197b5c04eae917d4e6c7de79, type: 2}
   - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
   - {fileID: 11400000, guid: ebc16846293594d4db0feea5af68ab84, type: 2}
-  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
   _testCases:
   - _testName: Series Divider R2 Voltage
     _expectedVoltage: 6.19
     _probeNode: NET2
     _tolerance: 0.1
   _budgetLimit: 10
+  _fixedPlacements:
+  - component: {fileID: 11400000, guid: cdc6bbd9197b5c04eae917d4e6c7de79, type: 2}
+    position: {x: 1, y: 8}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  - component: {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+    position: {x: 1, y: 0}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  _circuitDiagramDescription: "V+(9V)\uc640 GND \uc0ac\uc774\uc5d0 1k\u03a9\uacfc 2.2k\u03a9 \uc800\ud56d\uc744 \uc9c1\ub82c\ub85c \uc5f0\uacb0\ud558\uc138\uc694.\n\nKVL: V1 + V2 = 9V\n\uce21\uc815\uc810(NET2)\uc740 \ub450 \uc800\ud56d \uc0ac\uc774\uc5d0 \uc704\uce58\ud569\ub2c8\ub2e4.\nV_NET2 = 9V \u00d7 2.2k\u03a9 / (1k\u03a9 + 2.2k\u03a9) = 6.19V"

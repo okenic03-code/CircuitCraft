@@ -44,6 +44,22 @@ namespace CircuitCraft.UI
                 _closeButton.clicked -= HideModal;
         }
 
+        private void Update()
+        {
+            // F1 key toggles help
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                ToggleModal();
+                return;
+            }
+
+            // ? key (Shift + Slash) toggles help
+            if (Input.GetKeyDown(KeyCode.Slash) && (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+            {
+                ToggleModal();
+            }
+        }
+
         private void ToggleModal()
         {
             if (_modal == null) return;
