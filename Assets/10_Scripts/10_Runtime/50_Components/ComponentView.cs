@@ -90,14 +90,8 @@ namespace CircuitCraft.Components
         private static GridSettings _cachedGridSettings;
         private MaterialPropertyBlock _materialPropertyBlock;
         private readonly List<GameObject> _pinDots = new List<GameObject>();
-        private GameObject _simulationOverlayObject;
+        private ComponentOverlay _overlay;
         private ComponentEffects _effects;
-
-    #if UNITY_TEXTMESHPRO
-        private TextMeshPro _simulationOverlayText;
-    #else
-        private TextMesh _simulationOverlayText;
-    #endif
 
         // State
         private ComponentDefinition _definition;
@@ -119,7 +113,7 @@ namespace CircuitCraft.Components
         private void OnDestroy()
         {
             ClearPinDots();
-            ClearSimulationOverlay();
+            _overlay?.Cleanup();
             _effects?.Cleanup();
         }
 
@@ -129,6 +123,12 @@ namespace CircuitCraft.Components
             InitializeLabelText();
             ApplySpriteMaterial();
             _materialPropertyBlock = new MaterialPropertyBlock();
+            _overlay = new ComponentOverlay(
+                transform,
+                _spriteRenderer,
+                _simulationOverlayOffset,
+                _simulationOverlayScale,
+                _simulationOverlayColor);
             _effects = new ComponentEffects(
                 transform,
                 _spriteRenderer,
@@ -290,21 +290,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void ShowSimulationOverlay(string text)
         {
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                HideSimulationOverlay();
-                return;
-            }
-
-            EnsureSimulationOverlayText();
-            if (_simulationOverlayText == null)
-            {
-                return;
-            }
-
-            _simulationOverlayText.text = text;
-            _simulationOverlayText.color = _simulationOverlayColor;
-            _simulationOverlayObject.SetActive(true);
+            _overlay?.ShowSimulationOverlay(text);
         }
 
         /// <summary>
@@ -312,10 +298,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void HideSimulationOverlay()
         {
-            if (_simulationOverlayObject != null)
-            {
-                _simulationOverlayObject.SetActive(false);
-            }
+            _overlay?.HideSimulationOverlay();
         }
 
         /// <summary>
@@ -334,41 +317,6 @@ namespace CircuitCraft.Components
             _effects?.HideLEDGlow();
         }
 
-        private void EnsureSimulationOverlayText()
-        {
-            if (_simulationOverlayObject != null)
-            {
-                return;
-            }
-
-            _simulationOverlayObject = new GameObject("SimulationOverlay");
-            _simulationOverlayObject.transform.SetParent(transform, false);
-            _simulationOverlayObject.transform.localPosition = _simulationOverlayOffset;
-            _simulationOverlayObject.transform.localScale = Vector3.one * _simulationOverlayScale;
-
-        #if UNITY_TEXTMESHPRO
-            var overlayText = _simulationOverlayObject.AddComponent<TextMeshPro>();
-            overlayText.alignment = TMPro.TextAlignmentOptions.Center;
-            overlayText.fontSize = 4f;
-            overlayText.sortingLayerID = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
-            overlayText.sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder + 2 : 0;
-            overlayText.autoSizeTextContainer = false;
-            _simulationOverlayText = overlayText;
-        #else
-            var overlayText = _simulationOverlayObject.AddComponent<TextMesh>();
-            overlayText.alignment = TextAlignment.Center;
-            overlayText.anchor = TextAnchor.MiddleCenter;
-            overlayText.characterSize = 0.08f;
-            overlayText.fontSize = 28;
-            overlayText.GetComponent<MeshRenderer>().sortingLayerID =
-                _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
-            overlayText.GetComponent<MeshRenderer>().sortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder + 2 : 0;
-            _simulationOverlayText = overlayText;
-        #endif
-
-            _simulationOverlayObject.SetActive(false);
-        }
-
         /// <summary>
         /// Shows or hides a resistor heat glow effect.
         /// </summary>
@@ -384,18 +332,6 @@ namespace CircuitCraft.Components
         {
             _effects?.HideResistorHeatGlow();
         }
-
-
-        private void ClearSimulationOverlay()
-        {
-            if (_simulationOverlayObject != null)
-            {
-                Destroy(_simulationOverlayObject);
-                _simulationOverlayObject = null;
-                _simulationOverlayText = null;
-            }
-        }
-
         private void CreatePinDots()
         {
             if (_definition?.Pins == null || _definition.Pins.Length == 0)
