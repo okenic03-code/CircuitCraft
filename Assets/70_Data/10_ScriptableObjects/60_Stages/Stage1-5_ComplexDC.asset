@@ -10,21 +10,23 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
-  m_Name: Stage1-5_ComplexDC
+  m_Name: Stage1-5_SeriesParallel
   m_EditorClassIdentifier: 
   _stageId: 1-5
-  _displayName: Complex DC Circuit
+  _displayName: "\uC9C1\uBCD1\uB82C \uBCF5\uD569 \uD68C\uB85C"
   _worldId: world1
   _stageNumber: 5
-  _gridSize: {x: 14, y: 14}
-  _targetArea: 196
+  _gridSize: {x: 10, y: 10}
+  _targetArea: 100
   _allowedComponents:
+  - {fileID: 11400000, guid: cdc6bbd9197b5c04eae917d4e6c7de79, type: 2}
   - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
-  - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
+  - {fileID: 11400000, guid: ebc16846293594d4db0feea5af68ab84, type: 2}
+  - {fileID: 11400000, guid: 7ca4f65367656f449afdd499f69190d9, type: 2}
   - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
-  - {fileID: 11400000, guid: 82b7cdda793441b89b68bd4c2dc3db74, type: 2}
   _testCases:
-  - _testName: Output Voltage After Diode
-    _expectedVoltage: 4.3
-    _tolerance: 0.2
-  _budgetLimit: 20
+  - _testName: Series Parallel Node Voltage
+    _expectedVoltage: 5.4
+    _probeNode: NET2
+    _tolerance: 0.1
+  _budgetLimit: 15
