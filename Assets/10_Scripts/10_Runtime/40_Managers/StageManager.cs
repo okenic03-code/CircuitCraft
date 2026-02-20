@@ -122,32 +122,54 @@ namespace CircuitCraft.Managers
 
             // 4. Run simulation and await completion
             var probes = new List<ProbeDefinition>();
+            var testCaseInputs = new List<TestCaseInput>();
             if (_currentStage.TestCases != null)
             {
                 foreach (var tc in _currentStage.TestCases)
                 {
+                    if (tc == null)
+                    {
+                        Debug.LogWarning($"StageManager: Stage '{_currentStage.DisplayName}' contains a null test case entry.");
+                        continue;
+                    }
+
+                    if (!tc.HasProbeNode)
+                    {
+                        Debug.LogWarning(
+                            $"StageManager: Test case '{tc.TestName}' has no ProbeNode configured. " +
+                            "Skipping probe and evaluation for this test case.");
+                        continue;
+                    }
+
                     probes.Add(ProbeDefinition.Voltage($"V_{tc.TestName}", tc.ProbeNode));
+                    testCaseInputs.Add(new TestCaseInput(
+                        tc.ProbeNode,
+                        tc.ExpectedVoltage,
+                        tc.Tolerance
+                    ));
                 }
             }
 
             await _simulationManager.RunSimulationAsync(boardState, probes, true, true);
             var simResult = _simulationManager.LastSimulationResult;
 
-            // Convert StageTestCase[] → TestCaseInput[] (domain DTO bridge)
-            var stageTestCases = _currentStage.TestCases;
-            var testCaseInputs = new TestCaseInput[stageTestCases != null ? stageTestCases.Length : 0];
-            for (int i = 0; i < testCaseInputs.Length; i++)
+            EvaluationResult evalResult;
+            if (testCaseInputs.Count == 0)
             {
-                var stc = stageTestCases[i];
-                testCaseInputs[i] = new TestCaseInput(
-                    stc.ProbeNode,
-                    stc.ExpectedVoltage,
-                    stc.Tolerance
+                Debug.LogWarning(
+                    $"StageManager: Stage '{_currentStage.DisplayName}' has no test cases with a valid ProbeNode. " +
+                    "Marking objective evaluation as failed.");
+                evalResult = new EvaluationResult(
+                    false,
+                    new List<TestCaseResult>(),
+                    "FAILED (0/0 test cases) - No valid ProbeNode configured."
                 );
             }
-
-            // Evaluate objectives against test cases
-            var evalResult = _objectiveEvaluator.Evaluate(simResult, testCaseInputs);
+            else
+            {
+                // Evaluate objectives against configured test cases
+                evalResult = _objectiveEvaluator.Evaluate(simResult, testCaseInputs.ToArray());
+            }
 
             // Calculate total component cost by summing BaseCost of each placed component
             float totalCost = 0f;
