@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using CircuitCraft.Data;
+using CircuitCraft.Core;
 using UnityEngine;
 
-namespace CircuitCraft.Core
+namespace CircuitCraft.Data
 {
     /// <summary>
     /// Creates PinInstance lists from ComponentDefinition data.

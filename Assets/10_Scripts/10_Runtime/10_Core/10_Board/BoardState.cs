@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 
 namespace CircuitCraft.Core
 {
@@ -108,11 +107,7 @@ namespace CircuitCraft.Core
             if (!_componentsById.TryGetValue(instanceId, out var component))
                 return false;
 
-            if (component.IsFixed)
-            {
-                Debug.LogWarning($"BoardState: Cannot remove fixed component {instanceId}.");
-                return false;
-            }
+            if (component.IsFixed) return false;
 
             var removedPinPositions = new HashSet<GridPosition>();
             foreach (var pin in component.Pins)
