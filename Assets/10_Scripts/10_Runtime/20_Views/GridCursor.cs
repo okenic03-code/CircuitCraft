@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using CircuitCraft.Data;
 using CircuitCraft.Utils;
@@ -24,6 +25,8 @@ namespace CircuitCraft.Views
         private Vector2Int _currentGridPosition;
         private Vector3 _lastMousePosition;
         private bool _isOverGrid;
+
+        public event Action OnPositionChanged;
         
         private void Awake() => Init();
 
@@ -93,7 +96,11 @@ namespace CircuitCraft.Views
 
             if (_camera == null || _gridSettings == null)
             {
+                bool wasOverGrid = _isOverGrid;
+                _isOverGrid = false;
                 SetCursorVisible(false);
+                if (wasOverGrid)
+                    OnPositionChanged?.Invoke();
                 return;
             }
             
@@ -106,6 +113,7 @@ namespace CircuitCraft.Views
             );
             
             // Update current position - grid is unbounded, always over grid
+            bool positionChanged = !_isOverGrid || _currentGridPosition != gridPos;
             _currentGridPosition = gridPos;
             _isOverGrid = true;
             
@@ -117,6 +125,9 @@ namespace CircuitCraft.Views
             // Color hint: green inside suggested area, red outside
             bool insideSuggested = GridUtility.IsInsideSuggestedArea(gridPos, _gridSettings.SuggestedWidth, _gridSettings.SuggestedHeight);
             SetCursorColor(insideSuggested ? _validColor : _invalidColor);
+
+            if (positionChanged)
+                OnPositionChanged?.Invoke();
         }
         
         /// <summary>

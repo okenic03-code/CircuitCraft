@@ -20,6 +20,7 @@ namespace CircuitCraft.Commands
         public event Action<ICommand> OnCommandExecuted;
         public event Action<ICommand> OnUndo;
         public event Action<ICommand> OnRedo;
+        public event Action OnHistoryChanged;
 
         public void ExecuteCommand(ICommand command)
         {
@@ -36,6 +37,7 @@ namespace CircuitCraft.Commands
 
             _redoStack.Clear();
             OnCommandExecuted?.Invoke(command);
+            OnHistoryChanged?.Invoke();
         }
 
         public void Undo()
@@ -48,6 +50,7 @@ namespace CircuitCraft.Commands
             command.Undo();
             _redoStack.Push(command);
             OnUndo?.Invoke(command);
+            OnHistoryChanged?.Invoke();
         }
 
         public void Redo()
@@ -59,12 +62,14 @@ namespace CircuitCraft.Commands
             command.Execute();
             _undoStack.Add(command);
             OnRedo?.Invoke(command);
+            OnHistoryChanged?.Invoke();
         }
 
         public void Clear()
         {
             _undoStack.Clear();
             _redoStack.Clear();
+            OnHistoryChanged?.Invoke();
         }
     }
 }

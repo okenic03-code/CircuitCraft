@@ -104,10 +104,12 @@ namespace CircuitCraft.UI
                 _commandHistory = _gameManager.CommandHistory;
 
             RegisterCallbacks();
+            RegisterStatusBarSubscriptions();
             _paletteResizer.RegisterCallbacks();
             RegisterDataSubscriptions();
             SetStatusText("Ready");
             OnStageLoaded();
+            UpdateStatusBar();
         }
 
         private void OnDisable()
@@ -124,6 +126,8 @@ namespace CircuitCraft.UI
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= OnStageLoaded;
 
+            UnregisterStatusBarSubscriptions();
+
             _paletteResizer?.UnregisterCallbacks();
 
             UnregisterBoardStateSubscriptions();
@@ -131,7 +135,7 @@ namespace CircuitCraft.UI
 
         private void Update()
         {
-            UpdateStatusBar();
+            UpdateZoomStatus();
         }
 
         private void QueryVisualElements()
@@ -185,9 +189,34 @@ namespace CircuitCraft.UI
 
         }
 
+        private void RegisterStatusBarSubscriptions()
+        {
+            if (_gridCursor != null)
+                _gridCursor.OnPositionChanged += OnGridCursorPositionChanged;
+
+            if (_commandHistory != null)
+                _commandHistory.OnHistoryChanged += OnHistoryChanged;
+        }
+
+        private void UnregisterStatusBarSubscriptions()
+        {
+            if (_gridCursor != null)
+                _gridCursor.OnPositionChanged -= OnGridCursorPositionChanged;
+
+            if (_commandHistory != null)
+                _commandHistory.OnHistoryChanged -= OnHistoryChanged;
+        }
+
         private void UpdateStatusBar()
         {
-            // Grid coordinates from GridCursor
+            UpdateGridCoordinatesStatus();
+            UpdateGridCellSizeStatus();
+            UpdateZoomStatus();
+            UpdateUndoRedoState();
+        }
+
+        private void UpdateGridCoordinatesStatus()
+        {
             if (_statusCoords != null && _gridCursor != null)
             {
                 Vector2Int gridPos = _gridCursor.GetCurrentGridPosition();
@@ -212,8 +241,10 @@ namespace CircuitCraft.UI
                     _lastGridPos = new Vector2Int(int.MinValue, int.MinValue);
                 }
             }
+        }
 
-            // Grid cell size from GridSettings
+        private void UpdateGridCellSizeStatus()
+        {
             if (_statusGrid != null && _gridSettings != null)
             {
                 if (!Mathf.Approximately(_lastCellSize, _gridSettings.CellSize))
@@ -222,11 +253,12 @@ namespace CircuitCraft.UI
                     _lastCellSize = _gridSettings.CellSize;
                 }
             }
+        }
 
-            // Zoom percentage from camera orthographic size
+        private void UpdateZoomStatus()
+        {
             if (_statusZoom != null && _mainCamera != null && _mainCamera.orthographic)
             {
-                // Default ortho size = 12, treat as 100%
                 float zoomPercent = (12f / _mainCamera.orthographicSize) * 100f;
                 int roundedZoomPercent = Mathf.RoundToInt(zoomPercent);
                 if (_lastZoomPercent != roundedZoomPercent)
@@ -235,8 +267,15 @@ namespace CircuitCraft.UI
                     _lastZoomPercent = roundedZoomPercent;
                 }
             }
+        }
 
-            // Undo/Redo button enabled state
+        private void OnGridCursorPositionChanged()
+        {
+            UpdateGridCoordinatesStatus();
+        }
+
+        private void OnHistoryChanged()
+        {
             UpdateUndoRedoState();
         }
 
