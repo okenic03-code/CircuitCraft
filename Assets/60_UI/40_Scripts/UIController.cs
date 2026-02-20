@@ -19,7 +19,7 @@ namespace CircuitCraft.UI
     /// </summary>
     public class UIController : MonoBehaviour
     {
-        [SerializeField] private UIDocument uiDocument;
+        [SerializeField] private UIDocument _uiDocument;
         [SerializeField] private Camera _mainCamera;
         [SerializeField] private GridCursor _gridCursor;
         [SerializeField] private PlacementController _placementController;
@@ -63,8 +63,8 @@ namespace CircuitCraft.UI
 
         private void Awake()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>();
+            if (_uiDocument == null)
+                _uiDocument = GetComponent<UIDocument>();
 
             if (_mainCamera == null)
                 _mainCamera = Camera.main;
@@ -84,13 +84,13 @@ namespace CircuitCraft.UI
 
         private void OnEnable()
         {
-            if (uiDocument == null)
+            if (_uiDocument == null)
             {
                 Debug.LogError("UIController: No UIDocument component found.");
                 return;
             }
 
-            _root = uiDocument.rootVisualElement;
+            _root = _uiDocument.rootVisualElement;
             if (_root == null)
             {
                 Debug.LogError("UIController: UIDocument has no root visual element.");
