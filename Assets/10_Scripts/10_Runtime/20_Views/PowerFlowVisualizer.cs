@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using CircuitCraft.Components;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
@@ -131,8 +130,14 @@ namespace CircuitCraft.Views
                 return;
             }
 
-            float minVoltage = (float)nodeVoltages.Values.Min();
-            float maxVoltage = (float)nodeVoltages.Values.Max();
+            float minVoltage = float.MaxValue;
+            float maxVoltage = float.MinValue;
+            foreach (var v in nodeVoltages.Values)
+            {
+                float fv = (float)v;
+                if (fv < minVoltage) minVoltage = fv;
+                if (fv > maxVoltage) maxVoltage = fv;
+            }
             _traceRenderer.ApplyVoltageColors(nodeVoltages, minVoltage, maxVoltage);
         }
 
@@ -245,9 +250,11 @@ namespace CircuitCraft.Views
             }
 
             var resistorPowerByInstanceId = GetResistorPowerMap(result);
-            double maxPower = resistorPowerByInstanceId.Values.Count > 0
-                ? resistorPowerByInstanceId.Values.Max()
-                : 0d;
+            double maxPower = 0d;
+            foreach (var power in resistorPowerByInstanceId.Values)
+            {
+                if (power > maxPower) maxPower = power;
+            }
 
             foreach (var pair in _boardView.ComponentViews)
             {
@@ -303,7 +310,13 @@ namespace CircuitCraft.Views
                     continue;
                 }
 
-                var averageVoltage = measuredPinVoltages.Average();
+                double voltageSum = 0d;
+                for (int i = 0; i < measuredPinVoltages.Count; i++)
+                {
+                    voltageSum += measuredPinVoltages[i];
+                }
+
+                var averageVoltage = voltageSum / measuredPinVoltages.Count;
                 var currentProbeValue = GetComponentCurrent(componentView.Definition, placedComponent.InstanceId, result);
                 var currentText = currentProbeValue.HasValue
                     ? $"I: {FormatCurrent(currentProbeValue.Value)}"

@@ -103,6 +103,19 @@ namespace CircuitCraft.Views
             }
             _traceLines.Clear();
 
+            foreach (var pair in _flowLines)
+            {
+                if (pair.Value != null)
+                {
+                    if (pair.Value.sharedMaterial != null && pair.Value.sharedMaterial != _flowLineMaterial)
+                    {
+                        Destroy(pair.Value.sharedMaterial);
+                    }
+                    Destroy(pair.Value.gameObject);
+                }
+            }
+            _flowLines.Clear();
+
             if (_lineMaterial != null)
             {
                 Destroy(_lineMaterial);
@@ -154,7 +167,7 @@ namespace CircuitCraft.Views
                 offset = Mathf.Repeat(offset, 1f);
                 _segmentFlowOffsets[segmentId] = offset;
 
-                var flowMaterial = flowLine.material;
+                var flowMaterial = flowLine.sharedMaterial;
                 if (flowMaterial != null)
                 {
                     flowMaterial.SetTextureOffset(MainTexProperty, new Vector2(offset, 0f));
@@ -193,7 +206,13 @@ namespace CircuitCraft.Views
             foreach (var pair in _flowLines)
             {
                 if (pair.Value != null)
+                {
+                    if (pair.Value.sharedMaterial != null && pair.Value.sharedMaterial != _flowLineMaterial)
+                    {
+                        Destroy(pair.Value.sharedMaterial);
+                    }
                     Destroy(pair.Value.gameObject);
+                }
             }
             _flowLines.Clear();
 
@@ -456,6 +475,10 @@ namespace CircuitCraft.Views
             {
                 if (flowLine != null)
                 {
+                    if (flowLine.sharedMaterial != null && flowLine.sharedMaterial != _flowLineMaterial)
+                    {
+                        Destroy(flowLine.sharedMaterial);
+                    }
                     flowLine.enabled = false;
                     Destroy(flowLine.gameObject);
                 }
