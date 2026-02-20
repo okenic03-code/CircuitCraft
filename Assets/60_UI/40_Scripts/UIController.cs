@@ -33,6 +33,8 @@ namespace CircuitCraft.UI
         private VisualElement _toolbar;
         private VisualElement _gameView;
         private VisualElement _statusBar;
+        private VisualElement _componentPalette;
+        private VisualElement _paletteResizeHandle;
 
         private Label _statusText;
         private Label _statusCoords;
@@ -57,6 +59,13 @@ namespace CircuitCraft.UI
         private readonly Dictionary<string, float> _componentCostLookup = new Dictionary<string, float>();
         private BoardState _subscribedBoardState;
         private float _currentBudgetLimit;
+
+        private const float PaletteMinWidth = 280f;
+        private const float PaletteMaxWidth = 420f;
+        private bool _isPaletteResizing;
+        private int _activeResizePointerId = -1;
+        private float _resizeStartX;
+        private float _resizeStartWidth;
 
         private void Awake()
         {
@@ -119,6 +128,9 @@ namespace CircuitCraft.UI
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= OnStageLoaded;
 
+            UnregisterPaletteResizeCallbacks();
+            EndPaletteResize();
+
             UnregisterBoardStateSubscriptions();
         }
 
@@ -132,6 +144,8 @@ namespace CircuitCraft.UI
             _toolbar = _root.Q<VisualElement>("Toolbar");
             _gameView = _root.Q<VisualElement>("GameView");
             _statusBar = _root.Q<VisualElement>("StatusBar");
+            _componentPalette = _root.Q<VisualElement>("ComponentPalette");
+            _paletteResizeHandle = _root.Q<VisualElement>("PaletteResizeHandle");
 
             _statusText = _root.Q<Label>("StatusText");
             _statusBudget = _root.Q<Label>("StatusBudget");
@@ -151,6 +165,8 @@ namespace CircuitCraft.UI
             if (_statusBar == null) Debug.LogWarning("UIController: StatusBar not found.");
             if (_undoButton == null) Debug.LogWarning("UIController: UndoButton not found.");
             if (_redoButton == null) Debug.LogWarning("UIController: RedoButton not found.");
+            if (_componentPalette == null) Debug.LogWarning("UIController: ComponentPalette not found.");
+            if (_paletteResizeHandle == null) Debug.LogWarning("UIController: PaletteResizeHandle not found.");
         }
 
         private void RegisterDataSubscriptions()
@@ -171,6 +187,84 @@ namespace CircuitCraft.UI
 
             if (_redoButton != null)
                 _redoButton.clicked += OnRedo;
+
+            RegisterPaletteResizeCallbacks();
+        }
+
+        private void RegisterPaletteResizeCallbacks()
+        {
+            if (_paletteResizeHandle == null || _componentPalette == null || _root == null)
+                return;
+
+            _paletteResizeHandle.RegisterCallback<PointerDownEvent>(OnPaletteResizePointerDown);
+            _root.RegisterCallback<PointerMoveEvent>(OnPaletteResizePointerMove);
+            _root.RegisterCallback<PointerUpEvent>(OnPaletteResizePointerUp);
+            _paletteResizeHandle.RegisterCallback<PointerCaptureOutEvent>(OnPaletteResizePointerCaptureOut);
+        }
+
+        private void UnregisterPaletteResizeCallbacks()
+        {
+            if (_paletteResizeHandle == null || _root == null)
+                return;
+
+            _paletteResizeHandle.UnregisterCallback<PointerDownEvent>(OnPaletteResizePointerDown);
+            _root.UnregisterCallback<PointerMoveEvent>(OnPaletteResizePointerMove);
+            _root.UnregisterCallback<PointerUpEvent>(OnPaletteResizePointerUp);
+            _paletteResizeHandle.UnregisterCallback<PointerCaptureOutEvent>(OnPaletteResizePointerCaptureOut);
+        }
+
+        private void OnPaletteResizePointerDown(PointerDownEvent evt)
+        {
+            if (_componentPalette == null || _paletteResizeHandle == null || evt.button != 0)
+                return;
+
+            float currentWidth = _componentPalette.resolvedStyle.width;
+            if (currentWidth <= 0f)
+                currentWidth = PaletteMinWidth;
+
+            _isPaletteResizing = true;
+            _activeResizePointerId = evt.pointerId;
+            _resizeStartX = evt.position.x;
+            _resizeStartWidth = currentWidth;
+
+            _paletteResizeHandle.CapturePointer(_activeResizePointerId);
+            evt.StopPropagation();
+        }
+
+        private void OnPaletteResizePointerMove(PointerMoveEvent evt)
+        {
+            if (!_isPaletteResizing || evt.pointerId != _activeResizePointerId || _componentPalette == null)
+                return;
+
+            float delta = evt.position.x - _resizeStartX;
+            float nextWidth = Mathf.Clamp(_resizeStartWidth + delta, PaletteMinWidth, PaletteMaxWidth);
+            _componentPalette.style.width = nextWidth;
+            _componentPalette.style.minWidth = nextWidth;
+            evt.StopPropagation();
+        }
+
+        private void OnPaletteResizePointerUp(PointerUpEvent evt)
+        {
+            if (!_isPaletteResizing || evt.pointerId != _activeResizePointerId)
+                return;
+
+            EndPaletteResize();
+            evt.StopPropagation();
+        }
+
+        private void OnPaletteResizePointerCaptureOut(PointerCaptureOutEvent _)
+        {
+            if (_isPaletteResizing)
+                EndPaletteResize();
+        }
+
+        private void EndPaletteResize()
+        {
+            if (_paletteResizeHandle != null && _activeResizePointerId >= 0 && _paletteResizeHandle.HasPointerCapture(_activeResizePointerId))
+                _paletteResizeHandle.ReleasePointer(_activeResizePointerId);
+
+            _isPaletteResizing = false;
+            _activeResizePointerId = -1;
         }
 
         private void UpdateStatusBar()

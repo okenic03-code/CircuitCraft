@@ -42,6 +42,8 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
+
+            <ui:VisualElement name="PaletteResizeHandle" class="palette-resize-handle" />
             
             <!-- Center Game View (Transparent & Click-through) -->
             <ui:VisualElement name="GameView" class="game-view" picking-mode="Ignore">

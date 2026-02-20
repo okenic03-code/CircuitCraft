@@ -1,5 +1,5 @@
 /* ============================================================
-   CircuitCraft Ending Screen — Sci-Fi Mission Complete
+   CircuitCraft Ending Screen — Modern ECAD + Apple Mission Complete
    ============================================================ */
 
 /* === Root Container === */
@@ -13,9 +13,9 @@
 /* === Main Card === */
 .ending-card {
     width: 480px;
-    background-color: var(--bg-panel);
+    background-color: var(--bg-glass);
     border-width: 1px;
-    border-color: var(--border-primary);
+    border-color: var(--border-glass);
     border-radius: var(--radius-lg);
     align-items: center;
     overflow: hidden;
@@ -25,16 +25,16 @@
 .ending-header {
     width: 100%;
     padding: 12px 24px;
-    background-color: var(--bg-header);
+    background-color: var(--bg-glass-strong);
     border-bottom-width: 1px;
-    border-bottom-color: var(--border-primary);
+    border-bottom-color: var(--border-glass);
 }
 
 .ending-header-text {
     font-size: 14px;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 2px;
+    letter-spacing: 0.8px;
     -unity-text-align: middle-left;
 }
 
@@ -80,7 +80,7 @@
 .ending-divider {
     width: 85%;
     height: 1px;
-    background-color: var(--border-primary);
+    background-color: var(--border-glass);
     margin-bottom: 24px;
 }
 
@@ -98,20 +98,20 @@
     border-width: 1px;
     border-color: var(--accent-blue);
     color: var(--accent-blue);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: 14px;
     -unity-font-style: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
     transition-property: background-color, color;
-    transition-duration: 0.15s;
+    transition-duration: var(--transition-fast);
     align-items: center;
     justify-content: center;
 }
 
 .ending-button-primary:hover {
-    background-color: var(--accent-blue);
-    color: #000000;
+    background-color: rgba(122, 178, 218, 0.28);
+    color: var(--accent-ice);
 }
 
 .ending-button-primary:active {

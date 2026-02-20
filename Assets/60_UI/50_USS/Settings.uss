@@ -1,5 +1,5 @@
 /* ============================================================
-   CircuitCraft Settings — Sci-Fi System Configuration
+   CircuitCraft Settings — Modern ECAD + Apple System Configuration
    ============================================================ */
 
 .settings-container {
@@ -8,7 +8,7 @@
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(21, 25, 28, 0.92);
+    background-color: rgba(10, 14, 18, 0.85);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -18,9 +18,9 @@
 .settings-modal {
     width: 700px;
     max-height: 80%;
-    background-color: var(--bg-panel);
+    background-color: var(--bg-glass);
     border-width: 1px;
-    border-color: var(--border-primary);
+    border-color: var(--border-glass);
     border-radius: var(--radius-xl);
     overflow: hidden;
     flex-direction: column;
@@ -31,17 +31,17 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    background-color: var(--bg-header);
+    background-color: var(--bg-glass-strong);
     padding: 16px 24px;
     border-bottom-width: 1px;
-    border-bottom-color: var(--border-primary);
+    border-bottom-color: var(--border-glass);
 }
 
 .title-text {
     font-size: 18px;
     color: var(--text-primary);
     -unity-font-style: bold;
-    letter-spacing: 2px;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
 }
 
@@ -51,27 +51,27 @@
     height: 32px;
     background-color: transparent;
     border-width: 1px;
-    border-color: var(--border-primary);
+    border-color: var(--border-glass);
     color: var(--text-secondary);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: 13px;
     text-transform: uppercase;
-    transition-duration: 0.15s;
+    transition-duration: var(--transition-fast);
 }
 
 .back-button:hover {
-    background-color: var(--bg-surface);
+    background-color: var(--bg-hover-soft);
     border-color: var(--border-focus);
-    color: var(--text-primary);
+    color: var(--accent-ice);
 }
 
 /* Tabs */
 .tabs-container {
     flex-direction: row;
-    background-color: var(--bg-tab-bar);
+    background-color: rgba(14, 20, 28, 0.7);
     padding: 0 16px;
     border-bottom-width: 1px;
-    border-bottom-color: var(--border-primary);
+    border-bottom-color: var(--border-glass);
 }
 
 .tab-button {
@@ -85,14 +85,14 @@
     text-transform: uppercase;
     border-bottom-width: 2px;
     border-bottom-color: transparent;
-    transition-duration: 0.15s;
+    transition-duration: var(--transition-fast);
     border-radius: 0;
     margin: 0;
 }
 
 .tab-button:hover {
     color: var(--text-primary);
-    background-color: rgba(95, 168, 114, 0.05);
+    background-color: var(--bg-hover-soft);
 }
 
 .tab-button.active {
@@ -105,7 +105,7 @@
 .content-area {
     flex-grow: 1;
     padding: 24px;
-    background-color: var(--bg-panel);
+    background-color: transparent;
 }
 
 .tab-content {

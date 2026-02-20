@@ -1,34 +1,40 @@
 :root {
     /* Backgrounds */
-    --bg-void: #15191C;
-    --bg-panel: #1F2429;
-    --bg-surface: #2B3238;
-    --bg-input: #343D44;
-    --bg-header: #363F45;
-    --bg-tab-bar: #2A3035;
+    --bg-void: #0E1318;
+    --bg-panel: #171D24;
+    --bg-surface: #202832;
+    --bg-input: #222C36;
+    --bg-header: #202A33;
+    --bg-tab-bar: #1A232D;
+    --bg-glass: rgba(24, 31, 40, 0.82);
+    --bg-glass-strong: rgba(20, 26, 34, 0.9);
+    --bg-hover-soft: rgba(122, 178, 218, 0.1);
 
     /* Borders */
-    --border-primary: #3A454D;
-    --border-subtle: #2F363B;
-    --border-focus: #5A8DAB;
-    --border-selected: #D35400;
+    --border-primary: #344352;
+    --border-subtle: #26323E;
+    --border-focus: #7AB2DA;
+    --border-selected: #8DC6E9;
+    --border-glass: rgba(212, 232, 248, 0.18);
 
     /* Accents */
-    --accent-blue: #5A8DAB;
-    --accent-green: #5FA872;
-    --accent-orange: #D97E4A;
-    --accent-red: #FF5C5C;
+    --accent-blue: #79B3DC;
+    --accent-green: #5EBB85;
+    --accent-orange: #E39A66;
+    --accent-red: #FF6A6A;
     --accent-neon-green: #6EFF7C;
     --accent-neon-red: #FF5C5C;
-    --accent-run-green: #4CAF50;
+    --accent-run-green: #63D18B;
     --accent-pause-orange: #FF7043;
-    --accent-cyan: #4DD0E1;
+    --accent-cyan: #71CFE3;
+    --accent-ice: #CBE7FB;
 
     /* Text */
-    --text-primary: #E0E6EB;
-    --text-secondary: #B0B8BF;
-    --text-muted: #707A85;
-    --text-active: #5FA872;
+    --text-primary: #E8F0F7;
+    --text-secondary: #B6C5D2;
+    --text-muted: #8594A2;
+    --text-active: #79D19E;
+    --text-mono: #D5E4F1;
 
     /* Special */
     --color-star: #FFD700;
@@ -44,13 +50,13 @@
 
     /* Border Radius */
     --radius-sm: 4px;
-    --radius-md: 6px;
-    --radius-lg: 8px;
-    --radius-xl: 12px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
 
     /* Transitions */
-    --transition-fast: 0.1s;
-    --transition-normal: 0.15s;
+    --transition-fast: 0.15s;
+    --transition-normal: 0.18s;
     --transition-slow: 0.2s;
 }
 

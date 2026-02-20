@@ -1,4 +1,4 @@
-/* StageSelect.uss */
+/* StageSelect.uss — Modern ECAD + Apple */
 
 /* Root Container */
 .stage-select-root {
@@ -20,7 +20,7 @@
     color: var(--text-primary);
     -unity-font-style: bold;
     text-transform: uppercase;
-    letter-spacing: 3px;
+    letter-spacing: 1.2px;
     -unity-text-align: middle-center;
 }
 
@@ -38,19 +38,19 @@
 .stage-card {
     width: 160px;
     height: 180px;
-    background-color: var(--bg-panel);
+    background-color: var(--bg-glass);
     border-radius: var(--radius-lg);
     margin: 10px;
     border-width: 1px;
-    border-color: var(--border-primary);
+    border-color: var(--border-glass);
     flex-direction: row;
     overflow: hidden;
     transition-property: background-color, scale, border-color;
-    transition-duration: 0.15s;
+    transition-duration: var(--transition-fast);
 }
 
 .stage-card:hover {
-    background-color: var(--bg-surface);
+    background-color: var(--bg-hover-soft);
     scale: 1.04;
     border-color: var(--border-focus);
 }
@@ -86,7 +86,7 @@
 .stage-card.locked {
     opacity: 0.4;
     background-color: var(--bg-void);
-    border-color: var(--border-subtle);
+    border-color: var(--border-glass);
 }
 
 .stage-card.locked:hover {
@@ -131,21 +131,21 @@
     height: 42px;
     background-color: transparent;
     border-width: 1px;
-    border-color: var(--border-primary);
-    border-radius: var(--radius-sm);
+    border-color: var(--border-glass);
+    border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-size: 14px;
     -unity-font-style: bold;
     text-transform: uppercase;
     letter-spacing: 1px;
     transition-property: background-color, border-color, color;
-    transition-duration: 0.15s;
+    transition-duration: var(--transition-fast);
 }
 
 .back-button:hover {
-    background-color: var(--bg-surface);
+    background-color: var(--bg-hover-soft);
     border-color: var(--border-focus);
-    color: var(--text-primary);
+    color: var(--accent-ice);
 }
 
 .back-button:active {

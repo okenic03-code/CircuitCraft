@@ -1,10 +1,11 @@
+/* PauseMenu.uss — Modern ECAD + Apple */
 .pause-overlay {
     position: absolute;
     left: 0;
     top: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(15, 19, 22, 0.8);
+    background-color: rgba(10, 14, 18, 0.78);
     align-items: center;
     justify-content: center;
     display: none;
@@ -12,9 +13,9 @@
 
 .pause-panel {
     width: 340px;
-    background-color: var(--bg-panel);
+    background-color: var(--bg-glass);
     border-width: 1px;
-    border-color: var(--border-primary);
+    border-color: var(--border-glass);
     border-radius: var(--radius-lg);
     overflow: hidden;
 }
@@ -28,7 +29,7 @@
     font-size: 22px;
     -unity-font-style: bold;
     color: var(--text-primary);
-    letter-spacing: 3px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
 }
@@ -36,7 +37,7 @@
 .pause-divider {
     width: 80%;
     height: 1px;
-    background-color: var(--border-primary);
+    background-color: var(--border-glass);
     align-self: center;
     margin-bottom: 16px;
 }
@@ -50,22 +51,22 @@
     width: 100%;
     height: 42px;
     margin-bottom: 10px;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: var(--text-secondary);
     background-color: transparent;
     border-width: 1px;
-    border-color: var(--border-primary);
+    border-color: var(--border-glass);
     transition-property: background-color, border-color, color;
-    transition-duration: 0.15s;
+    transition-duration: var(--transition-fast);
 }
 
 .pause-button:hover {
-    background-color: var(--bg-surface);
+    background-color: var(--bg-hover-soft);
     border-color: var(--border-focus);
-    color: var(--text-primary);
+    color: var(--accent-ice);
 }
 
 .pause-button:active {
@@ -73,15 +74,15 @@
 }
 
 .pause-button-primary {
-    background-color: rgba(90, 141, 171, 0.15);
+    background-color: rgba(122, 178, 218, 0.15);
     border-color: var(--accent-blue);
     color: var(--accent-blue);
     -unity-font-style: bold;
 }
 
 .pause-button-primary:hover {
-    background-color: var(--accent-blue);
-    color: #000000;
+    background-color: rgba(122, 178, 218, 0.28);
+    color: var(--accent-ice);
 }
 
 .pause-button-danger {
@@ -90,6 +91,6 @@
 }
 
 .pause-button-danger:hover {
-    background-color: rgba(217, 126, 74, 0.15);
+    background-color: rgba(227, 154, 102, 0.18);
     border-color: var(--accent-orange);
 }
