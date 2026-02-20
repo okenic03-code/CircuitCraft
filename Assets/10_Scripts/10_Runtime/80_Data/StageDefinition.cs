@@ -3,6 +3,25 @@ using UnityEngine.Serialization;
 
 namespace CircuitCraft.Data
 {
+    [System.Serializable]
+    public struct FixedPlacement
+    {
+        [Tooltip("The component to place (e.g., VoltageSource_5V, Ground).")]
+        public ComponentDefinition component;
+
+        [Tooltip("Grid position where the component is placed.")]
+        public Vector2Int position;
+
+        [Tooltip("Rotation in degrees (0, 90, 180, 270).")]
+        public int rotation;
+
+        [Tooltip("Whether to override the component's default electrical value.")]
+        public bool overrideCustomValue;
+
+        [Tooltip("Custom electrical value (only used when overrideCustomValue is true).")]
+        public float customValue;
+    }
+
     /// <summary>
     /// Defines the data for a playable stage in the game.
     /// This ScriptableObject stores configuration such as grid size, allowed components, and win conditions.
@@ -60,6 +79,17 @@ namespace CircuitCraft.Data
         [FormerlySerializedAs("budgetLimit")]
         private float _budgetLimit;
 
+        [Header("Fixed Components")]
+        [SerializeField]
+        [Tooltip("Components pre-placed on the board that the player cannot move or remove.")]
+        private FixedPlacement[] _fixedPlacements;
+
+        [Header("Circuit Diagram")]
+        [SerializeField]
+        [TextArea(3, 10)]
+        [Tooltip("Text description of the example circuit for this stage. Shown in the circuit diagram modal.")]
+        private string _circuitDiagramDescription;
+
         /// <summary>Unique internal identifier for the stage.</summary>
         public string StageId => _stageId;
 
@@ -83,6 +113,12 @@ namespace CircuitCraft.Data
 
         /// <summary>Maximum budget allowed for the circuit. 0 means no limit.</summary>
         public float BudgetLimit => _budgetLimit;
+
+        /// <summary>Components pre-placed on the board that the player cannot move or remove.</summary>
+        public FixedPlacement[] FixedPlacements => _fixedPlacements;
+
+        /// <summary>Text description of the example circuit for this stage.</summary>
+        public string CircuitDiagramDescription => _circuitDiagramDescription;
 
     }
 }

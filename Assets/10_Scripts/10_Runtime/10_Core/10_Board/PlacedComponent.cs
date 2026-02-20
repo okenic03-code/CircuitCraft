@@ -26,6 +26,9 @@ namespace CircuitCraft.Core
         /// <summary>Gets the user-specified custom electrical value (null if using definition default).</summary>
         public float? CustomValue { get; }
 
+        /// <summary>Gets whether this component is fixed and cannot be moved/removed by the player.</summary>
+        public bool IsFixed { get; }
+
         /// <summary>Gets the read-only list of pins on this component.</summary>
         public IReadOnlyList<PinInstance> Pins => _readOnlyPins;
 
@@ -38,8 +41,9 @@ namespace CircuitCraft.Core
         /// <param name="rotation">Rotation in degrees (0, 90, 180, 270).</param>
         /// <param name="pins">Pin instances for this component.</param>
         /// <param name="customValue">User-specified custom electrical value (null to use definition default).</param>
+        /// <param name="isFixed">True when this component is pre-placed and non-removable.</param>
         public PlacedComponent(int instanceId, string componentDefId, GridPosition position, 
-                               int rotation, IEnumerable<PinInstance> pins, float? customValue = null)
+                               int rotation, IEnumerable<PinInstance> pins, float? customValue = null, bool isFixed = false)
         {
             if (instanceId < 0)
                 throw new ArgumentOutOfRangeException(nameof(instanceId), "Instance ID must be non-negative.");
@@ -55,6 +59,7 @@ namespace CircuitCraft.Core
             Position = position;
             Rotation = rotation;
             CustomValue = customValue;
+            IsFixed = isFixed;
             _pins.AddRange(pins);
             _readOnlyPins = _pins.AsReadOnly();
         }

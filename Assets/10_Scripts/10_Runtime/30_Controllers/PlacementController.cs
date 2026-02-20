@@ -6,8 +6,6 @@ using CircuitCraft.Utils;
 using CircuitCraft.Managers;
 using CircuitCraft.Components;
 using CircuitCraft.Commands;
-using System.Collections.Generic;
-
 namespace CircuitCraft.Controllers
 {
     /// <summary>
@@ -307,33 +305,7 @@ namespace CircuitCraft.Controllers
             }
             
             // Create pin instances from component definition
-            List<PinInstance> pinInstances = new List<PinInstance>();
-            var pins = _selectedComponent.Pins;
-
-            // Fallback to standard pin definitions for components without explicit pins.
-            if (pins == null || pins.Length == 0)
-            {
-                pins = GetStandardPins(_selectedComponent.Kind);
-            }
-
-            if (pins != null)
-            {
-                for (int i = 0; i < pins.Length; i++)
-                {
-                    var pinDef = pins[i];
-                    
-                    // Convert PinDefinition local position to GridPosition
-                    GridPosition pinLocalPos = new GridPosition(pinDef.LocalPosition.x, pinDef.LocalPosition.y);
-                    
-                    PinInstance pinInstance = new PinInstance(
-                        pinIndex: i,
-                        pinName: pinDef.PinName,
-                        localPosition: pinLocalPos
-                    );
-                    
-                    pinInstances.Add(pinInstance);
-                }
-            }
+            var pinInstances = PinInstanceFactory.CreatePinInstances(_selectedComponent);
 
             // Place component in BoardState
             GridPosition position = new GridPosition(gridPos.x, gridPos.y);
@@ -352,23 +324,6 @@ namespace CircuitCraft.Controllers
 #endif
         }
 
-        private static PinDefinition[] GetStandardPins(ComponentKind kind)
-        {
-            switch (kind)
-            {
-                case ComponentKind.BJT:
-                    return StandardPinDefinitions.BJT;
-                case ComponentKind.MOSFET:
-                    return StandardPinDefinitions.MOSFET;
-                case ComponentKind.Diode:
-                case ComponentKind.LED:
-                case ComponentKind.ZenerDiode:
-                    return StandardPinDefinitions.Diode;
-                default:
-                    return StandardPinDefinitions.TwoPin;
-            }
-        }
-        
         /// <summary>
         /// Sets the currently selected component definition for placement.
         /// Creates/destroys preview instance when selection changes.

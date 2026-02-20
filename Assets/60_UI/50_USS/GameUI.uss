@@ -490,3 +490,54 @@
     background-color: var(--bg-surface);
     color: var(--text-primary);
 }
+
+/* Modal Overlay (shared by circuit diagram and help) */
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.65);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-panel {
+    width: 520px;
+    max-height: 70%;
+    background-color: var(--bg-glass-strong);
+    border-width: 1px;
+    border-color: var(--border-glass);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    align-items: center;
+}
+
+.modal-title {
+    font-size: 16px;
+    -unity-font-style: bold;
+    color: var(--accent-ice);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+}
+
+.modal-scroll {
+    flex-grow: 1;
+    width: 100%;
+    margin-bottom: 16px;
+    max-height: 400px;
+}
+
+.modal-body-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    white-space: pre-wrap;
+    padding: 12px;
+    background-color: rgba(14, 19, 26, 0.75);
+    border-radius: var(--radius-md);
+    border-width: 1px;
+    border-color: var(--border-subtle);
+}

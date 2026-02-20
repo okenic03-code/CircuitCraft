@@ -62,6 +62,45 @@ namespace CircuitCraft.Managers
 
             Debug.Log($"StageManager: Loaded stage '{stage.DisplayName}' (suggested area {side}x{side})");
             OnStageLoaded?.Invoke();
+            PlaceFixedComponents(stage);
+        }
+
+        /// <summary>
+        /// Places stage-defined fixed components after board reset and view subscriptions.
+        /// Probe components also create and connect to an OUT net.
+        /// </summary>
+        /// <param name="stage">The stage containing fixed placement definitions.</param>
+        private void PlaceFixedComponents(StageDefinition stage)
+        {
+            if (stage.FixedPlacements == null || stage.FixedPlacements.Length == 0)
+                return;
+
+            var boardState = _gameManager.BoardState;
+
+            for (int i = 0; i < stage.FixedPlacements.Length; i++)
+            {
+                var fp = stage.FixedPlacements[i];
+                if (fp.component == null)
+                {
+                    Debug.LogWarning($"StageManager: Fixed placement at index {i} has a null component. Skipping.");
+                    continue;
+                }
+
+                var pinInstances = PinInstanceFactory.CreatePinInstances(fp.component);
+                var position = new GridPosition(fp.position.x, fp.position.y);
+                float? customValue = fp.overrideCustomValue ? fp.customValue : (float?)null;
+                var placed = boardState.PlaceComponent(fp.component.Id, position, fp.rotation, pinInstances, customValue, isFixed: true);
+
+                Debug.Log($"StageManager: Placed fixed component '{fp.component.Id}' at {position} with rotation {fp.rotation}.");
+
+                if (fp.component.Kind == ComponentKind.Probe && placed.Pins.Count > 0)
+                {
+                    var outNet = boardState.CreateNet("OUT");
+                    var pinRef = new PinReference(placed.InstanceId, 0, placed.GetPinWorldPosition(0));
+                    boardState.ConnectPinToNet(outNet.NetId, pinRef);
+                    Debug.Log($"StageManager: Created net 'OUT' for fixed probe {placed.InstanceId} and connected pin 0.");
+                }
+            }
         }
 
         /// <summary>
@@ -182,6 +221,8 @@ namespace CircuitCraft.Managers
                 float totalCost = 0f;
                 foreach (var component in boardState.Components)
                 {
+                    // Exclude fixed (pre-placed) components from budget calculation
+                    if (component.IsFixed) continue;
                     var def = _simulationManager.GetComponentDefinition(component.ComponentDefinitionId);
                     if (def != null)
                     {

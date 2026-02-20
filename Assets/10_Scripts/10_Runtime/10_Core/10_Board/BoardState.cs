@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace CircuitCraft.Core
 {
@@ -79,15 +80,16 @@ namespace CircuitCraft.Core
         /// <param name="rotation">Rotation (0, 90, 180, 270).</param>
         /// <param name="pins">Pin instances for this component.</param>
         /// <param name="customValue">User-specified custom electrical value (null to use definition default).</param>
+        /// <param name="isFixed">True when this component is pre-placed and non-removable.</param>
         /// <returns>The placed component.</returns>
         public PlacedComponent PlaceComponent(string componentDefId, GridPosition position, 
-                                               int rotation, IEnumerable<PinInstance> pins, float? customValue = null)
+                                               int rotation, IEnumerable<PinInstance> pins, float? customValue = null, bool isFixed = false)
         {
             if (_componentsByPosition.ContainsKey(position))
                 throw new InvalidOperationException($"Position {position} is already occupied.");
 
             var instanceId = _nextComponentId++;
-            var component = new PlacedComponent(instanceId, componentDefId, position, rotation, pins, customValue);
+            var component = new PlacedComponent(instanceId, componentDefId, position, rotation, pins, customValue, isFixed);
             _components.Add(component);
             _componentsById.Add(component.InstanceId, component);
             _componentsByPosition.Add(position, component);
@@ -105,6 +107,12 @@ namespace CircuitCraft.Core
         {
             if (!_componentsById.TryGetValue(instanceId, out var component))
                 return false;
+
+            if (component.IsFixed)
+            {
+                Debug.LogWarning($"BoardState: Cannot remove fixed component {instanceId}.");
+                return false;
+            }
 
             var removedPinPositions = new HashSet<GridPosition>();
             foreach (var pin in component.Pins)

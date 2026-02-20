@@ -9,11 +9,13 @@
                 <ui:Button name="RedoButton" class="toolbar-button" text="Redo" />
                 <ui:VisualElement style="width: 16px;" /> <!-- Spacer -->
                 <ui:Button name="ClearBoardButton" class="toolbar-button" text="Clear Board" />
+                <ui:Button name="CircuitDiagramButton" class="toolbar-button" text="📋 Circuit" />
             </ui:VisualElement>
             
             <ui:VisualElement class="toolbar-group">
                 <ui:Button name="simulate-button" class="toolbar-button" text="▶ RUN SIMULATION" />
                 <ui:Button name="btn-toggle-results" class="toolbar-button" text="Results" />
+                <ui:Button name="HelpButton" class="toolbar-button" text="❓ Help" />
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -91,6 +93,28 @@
                 <ui:Button name="btn-modify-circuit" text="Modify Circuit" class="results-nav-button" />
                 <ui:Button name="btn-retry-stage" text="Retry" class="results-nav-button" />
                 <ui:Button name="btn-next-stage" text="Next Stage" class="results-nav-button results-nav-primary" style="display: none;" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Circuit Diagram Modal -->
+        <ui:VisualElement name="circuit-diagram-modal" class="modal-overlay" style="display: none;">
+            <ui:VisualElement class="modal-panel">
+                <ui:Label name="circuit-diagram-title" class="modal-title" text="Example Circuit" />
+                <ui:ScrollView class="modal-scroll">
+                    <ui:Label name="circuit-diagram-text" class="modal-body-text" text="No circuit description available." />
+                </ui:ScrollView>
+                <ui:Button name="circuit-diagram-close" class="close-button" text="CLOSE" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Help Overlay -->
+        <ui:VisualElement name="help-overlay" class="modal-overlay" style="display: none;">
+            <ui:VisualElement class="modal-panel">
+                <ui:Label class="modal-title" text="Controls &amp; Help" />
+                <ui:ScrollView class="modal-scroll">
+                    <ui:Label class="modal-body-text" text="KEYBOARD SHORTCUTS&#10;─────────────────────&#10;Ctrl+Z .......... Undo&#10;Ctrl+Y .......... Redo&#10;Delete / Backspace . Remove selected&#10;Escape .......... Deselect / Cancel&#10;R ............... Rotate component&#10;&#10;PLACEMENT&#10;─────────────────────&#10;1. Select a component from the left palette&#10;2. Click on the grid to place it&#10;3. Click on placed component pins to start wiring&#10;4. Click on another pin to connect&#10;&#10;WIRING&#10;─────────────────────&#10;• Click a pin to start a wire&#10;• Click another pin to complete connection&#10;• Traces auto-route between pins&#10;&#10;SIMULATION&#10;─────────────────────&#10;• Click ▶ RUN SIMULATION to test your circuit&#10;• Meet the target voltage at the OUT node&#10;• Budget and area affect your score" />
+                </ui:ScrollView>
+                <ui:Button name="help-overlay-close" class="close-button" text="GOT IT" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

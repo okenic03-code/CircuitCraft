@@ -137,7 +137,25 @@ namespace CircuitCraft.Views
             {
                 _boardState = _gameManager.BoardState;
                 if (_boardState != null)
+                {
                     SubscribeToBoardEvents();
+                    SyncExistingComponents();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Defensive safety net for components that may already be present on BoardState
+        /// before this view subscribes to placement events.
+        /// </summary>
+        private void SyncExistingComponents()
+        {
+            if (_boardState == null) return;
+
+            foreach (var component in _boardState.Components)
+            {
+                if (_componentViews.ContainsKey(component.InstanceId)) continue;
+                SpawnComponentView(component);
             }
         }
 
