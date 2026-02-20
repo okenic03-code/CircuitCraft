@@ -15,7 +15,7 @@
             <ui:VisualElement class="toolbar-group">
                 <ui:Button name="simulate-button" class="toolbar-button" text="▶ RUN SIMULATION" />
                 <ui:Button name="btn-toggle-results" class="toolbar-button" text="Results" />
-                <ui:Button name="HelpButton" class="toolbar-button" text="❓ Help" />
+                <ui:Button name="HelpButton" class="toolbar-button" text="❓ 도움말" />
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -110,11 +110,11 @@
         <!-- Help Overlay -->
         <ui:VisualElement name="help-overlay" class="modal-overlay" style="display: none;">
             <ui:VisualElement class="modal-panel">
-                <ui:Label class="modal-title" text="Controls &amp; Help" />
+                <ui:Label class="modal-title" text="조작법 &amp; 도움말" />
                 <ui:ScrollView class="modal-scroll">
-                    <ui:Label class="modal-body-text" text="KEYBOARD SHORTCUTS&#10;─────────────────────&#10;Ctrl+Z .......... Undo&#10;Ctrl+Y .......... Redo&#10;Delete / Backspace . Remove selected&#10;Escape .......... Deselect / Cancel&#10;R ............... Rotate component&#10;&#10;PLACEMENT&#10;─────────────────────&#10;1. Select a component from the left palette&#10;2. Click on the grid to place it&#10;3. Click on placed component pins to start wiring&#10;4. Click on another pin to connect&#10;&#10;WIRING&#10;─────────────────────&#10;• Click a pin to start a wire&#10;• Click another pin to complete connection&#10;• Traces auto-route between pins&#10;&#10;SIMULATION&#10;─────────────────────&#10;• Click ▶ RUN SIMULATION to test your circuit&#10;• Meet the target voltage at the OUT node&#10;• Budget and area affect your score" />
+                    <ui:Label class="modal-body-text" text="키보드 단축키&#10;─────────────────────&#10;Ctrl+Z .......... 실행 취소&#10;Ctrl+Y .......... 다시 실행&#10;Delete / Backspace . 선택 항목 삭제&#10;Escape .......... 선택 해제 / 취소&#10;R ............... 부품 회전&#10;&#10;배치&#10;─────────────────────&#10;1. 좌측 팔레트에서 부품을 선택합니다&#10;2. 그리드를 클릭하여 배치합니다&#10;3. 배치된 부품의 핀을 클릭하여 배선을 시작합니다&#10;4. 다른 핀을 클릭하여 연결합니다&#10;&#10;배선&#10;─────────────────────&#10;• 핀을 클릭하여 배선을 시작합니다&#10;• 다른 핀을 클릭하여 연결을 완료합니다&#10;• 핀 사이의 경로가 자동으로 설정됩니다&#10;&#10;시뮬레이션&#10;─────────────────────&#10;• ▶ 시뮬레이션 실행을 클릭하여 회로를 테스트합니다&#10;• OUT 노드에서 목표 전압을 달성하세요&#10;• 예산과 면적이 점수에 영향을 줍니다" />
                 </ui:ScrollView>
-                <ui:Button name="help-overlay-close" class="close-button" text="GOT IT" />
+                <ui:Button name="help-overlay-close" class="close-button" text="확인" />
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

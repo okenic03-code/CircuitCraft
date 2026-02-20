@@ -262,11 +262,6 @@ namespace CircuitCraft.Controllers
             if (componentView == null)
                 return false;
 
-            var boardPos = new GridPosition(componentView.GridPosition.x, componentView.GridPosition.y);
-            var component = _boardState.GetComponentAt(boardPos);
-            if (component == null)
-                return false;
-
             Vector2Int mouseGrid = GridUtility.ScreenToGridPosition(
                 Input.mousePosition,
                 _mainCamera,
@@ -274,6 +269,27 @@ namespace CircuitCraft.Controllers
                 _gridSettings.GridOrigin
             );
             var mouseGridPos = new GridPosition(mouseGrid.x, mouseGrid.y);
+
+            var boardPos = new GridPosition(componentView.GridPosition.x, componentView.GridPosition.y);
+            var primaryComponent = _boardState.GetComponentAt(boardPos);
+            if (TryGetNearestPin(primaryComponent, mouseGridPos, out pinRef))
+                return true;
+
+            var fallbackComponent = _boardState.GetComponentAt(mouseGridPos);
+            if (primaryComponent == null || fallbackComponent == null || primaryComponent.InstanceId != fallbackComponent.InstanceId)
+            {
+                if (TryGetNearestPin(fallbackComponent, mouseGridPos, out pinRef))
+                    return true;
+            }
+
+            return false;
+        }
+
+        private static bool TryGetNearestPin(PlacedComponent component, GridPosition mouseGridPos, out PinReference pinRef)
+        {
+            pinRef = default;
+            if (component == null)
+                return false;
 
             PinReference? bestPin = null;
             int bestDistance = int.MaxValue;

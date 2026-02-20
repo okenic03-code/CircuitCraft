@@ -55,6 +55,9 @@ namespace CircuitCraft.Data
                 case ComponentKind.LED:
                 case ComponentKind.ZenerDiode:
                     return StandardPinDefinitions.Diode;
+                case ComponentKind.VoltageSource:
+                case ComponentKind.CurrentSource:
+                    return StandardPinDefinitions.VerticalTwoPin;
                 default:
                     return StandardPinDefinitions.TwoPin;
             }

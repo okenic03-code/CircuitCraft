@@ -16,6 +16,16 @@ namespace CircuitCraft.Data
             new PinDefinition("A", new Vector2Int(0, 0)),
             new PinDefinition("B", new Vector2Int(1, 0))
         };
+
+        /// <summary>
+        /// Standard vertical 2-pin definition for voltage/current sources.
+        /// Pin 0: Negative (-) bottom, Pin 1: Positive (+) top
+        /// </summary>
+        public static PinDefinition[] VerticalTwoPin => new[]
+        {
+            new PinDefinition("-", new Vector2Int(0, 0)),
+            new PinDefinition("+", new Vector2Int(0, 1))
+        };
         
         /// <summary>
         /// BJT transistor pins (NPN/PNP).

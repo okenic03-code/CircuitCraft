@@ -578,7 +578,7 @@ namespace CircuitCraft.Components
 
         private static void DrawVoltageSourceSymbol(Texture2D texture, Color color)
         {
-            DrawHorizontalLeads(texture, 32, 16, 48, color);
+            DrawVerticalLeads(texture, 32, 16, 48, color);
             DrawCircleThick(texture, 32, 32, 16, FallbackLineThickness, color);
             DrawLineThick(texture, 32, 38, 32, 46, FallbackLineThickness, color);
             DrawLineThick(texture, 28, 42, 36, 42, FallbackLineThickness, color);
@@ -587,7 +587,7 @@ namespace CircuitCraft.Components
 
         private static void DrawCurrentSourceSymbol(Texture2D texture, Color color)
         {
-            DrawHorizontalLeads(texture, 32, 16, 48, color);
+            DrawVerticalLeads(texture, 32, 16, 48, color);
             DrawCircleThick(texture, 32, 32, 16, FallbackLineThickness, color);
             DrawArrow(texture, 32, 22, 32, 42, color);
         }
@@ -691,6 +691,12 @@ namespace CircuitCraft.Components
         {
             DrawLineThick(texture, 4, y, leftInner, y, FallbackLineThickness, color);
             DrawLineThick(texture, rightInner, y, 60, y, FallbackLineThickness, color);
+        }
+
+        private static void DrawVerticalLeads(Texture2D texture, int x, int bottomInner, int topInner, Color color)
+        {
+            DrawLineThick(texture, x, 4, x, bottomInner, FallbackLineThickness, color);
+            DrawLineThick(texture, x, topInner, x, 60, FallbackLineThickness, color);
         }
 
         private static void DrawArrow(Texture2D texture, int startX, int startY, int endX, int endY, Color color)
