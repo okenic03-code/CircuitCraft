@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CircuitCraft.Utils;
 using UnityEngine;
 using CircuitCraft.Data;
 
@@ -566,13 +567,13 @@ namespace CircuitCraft.Components
             switch (definition.Kind)
             {
                 case ComponentKind.Resistor:
-                    return FormatResistance(definition.ResistanceOhms);
+                    return CircuitUnitFormatter.FormatResistance(definition.ResistanceOhms);
                 
                 case ComponentKind.Capacitor:
-                    return FormatCapacitance(definition.CapacitanceFarads);
+                    return CircuitUnitFormatter.FormatCapacitance(definition.CapacitanceFarads);
                 
                 case ComponentKind.Inductor:
-                    return FormatInductance(definition.InductanceHenrys);
+                    return CircuitUnitFormatter.FormatInductance(definition.InductanceHenrys);
                 
                 case ComponentKind.VoltageSource:
                     return $"{definition.VoltageVolts}V";
@@ -588,46 +589,5 @@ namespace CircuitCraft.Components
             }
         }
         
-        /// <summary>
-        /// Format resistance value with engineering notation.
-        /// </summary>
-        private string FormatResistance(float ohms)
-        {
-            if (ohms >= 1_000_000)
-                return $"{ohms / 1_000_000:0.##}MΩ";
-            if (ohms >= 1_000)
-                return $"{ohms / 1_000:0.##}kΩ";
-            return $"{ohms:0.##}Ω";
-        }
-        
-        /// <summary>
-        /// Format capacitance value with engineering notation.
-        /// </summary>
-        private string FormatCapacitance(float farads)
-        {
-            if (farads >= 1)
-                return $"{farads:0.##}F";
-            if (farads >= 0.001)
-                return $"{farads * 1_000:0.##}mF";
-            if (farads >= 0.000_001)
-                return $"{farads * 1_000_000:0.##}µF";
-            if (farads >= 0.000_000_001)
-                return $"{farads * 1_000_000_000:0.##}nF";
-            return $"{farads * 1_000_000_000_000:0.##}pF";
-        }
-        
-        /// <summary>
-        /// Format inductance value with engineering notation.
-        /// </summary>
-        private string FormatInductance(float henrys)
-        {
-            if (henrys >= 1)
-                return $"{henrys:0.##}H";
-            if (henrys >= 0.001)
-                return $"{henrys * 1_000:0.##}mH";
-            if (henrys >= 0.000_001)
-                return $"{henrys * 1_000_000:0.##}µH";
-            return $"{henrys * 1_000_000_000:0.##}nH";
-        }
     }
 }

@@ -6,6 +6,7 @@ using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using CircuitCraft.Simulation;
 using CircuitCraft.Systems;
+using CircuitCraft.Utils;
 using UnityEngine;
 
 namespace CircuitCraft.Views
@@ -319,11 +320,11 @@ namespace CircuitCraft.Views
                 var averageVoltage = voltageSum / measuredPinVoltages.Count;
                 var currentProbeValue = GetComponentCurrent(componentView.Definition, placedComponent.InstanceId, result);
                 var currentText = currentProbeValue.HasValue
-                    ? $"I: {FormatCurrent(currentProbeValue.Value)}"
+                    ? $"I: {CircuitUnitFormatter.FormatCurrent(currentProbeValue.Value)}"
                     : "I: n/a";
 
                 componentView.ShowSimulationOverlay(
-                    $"V: {FormatVoltage(averageVoltage)}\n{currentText}");
+                    $"V: {CircuitUnitFormatter.FormatVoltage(averageVoltage)}\n{currentText}");
 
                 var shouldGlow = definition.Kind == ComponentKind.LED
                     && currentProbeValue.HasValue
@@ -426,39 +427,6 @@ namespace CircuitCraft.Views
             {
                 return null;
             }
-        }
-
-        private static string FormatVoltage(double value)
-        {
-            return value >= 0
-                ? $"{value:0.000} V"
-                : $"{value:0.000} V";
-        }
-
-        private static string FormatCurrent(double value)
-        {
-            var absValue = Math.Abs(value);
-            if (absValue >= 1e3)
-            {
-                return $"{value / 1e3:0.###} kA";
-            }
-
-            if (absValue >= 1)
-            {
-                return $"{value:0.###} A";
-            }
-
-            if (absValue >= 1e-3)
-            {
-                return $"{value * 1e3:0.###} mA";
-            }
-
-            if (absValue >= 1e-6)
-            {
-                return $"{value * 1e6:0.###} µA";
-            }
-
-            return $"{value * 1e9:0.###} nA";
         }
 
         private void ClearVisualization()
