@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using Cysharp.Threading.Tasks;
 using CircuitCraft.Managers;
 using CircuitCraft.Core;
 using CircuitCraft.Simulation;
@@ -101,12 +100,7 @@ namespace CircuitCraft.UI
         
         private void OnSimulateClicked()
         {
-            OnSimulateClickedAsync().Forget();
-        }
-
-        private UniTaskVoid OnSimulateClickedAsync()
-        {
-            if (_gameManager == null || _stageManager == null) return default;
+            if (_gameManager == null || _stageManager == null) return;
 
             if (_statusLabel != null)
             {
@@ -129,8 +123,6 @@ namespace CircuitCraft.UI
                 // Re-enable button only on synchronous failure
                 UpdateButtonState();
             }
-
-            return default;
         }
         
         private void OnSimulationCompleted(SimulationResult result)

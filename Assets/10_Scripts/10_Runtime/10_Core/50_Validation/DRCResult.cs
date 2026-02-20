@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 namespace CircuitCraft.Core
 {
@@ -65,10 +64,10 @@ namespace CircuitCraft.Core
         public bool HasViolations => _violations.Count > 0;
 
         /// <summary>Gets the number of short violations.</summary>
-        public int ShortCount => _violations.Count(v => v.ViolationType == DRCViolationType.Short);
+        public int ShortCount { get; }
 
         /// <summary>Gets the number of unconnected pin violations.</summary>
-        public int UnconnectedCount => _violations.Count(v => v.ViolationType == DRCViolationType.UnconnectedPin);
+        public int UnconnectedCount { get; }
 
         /// <summary>
         /// Creates a new DRC result.
@@ -78,6 +77,19 @@ namespace CircuitCraft.Core
         {
             _violations = violations ?? new List<DRCViolationItem>();
             Violations = _violations.AsReadOnly();
+
+            int shortCount = 0;
+            int unconnectedCount = 0;
+            for (int i = 0; i < _violations.Count; i++)
+            {
+                if (_violations[i].ViolationType == DRCViolationType.Short)
+                    shortCount++;
+                else if (_violations[i].ViolationType == DRCViolationType.UnconnectedPin)
+                    unconnectedCount++;
+            }
+
+            ShortCount = shortCount;
+            UnconnectedCount = unconnectedCount;
         }
 
         /// <summary>

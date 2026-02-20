@@ -42,6 +42,8 @@ namespace CircuitCraft.UI
         // State
         private Resolution[] _resolutions;
         private List<string> _resolutionOptions;
+        private List<string> _qualityNames;
+        private bool _settingsDirty;
 
         // PlayerPrefs Keys
         private const string KEY_MASTER_VOL = "MasterVolume";
@@ -110,6 +112,12 @@ namespace CircuitCraft.UI
         private void OnDisable()
         {
             _btnBack?.UnregisterCallback<ClickEvent>(OnBackClicked);
+
+            if (_settingsDirty)
+            {
+                PlayerPrefs.Save();
+                _settingsDirty = false;
+            }
             
             // Note: In a real production environment, we should unregister all callbacks
             // However, for brevity and since UI elements are often destroyed with the scene,
@@ -150,12 +158,13 @@ namespace CircuitCraft.UI
                 _toggleFullscreen.value = Screen.fullScreen;
 
             // Quality
+            _qualityNames = QualitySettings.names.ToList();
             if (_dropdownQuality != null)
             {
-                _dropdownQuality.choices = QualitySettings.names.ToList();
+                _dropdownQuality.choices = _qualityNames;
                 // Check if persisted quality exists
                 int qualityLevel = PlayerPrefs.GetInt(KEY_QUALITY, QualitySettings.GetQualityLevel());
-                if (qualityLevel < QualitySettings.names.Length)
+                if (qualityLevel < _qualityNames.Count)
                     _dropdownQuality.index = qualityLevel;
             }
 
@@ -222,12 +231,12 @@ namespace CircuitCraft.UI
 
         private void OnQualityChanged(ChangeEvent<string> evt)
         {
-            int index = QualitySettings.names.ToList().IndexOf(evt.newValue);
+            int index = _qualityNames.IndexOf(evt.newValue);
             if (index >= 0)
             {
                 QualitySettings.SetQualityLevel(index);
                 PlayerPrefs.SetInt(KEY_QUALITY, index);
-                PlayerPrefs.Save();
+                _settingsDirty = true;
             }
         }
 
@@ -235,33 +244,33 @@ namespace CircuitCraft.UI
         {
             AudioListener.volume = evt.newValue;
             PlayerPrefs.SetFloat(KEY_MASTER_VOL, evt.newValue);
-            PlayerPrefs.Save();
+            _settingsDirty = true;
         }
 
         private void OnBgmVolumeChanged(ChangeEvent<float> evt)
         {
             PlayerPrefs.SetFloat(KEY_BGM_VOL, evt.newValue);
-            PlayerPrefs.Save();
+            _settingsDirty = true;
             // In a real game, we'd hook this to the AudioMixer
         }
 
         private void OnSfxVolumeChanged(ChangeEvent<float> evt)
         {
             PlayerPrefs.SetFloat(KEY_SFX_VOL, evt.newValue);
-            PlayerPrefs.Save();
+            _settingsDirty = true;
             // In a real game, we'd hook this to the AudioMixer
         }
 
         private void OnAutosaveChanged(ChangeEvent<bool> evt)
         {
             PlayerPrefs.SetInt(KEY_AUTOSAVE, evt.newValue ? 1 : 0);
-            PlayerPrefs.Save();
+            _settingsDirty = true;
         }
 
         private void OnHintsChanged(ChangeEvent<bool> evt)
         {
             PlayerPrefs.SetInt(KEY_HINTS, evt.newValue ? 1 : 0);
-            PlayerPrefs.Save();
+            _settingsDirty = true;
         }
     }
 }
