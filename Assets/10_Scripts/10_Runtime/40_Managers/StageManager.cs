@@ -203,6 +203,22 @@ namespace CircuitCraft.Managers
                     }
                 }
 
+                // Snapshot scoring inputs before awaiting simulation to avoid race with live board edits.
+                float totalCost = 0f;
+                foreach (var component in boardState.Components)
+                {
+                    if (component.IsFixed) continue;
+                    var def = _simulationManager.GetComponentDefinition(component.ComponentDefinitionId);
+                    if (def != null)
+                    {
+                        totalCost += def.BaseCost;
+                    }
+                }
+
+                var contentBounds = boardState.ComputeContentBounds();
+                int boardArea = Math.Max(1, contentBounds.Width * contentBounds.Height);
+                int traceCount = boardState.Traces.Count;
+
                 cancellationToken.ThrowIfCancellationRequested();
                 await _simulationManager.RunSimulationAsync(boardState, probes, true, true, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
@@ -226,22 +242,7 @@ namespace CircuitCraft.Managers
                     evalResult = _objectiveEvaluator.Evaluate(simResult, testCaseInputs.ToArray());
                 }
 
-                // Calculate total component cost by summing BaseCost of each placed component
-                float totalCost = 0f;
-                foreach (var component in boardState.Components)
-                {
-                    // Exclude fixed (pre-placed) components from budget calculation
-                    if (component.IsFixed) continue;
-                    var def = _simulationManager.GetComponentDefinition(component.ComponentDefinitionId);
-                    if (def != null)
-                    {
-                        totalCost += def.BaseCost;
-                    }
-                }
-
                 // Build scoring input from evaluation + board size + stage target.
-                var contentBounds = _gameManager.BoardState.ComputeContentBounds();
-                int boardArea = Math.Max(1, contentBounds.Width * contentBounds.Height);
                 int targetArea = _currentStage.TargetArea;
 
                 var scoringInput = new ScoringInput(
@@ -250,7 +251,7 @@ namespace CircuitCraft.Managers
                     budgetLimit: _currentStage.BudgetLimit,
                     boardArea: boardArea,
                     targetArea: targetArea,
-                    traceCount: boardState.Traces.Count
+                    traceCount: traceCount
                 );
 
                 // Calculate final score breakdown

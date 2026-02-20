@@ -22,6 +22,8 @@ namespace CircuitCraft.Commands
 
         // State captured during Execute for Undo
         private int _netId;
+        private string _netName;
+        private int? _restoredRouteNetId;
         private readonly List<int> _addedSegmentIds = new List<int>();
         // ReSharper disable once NotAccessedField.Local
         private bool _createdNewNet;
@@ -64,9 +66,11 @@ namespace CircuitCraft.Commands
 
             _addedSegmentIds.Clear();
             _didMerge = false;
+            _restoredRouteNetId = null;
 
             // Resolve which net to use (may create a new one)
             _netId = ResolveNetId();
+            _netName = _boardState.GetNet(_netId)?.NetName;
 
             // Connect pins to the net
             _boardState.ConnectPinToNet(_netId, _startPin);
@@ -281,15 +285,27 @@ namespace CircuitCraft.Commands
 
         private void RestorePreviousPinConnection(PinReference pinRef, int? previousNetId)
         {
-            if (!previousNetId.HasValue || previousNetId.Value == _netId)
+            if (!previousNetId.HasValue)
                 return;
 
-            // Only restore if the previous net still exists
-            var previousNet = _boardState.GetNet(previousNetId.Value);
+            int targetNetId = previousNetId.Value;
+            if (_restoredRouteNetId.HasValue && previousNetId.Value == _netId)
+            {
+                targetNetId = _restoredRouteNetId.Value;
+            }
+
+            var previousNet = _boardState.GetNet(targetNetId);
             if (previousNet == null)
-                return;
+            {
+                if (previousNetId.Value != _netId || string.IsNullOrEmpty(_netName))
+                    return;
 
-            _boardState.ConnectPinToNet(previousNetId.Value, pinRef);
+                previousNet = _boardState.CreateNet(_netName);
+                _restoredRouteNetId = previousNet.NetId;
+                targetNetId = previousNet.NetId;
+            }
+
+            _boardState.ConnectPinToNet(targetNetId, pinRef);
         }
     }
 }
