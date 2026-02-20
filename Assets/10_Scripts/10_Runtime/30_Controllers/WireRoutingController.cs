@@ -50,6 +50,10 @@ namespace CircuitCraft.Controllers
         private int _selectedTraceSegmentId = -1;
         private LineRenderer _previewLine;
 
+        private const string StatusWiring = "배선 중... (ESC: 취소)";
+        private const string StatusWiringMode = "배선 모드 (Ctrl+W: 해제)";
+        private const string StatusReady = "Ready";
+
         private void Awake()
         {
             if (_mainCamera == null)
@@ -227,7 +231,7 @@ namespace CircuitCraft.Controllers
             UpdatePreviewPath();
 
             if (_statusLabel != null)
-                _statusLabel.text = "배선 중... (ESC: 취소)";
+                _statusLabel.text = StatusWiring;
         }
 
         private void CommitRouting(PinReference endPin)
@@ -462,7 +466,7 @@ namespace CircuitCraft.Controllers
             }
             else if (_statusLabel != null)
             {
-                _statusLabel.text = "Ready";
+                _statusLabel.text = StatusReady;
             }
         }
 
@@ -491,13 +495,13 @@ namespace CircuitCraft.Controllers
             CancelRouting();
 
             if (_statusLabel != null)
-                _statusLabel.text = "Ready";
+                _statusLabel.text = StatusReady;
         }
 
         private void UpdateStatusForWiringMode()
         {
             if (_statusLabel != null)
-                _statusLabel.text = "배선 모드 (Ctrl+W: 해제)";
+                _statusLabel.text = StatusWiringMode;
         }
 
         private void HandleBoardReset()
