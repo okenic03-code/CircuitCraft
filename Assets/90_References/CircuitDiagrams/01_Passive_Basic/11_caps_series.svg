@@ -1,0 +1,7 @@
+<svg width="248mm" height="55mm" version="1.1" viewBox="0 0 248 55" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><rect width="248" height="55" fill="#fff"/>
+ <g fill="none" stroke="#000" stroke-width="1.5"><path d="m242 18h-64m-49 0h-123"/><path d="m175 18h-46" stroke-dasharray="3"/>
+ <g id="a" stroke-width="3"><path d="m51 5v26m6-26v26"/><path d="m54 5v26" stroke="#fff"/></g>
+ <use transform="translate(58)" xlink:href="#a"/><use transform="translate(144)" xlink:href="#a"/><circle cx="242" cy="18" r="3" fill="#fff"/><circle cx="6" cy="18" r="3" fill="#fff"/></g>
+ <g font-family="Times" font-size="18px">
+ <g font-size="25px" font-style="italic"><text x="103" y="50">C</text><text x="43" y="50">C</text><text x="190" y="50">C</text></g>
+ <text x="120" y="53">2</text><text x="60" y="53">1</text><text x="207" y="53">n</text></g></svg>

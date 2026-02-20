@@ -1,0 +1,8 @@
+<svg version="1.1" viewBox="0 0 210 99" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><rect width="210" height="99" fill="#fff"/>
+ <g fill="none" stroke="#000" stroke-width="1.5"><path d="m90 93v-86m66 0h21v86h-21m-46-86h-103m103 86h-103m40 0v-86"/><path d="m156 93h-46m46-86h-46" stroke-dasharray="3"/>
+ <g id="a" transform="translate(-3-4)" stroke-width="3"><path d="m37 57h26m-26-6h26"/><path d="m37 54h26" stroke="#fff"/></g>
+ <use transform="translate(43)" xlink:href="#a"/><use transform="translate(130)" xlink:href="#a"/><circle cx="7" cy="7" r="3" fill="#fff"/><circle cx="7" cy="93" r="3" fill="#fff"/></g>
+ <circle cx="47" cy="93" r="3"/><circle cx="90" cy="93" r="3"/><circle cx="90" cy="7" r="3"/><circle cx="47" cy="7" r="3"/>
+ <g font-family="Times" font-size="18px">
+ <g font-style="italic" font-size="25px"><text x="96" y="76">C</text><text x="52" y="76">C</text><text x="182" y="76">C</text></g>
+ <text x="113" y="81">2</text><text x="69" y="81">1</text><text x="199" y="81">n</text></g></svg>

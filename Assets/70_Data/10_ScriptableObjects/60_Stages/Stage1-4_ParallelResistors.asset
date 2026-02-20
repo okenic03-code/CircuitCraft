@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage1-4_ParallelResistors
+  m_EditorClassIdentifier: 
+  _stageId: 1-4
+  _displayName: "\uBCD1\uB82C \uC800\uD56D"
+  _worldId: world1
+  _stageNumber: 4
+  _gridSize: {x: 10, y: 10}
+  _targetArea: 100
+  _allowedComponents:
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: ebc16846293594d4db0feea5af68ab84, type: 2}
+  - {fileID: 11400000, guid: 750562e6434ddb941b62ba6e951fa594, type: 2}
+  _testCases:
+  - _testName: Parallel Branch Voltage
+    _expectedVoltage: 2.97
+    _probeNode: NET2
+    _tolerance: 0.1
+  _budgetLimit: 15
+  _fixedPlacements:
+  - component: {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
+    position: {x: 1, y: 8}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  - component: {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+    position: {x: 1, y: 0}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  _circuitDiagramDescription: "V+(5V)\uc5d0\uc11c 470\u03a9 \uc9c1\ub82c \uc800\ud56d \ud6c4, 1k\u03a9\uacfc 2.2k\u03a9\uc744 \ubcd1\ub82c\ub85c \uc5f0\uacb0\ud558\uace0 GND\uc5d0 \uc5f0\uacb0\ud558\uc138\uc694.\n\n\ubcd1\ub82c \ud569\uc131 \uc800\ud56d: R_p = (1k \u00d7 2.2k) / (1k + 2.2k) = 687.5\u03a9\n\uce21\uc815\uc810(NET2)\uc5d0\uc11c 2.97V\uac00 \uce21\uc815\ub418\uc5b4\uc57c \ud569\ub2c8\ub2e4."

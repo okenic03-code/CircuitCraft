@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage1-5_SeriesParallel
+  m_EditorClassIdentifier: 
+  _stageId: 1-5
+  _displayName: "\uC9C1\uBCD1\uB82C \uBCF5\uD569 \uD68C\uB85C"
+  _worldId: world1
+  _stageNumber: 5
+  _gridSize: {x: 10, y: 10}
+  _targetArea: 100
+  _allowedComponents:
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: ebc16846293594d4db0feea5af68ab84, type: 2}
+  - {fileID: 11400000, guid: 7ca4f65367656f449afdd499f69190d9, type: 2}
+  _testCases:
+  - _testName: Series Parallel Node Voltage
+    _expectedVoltage: 5.4
+    _probeNode: NET2
+    _tolerance: 0.1
+  _budgetLimit: 15
+  _fixedPlacements:
+  - component: {fileID: 11400000, guid: cdc6bbd9197b5c04eae917d4e6c7de79, type: 2}
+    position: {x: 1, y: 8}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  - component: {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+    position: {x: 1, y: 0}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  _circuitDiagramDescription: "V+(9V)\uc5d0\uc11c 1k\u03a9 \uc9c1\ub82c \uc800\ud56d \ud6c4, 2.2k\u03a9\uacfc 4.7k\u03a9\uc744 \ubcd1\ub82c\ub85c \uc5f0\uacb0\ud558\uace0 GND\uc5d0 \uc5f0\uacb0\ud558\uc138\uc694.\n\n\ubcd1\ub82c \ud569\uc131: R_p = (2.2k \u00d7 4.7k) / (2.2k + 4.7k) = 1.5k\u03a9\nV_NET2 = 9V \u00d7 1.5k\u03a9 / (1k\u03a9 + 1.5k\u03a9) = 5.40V\n\uce21\uc815\uc810(NET2)\uc5d0\uc11c 5.40V\uac00 \uce21\uc815\ub418\uc5b4\uc57c \ud569\ub2c8\ub2e4."

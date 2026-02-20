@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200pt" height="200pt" font-family="sans-serif" font-size="24">
+  <g fill="none" stroke="#000" stroke-width="2">
+    <path d="M55 25.5h175.2M55 225.5h175.2M155 25.5v45h-15v30h15v50h-15v30h15v45m0-100h50m-72-56v32m0 48v32m-7.4-96H98v80h35m-35-40H53"/>
+    <circle cx="129.1" cy="85.5" r="3.5"/>
+    <path stroke-width="2.3" d="M140 144.7V188m0-124.7v43.3"/>
+  </g>
+  <circle cx="155" cy="225.5" r="2.5"/>
+  <circle cx="155" cy="125.5" r="2.5"/>
+  <circle cx="98" cy="125.5" r="2.5"/>
+  <circle cx="155" cy="25.5" r="2.5"/>
+  <g text-anchor="end">
+  <text x="53.346" y="36.407" >V<tspan dy=".4em">dd</tspan></text>
+  <text x="49" y="232.1">V<tspan dy=".4em">ss</tspan></text>
+  <text x="49.1" y="132.9">A</text>
+  </g>
+  <text x="218.1" y="133.6">Q</text>
+
+</svg>

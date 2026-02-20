@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage10-4_BandgapRef
+  m_EditorClassIdentifier: 
+  _stageId: 10-4
+  _displayName: "\uBC34\uB4DC\uAC2D \uAE30\uC900 \uAC1C\uB150"
+  _worldId: world10
+  _stageNumber: 4
+  _gridSize: {x: 16, y: 14}
+  _targetArea: 224
+  _allowedComponents:
+  - {fileID: 11400000, guid: 570e48d4587c147488de5d83a4a764ef, type: 2}
+  - {fileID: 11400000, guid: e8da7b3c2a7ca494eaa819665e3eea83, type: 2}
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: 7ca4f65367656f449afdd499f69190d9, type: 2}
+  - {fileID: 11400000, guid: b03b4a56d58e03b4087fc1f1ea898d17, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: Vref
+    _expectedVoltage: 1.25
+    _tolerance: 0.2
+  _budgetLimit: 35

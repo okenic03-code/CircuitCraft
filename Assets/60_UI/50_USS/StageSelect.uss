@@ -1,0 +1,153 @@
+/* StageSelect.uss — Modern ECAD + Apple */
+
+/* Root Container */
+.stage-select-root {
+    flex-grow: 1;
+    background-color: var(--bg-void);
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+/* Header */
+.stage-select-header {
+    margin-bottom: 40px;
+    align-items: center;
+}
+
+.world-title {
+    font-size: 28px;
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    -unity-text-align: middle-center;
+}
+
+/* Stage Grid */
+.stage-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+/* Stage Card */
+.stage-card {
+    width: 160px;
+    height: 180px;
+    background-color: var(--bg-glass);
+    border-radius: var(--radius-lg);
+    margin: 10px;
+    border-width: 1px;
+    border-color: var(--border-glass);
+    flex-direction: row;
+    overflow: hidden;
+    transition-property: background-color, scale, border-color;
+    transition-duration: var(--transition-fast);
+}
+
+.stage-card:hover {
+    background-color: var(--bg-hover-soft);
+    scale: 1.04;
+    border-color: var(--border-focus);
+}
+
+/* Status Bar */
+.card-status-bar {
+    width: 4px;
+    height: 100%;
+    border-radius: 0;
+}
+
+.status-blue {
+    background-color: var(--accent-blue);
+}
+
+.status-green {
+    background-color: var(--accent-green);
+}
+
+.status-orange {
+    background-color: var(--accent-orange);
+}
+
+/* Card Content */
+.card-content {
+    flex-grow: 1;
+    padding: 14px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Locked State */
+.stage-card.locked {
+    opacity: 0.4;
+    background-color: var(--bg-void);
+    border-color: var(--border-glass);
+}
+
+.stage-card.locked:hover {
+    scale: 1.0;
+    background-color: var(--bg-void);
+}
+
+/* Completed State */
+.stage-card.completed {
+    border-color: var(--accent-green);
+}
+
+/* Typography inside Card */
+.stage-number {
+    font-size: 13px;
+    color: var(--text-muted);
+    -unity-font-style: bold;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.stage-name {
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
+.stage-stars {
+    font-size: 20px;
+    color: var(--color-star);
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+    text-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
+}
+
+/* Back Button */
+.back-button {
+    width: 220px;
+    height: 42px;
+    background-color: transparent;
+    border-width: 1px;
+    border-color: var(--border-glass);
+    border-radius: var(--radius-md);
+    color: var(--text-secondary);
+    font-size: 14px;
+    -unity-font-style: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--transition-fast);
+}
+
+.back-button:hover {
+    background-color: var(--bg-hover-soft);
+    border-color: var(--border-focus);
+    color: var(--accent-ice);
+}
+
+.back-button:active {
+    background-color: var(--bg-input);
+}
