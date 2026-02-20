@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Cysharp.Threading.Tasks;
 using CircuitCraft.Managers;
+using CircuitCraft.Core;
 using CircuitCraft.Simulation;
 using System;
 
@@ -74,6 +75,10 @@ namespace CircuitCraft.UI
             {
                 Debug.LogError("SimulationButtonController: StageManager reference is missing.");
             }
+            else
+            {
+                _stageManager.OnStageCompleted += OnStageEvaluationCompleted;
+            }
         }
         
         private void OnDisable()
@@ -86,6 +91,11 @@ namespace CircuitCraft.UI
             if (_gameManager != null)
             {
                 _gameManager.OnSimulationCompleted -= OnSimulationCompleted;
+            }
+
+            if (_stageManager != null)
+            {
+                _stageManager.OnStageCompleted -= OnStageEvaluationCompleted;
             }
         }
         
@@ -116,9 +126,7 @@ namespace CircuitCraft.UI
             catch (Exception ex)
             {
                 Debug.LogError($"SimulationButtonController: Failed to start stage simulation. {ex.Message}");
-            }
-            finally
-            {
+                // Re-enable button only on synchronous failure
                 UpdateButtonState();
             }
 
@@ -140,6 +148,11 @@ namespace CircuitCraft.UI
                     _statusLabel.text = "Simulation Failed";
                 }
             }
+        }
+
+        private void OnStageEvaluationCompleted(ScoreBreakdown breakdown)
+        {
+            UpdateButtonState();
         }
         
         private void UpdateButtonState()

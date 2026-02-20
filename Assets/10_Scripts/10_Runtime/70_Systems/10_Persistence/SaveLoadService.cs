@@ -85,7 +85,8 @@ namespace CircuitCraft.Systems
                         new GridPosition(compData.positionX, compData.positionY),
                         compData.rotation,
                         pins,
-                        customValue
+                        customValue,
+                        isFixed: compData.isFixed
                     );
 
                     componentIdMap[compData.instanceId] = placed.InstanceId;
@@ -193,15 +194,14 @@ namespace CircuitCraft.Systems
             // Serialize components and their pins
             foreach (var comp in boardState.Components)
             {
-                if (comp.IsFixed) continue;
-
                 var compData = new ComponentSaveData
                 {
                     instanceId = comp.InstanceId,
                     componentDefId = comp.ComponentDefinitionId,
                     positionX = comp.Position.X,
                     positionY = comp.Position.Y,
-                    rotation = comp.Rotation
+                    rotation = comp.Rotation,
+                    isFixed = comp.IsFixed
                 };
                 compData.hasCustomValue = comp.CustomValue.HasValue;
                 compData.customValue = comp.CustomValue ?? 0f;

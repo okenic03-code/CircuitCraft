@@ -53,6 +53,9 @@ namespace CircuitCraft.Systems
         /// <summary>Rotation in degrees (0, 90, 180, 270).</summary>
         public int rotation;
 
+        /// <summary>Whether this component is a fixed (pre-placed) stage component.</summary>
+        public bool isFixed;
+
         /// <summary>User-specified custom electrical value (0 if not custom).</summary>
         public float customValue;
 

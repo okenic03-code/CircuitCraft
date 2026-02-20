@@ -35,6 +35,10 @@ namespace CircuitCraft.Commands
             if (component == null)
                 return;
 
+            // Fixed components cannot be removed.
+            if (component.IsFixed)
+                return;
+
             _componentDefId = component.ComponentDefinitionId;
             _position = component.Position;
             _rotation = component.Rotation;

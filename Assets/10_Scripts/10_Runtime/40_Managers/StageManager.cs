@@ -178,17 +178,25 @@ namespace CircuitCraft.Managers
                             continue;
                         }
 
-                        if (!tc.HasProbeNode)
+                        string probeNode = tc.HasProbeNode ? tc.ProbeNode : tc.TestName;
+                        if (string.IsNullOrWhiteSpace(probeNode))
                         {
                             Debug.LogWarning(
-                                $"StageManager: Test case '{tc.TestName}' has no ProbeNode configured. " +
+                                "StageManager: Test case has neither ProbeNode nor TestName configured. " +
                                 "Skipping probe and evaluation for this test case.");
                             continue;
                         }
 
-                        probes.Add(ProbeDefinition.Voltage($"V_{tc.TestName}", tc.ProbeNode));
+                        if (!tc.HasProbeNode)
+                        {
+                            Debug.Log(
+                                $"StageManager: Test case '{tc.TestName}' has no ProbeNode configured. " +
+                                $"Using TestName '{probeNode}' as fallback probe node.");
+                        }
+
+                        probes.Add(ProbeDefinition.Voltage($"V_{tc.TestName}", probeNode));
                         testCaseInputs.Add(new TestCaseInput(
-                            tc.ProbeNode,
+                            probeNode,
                             tc.ExpectedVoltage,
                             tc.Tolerance
                         ));
