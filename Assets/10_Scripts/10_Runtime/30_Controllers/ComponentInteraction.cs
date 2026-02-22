@@ -19,6 +19,7 @@ namespace CircuitCraft.Controllers
         private GameManager _gameManager;
 
         [SerializeField]
+        [Tooltip("Stage manager used to refresh cached board references after stage loads.")]
         private StageManager _stageManager;
         
         [SerializeField]
@@ -67,8 +68,6 @@ namespace CircuitCraft.Controllers
                 Debug.LogError("ComponentInteraction: GameManager reference is missing.", this);
             }
 
-            if (_stageManager == null)
-                _stageManager = FindFirstObjectByType<StageManager>();
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
         }
@@ -180,17 +179,17 @@ namespace CircuitCraft.Controllers
         /// </summary>
         private void DeleteSelectedComponent()
         {
-            if (_selectedComponent == null || _boardState == null) return;
+            if (_selectedComponent == null || _boardState is null) return;
             
             // Find the PlacedComponent in BoardState by matching GridPosition
             // (ComponentView stores GridPosition, PlacedComponent has InstanceId)
             Vector2Int gridPos = _selectedComponent.GridPosition;
             
             // Search for component at this grid position
-            var boardPosition = new GridPosition(gridPos.x, gridPos.y);
+            GridPosition boardPosition = new(gridPos.x, gridPos.y);
             PlacedComponent placedComponent = _boardState.GetComponentAt(boardPosition);
             
-            if (placedComponent != null)
+            if (placedComponent is not null)
             {
                 int instanceId = placedComponent.InstanceId;
                 
@@ -220,8 +219,6 @@ namespace CircuitCraft.Controllers
         /// </summary>
         /// <returns>Selected ComponentView, or null if none selected.</returns>
         public ComponentView GetSelectedComponent()
-        {
-            return _selectedComponent;
-        }
+            => _selectedComponent;
     }
 }

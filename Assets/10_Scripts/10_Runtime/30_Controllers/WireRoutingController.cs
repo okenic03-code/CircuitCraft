@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Linq;
 using CircuitCraft.Commands;
 using CircuitCraft.Components;
@@ -17,25 +16,32 @@ namespace CircuitCraft.Controllers
     public class WireRoutingController : MonoBehaviour
     {
         [Header("Dependencies")]
+        [Tooltip("Game manager that provides board state and command history.")]
         [SerializeField] private GameManager _gameManager;
+
+        [Tooltip("Stage manager used to refresh references when stages load.")]
         [SerializeField] private StageManager _stageManager;
+
+        [Tooltip("Grid settings used for screen-to-grid conversion.")]
         [SerializeField] private GridSettings _gridSettings;
+
+        [Tooltip("Camera used for routing raycasts and cursor grid conversion.")]
         [SerializeField] private Camera _mainCamera;
 
+        [Tooltip("Preview manager used to draw temporary routing paths.")]
+        [SerializeField] private WirePreviewManager _wirePreviewManager;
+
         private CommandHistory _commandHistory;
-        private UIDocument[] _uiDocuments;
+        [Tooltip("UI documents used to suppress board input when hovering UI.")]
+        [SerializeField] private UIDocument[] _uiDocuments;
         private bool _wiringModeActive;
-        private PlacementController _placementController;
+
+        [Tooltip("Placement controller used to coordinate mode switching.")]
+        [SerializeField] private PlacementController _placementController;
         private Label _statusLabel;
 
         [Header("Raycast Settings")]
         [SerializeField] private float _raycastDistance = 100f;
-
-        [Header("Preview")]
-        [SerializeField] private Color _previewColor = Color.yellow;
-        [SerializeField] private float _previewWidth = 0.08f;
-        [SerializeField] private float _previewY = 0.06f;
-        [SerializeField] private Shader _previewShader;
 
         private enum RoutingState
         {
@@ -48,7 +54,6 @@ namespace CircuitCraft.Controllers
         private BoardState _boardState;
         private PinReference _startPin;
         private int _selectedTraceSegmentId = -1;
-        private LineRenderer _previewLine;
 
         private const string StatusWiring = "배선 중... (ESC: 취소)";
         private const string StatusWiringMode = "배선 모드 (Ctrl+W: 해제)";
@@ -67,38 +72,38 @@ namespace CircuitCraft.Controllers
                 _commandHistory = _gameManager.CommandHistory;
             }
 
-            // Cache UIDocuments for UI click-through detection
-            _uiDocuments = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
-            _placementController = FindFirstObjectByType<PlacementController>();
+            if (_wirePreviewManager == null)
+                _wirePreviewManager = GetComponent<WirePreviewManager>();
 
-            if (_uiDocuments != null)
+            if (_uiDocuments is not null)
             {
                 foreach (var doc in _uiDocuments)
                 {
-                    if (doc == null || doc.rootVisualElement == null)
+                    if (doc == null || doc.rootVisualElement is null)
                         continue;
 
                     _statusLabel = doc.rootVisualElement.Q<Label>("StatusText");
-                    if (_statusLabel != null)
+                    if (_statusLabel is not null)
                         break;
                 }
             }
 
-            EnsurePreviewLine();
-            HidePreview();
+            if (_wirePreviewManager != null)
+            {
+                _wirePreviewManager.Initialize();
+                _wirePreviewManager.Hide();
+            }
         }
 
         private void Start()
         {
-            if (_stageManager == null)
-                _stageManager = FindFirstObjectByType<StageManager>();
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
         }
 
         private void Update()
         {
-            if (_boardState == null || _gridSettings == null || _mainCamera == null)
+            if (_boardState is null || _gridSettings == null || _mainCamera == null)
                 return;
 
             bool ctrl = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
@@ -120,7 +125,14 @@ namespace CircuitCraft.Controllers
 
             if (_state == RoutingState.Drawing)
             {
-                UpdatePreviewPath();
+                Vector2Int mouseGrid = GridUtility.ScreenToGridPosition(
+                    Input.mousePosition,
+                    _mainCamera,
+                    _gridSettings.CellSize,
+                    _gridSettings.GridOrigin
+                );
+                var currentPos = new GridPosition(mouseGrid.x, mouseGrid.y);
+                _wirePreviewManager?.UpdatePath(_startPin.Position, currentPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
             }
         }
 
@@ -210,7 +222,7 @@ namespace CircuitCraft.Controllers
                 return;
 
             var selectedTrace = _boardState.Traces.FirstOrDefault(t => t.SegmentId == _selectedTraceSegmentId);
-            if (selectedTrace == null)
+            if (selectedTrace is null)
             {
                 _selectedTraceSegmentId = -1;
                 return;
@@ -227,10 +239,19 @@ namespace CircuitCraft.Controllers
             _state = RoutingState.PinSelected;
             _selectedTraceSegmentId = -1;
             _state = RoutingState.Drawing;
-            ShowPreview();
-            UpdatePreviewPath();
 
-            if (_statusLabel != null)
+            Vector2Int mouseGrid = GridUtility.ScreenToGridPosition(
+                Input.mousePosition,
+                _mainCamera,
+                _gridSettings.CellSize,
+                _gridSettings.GridOrigin
+            );
+            var currentPos = new GridPosition(mouseGrid.x, mouseGrid.y);
+
+            _wirePreviewManager?.Show();
+            _wirePreviewManager?.UpdatePath(_startPin.Position, currentPos, _gridSettings.CellSize, _gridSettings.GridOrigin);
+
+            if (_statusLabel is not null)
                 _statusLabel.text = StatusWiring;
         }
 
@@ -242,66 +263,11 @@ namespace CircuitCraft.Controllers
                 return;
             }
 
-            var segments = BuildManhattanSegments(_startPin.Position, endPin.Position);
+            var segments = WirePathCalculator.BuildManhattanSegments(_startPin.Position, endPin.Position);
             var command = new RouteTraceCommand(_boardState, _startPin, endPin, segments);
             _commandHistory.ExecuteCommand(command);
 
             CancelRouting();
-        }
-
-        private List<(GridPosition start, GridPosition end)> BuildManhattanSegments(GridPosition start, GridPosition end)
-        {
-            var segments = new List<(GridPosition start, GridPosition end)>();
-
-            if (start.X == end.X || start.Y == end.Y)
-            {
-                segments.Add((start, end));
-                return segments;
-            }
-
-            var corner = new GridPosition(end.X, start.Y);
-            segments.Add((start, corner));
-            segments.Add((corner, end));
-
-            return segments;
-        }
-
-        private void UpdatePreviewPath()
-        {
-            Vector2Int mouseGrid = GridUtility.ScreenToGridPosition(
-                Input.mousePosition,
-                _mainCamera,
-                _gridSettings.CellSize,
-                _gridSettings.GridOrigin
-            );
-
-            var current = new GridPosition(mouseGrid.x, mouseGrid.y);
-
-            if (_startPin.Position.X == current.X || _startPin.Position.Y == current.Y)
-            {
-                _previewLine.positionCount = 2;
-                SetPreviewPosition(0, _startPin.Position);
-                SetPreviewPosition(1, current);
-            }
-            else
-            {
-                var corner = new GridPosition(current.X, _startPin.Position.Y);
-                _previewLine.positionCount = 3;
-                SetPreviewPosition(0, _startPin.Position);
-                SetPreviewPosition(1, corner);
-                SetPreviewPosition(2, current);
-            }
-        }
-
-        private void SetPreviewPosition(int index, GridPosition gridPos)
-        {
-            Vector3 worldPos = GridUtility.GridToWorldPosition(
-                new Vector2Int(gridPos.X, gridPos.Y),
-                _gridSettings.CellSize,
-                _gridSettings.GridOrigin
-            );
-            worldPos.y += _previewY;
-            _previewLine.SetPosition(index, worldPos);
         }
 
         private bool TryGetClickedPin(out PinReference pinRef)
@@ -331,47 +297,17 @@ namespace CircuitCraft.Controllers
 
             var boardPos = new GridPosition(componentView.GridPosition.x, componentView.GridPosition.y);
             var primaryComponent = _boardState.GetComponentAt(boardPos);
-            if (TryGetNearestPin(primaryComponent, mouseGridPos, out pinRef))
+            if (PinDetector.TryGetNearestPin(primaryComponent, mouseGridPos, out pinRef))
                 return true;
 
             var fallbackComponent = _boardState.GetComponentAt(mouseGridPos);
-            if (primaryComponent == null || fallbackComponent == null || primaryComponent.InstanceId != fallbackComponent.InstanceId)
+            if (primaryComponent is null || fallbackComponent is null || primaryComponent.InstanceId != fallbackComponent.InstanceId)
             {
-                if (TryGetNearestPin(fallbackComponent, mouseGridPos, out pinRef))
+                if (PinDetector.TryGetNearestPin(fallbackComponent, mouseGridPos, out pinRef))
                     return true;
             }
 
             return false;
-        }
-
-        private static bool TryGetNearestPin(PlacedComponent component, GridPosition mouseGridPos, out PinReference pinRef)
-        {
-            pinRef = default;
-            if (component == null)
-                return false;
-
-            PinReference? bestPin = null;
-            int bestDistance = int.MaxValue;
-
-            foreach (var pin in component.Pins)
-            {
-                GridPosition pinWorld = component.GetPinWorldPosition(pin.PinIndex);
-                int distance = pinWorld.ManhattanDistance(mouseGridPos);
-                if (distance < bestDistance)
-                {
-                    bestDistance = distance;
-                    bestPin = new PinReference(component.InstanceId, pin.PinIndex, pinWorld);
-                }
-            }
-
-            if (!bestPin.HasValue)
-                return false;
-
-            if (bestDistance > 1)
-                return false;
-
-            pinRef = bestPin.Value;
-            return true;
         }
 
         private bool TryGetClickedPinByGrid(out PinReference pinRef)
@@ -387,30 +323,7 @@ namespace CircuitCraft.Controllers
 
             var mouseGridPos = new GridPosition(mouseGrid.x, mouseGrid.y);
 
-            PinReference? bestPin = null;
-            int bestDistance = int.MaxValue;
-
-            foreach (var component in _boardState.Components)
-            {
-                foreach (var pin in component.Pins)
-                {
-                    GridPosition pinWorld = component.GetPinWorldPosition(pin.PinIndex);
-                    int distance = pinWorld.ManhattanDistance(mouseGridPos);
-                    if (distance < bestDistance)
-                    {
-                        bestDistance = distance;
-                        bestPin = new PinReference(component.InstanceId, pin.PinIndex, pinWorld);
-                    }
-                }
-            }
-
-            if (bestPin.HasValue && bestDistance <= 1)
-            {
-                pinRef = bestPin.Value;
-                return true;
-            }
-
-            return false;
+            return PinDetector.TryGetNearestPinFromAll(_boardState.Components, mouseGridPos, out pinRef);
         }
 
         private void TrySelectTraceAtMouse()
@@ -426,7 +339,7 @@ namespace CircuitCraft.Controllers
             _selectedTraceSegmentId = -1;
             foreach (var trace in _boardState.Traces)
             {
-                if (IsPointOnTrace(trace, pos))
+                if (WirePathCalculator.IsPointOnTrace(trace, pos))
                 {
                     _selectedTraceSegmentId = trace.SegmentId;
                     break;
@@ -434,37 +347,17 @@ namespace CircuitCraft.Controllers
             }
         }
 
-        private static bool IsPointOnTrace(TraceSegment trace, GridPosition point)
-        {
-            if (trace.Start.X == trace.End.X)
-            {
-                if (point.X != trace.Start.X)
-                    return false;
-
-                int minY = Mathf.Min(trace.Start.Y, trace.End.Y);
-                int maxY = Mathf.Max(trace.Start.Y, trace.End.Y);
-                return point.Y >= minY && point.Y <= maxY;
-            }
-
-            if (point.Y != trace.Start.Y)
-                return false;
-
-            int minX = Mathf.Min(trace.Start.X, trace.End.X);
-            int maxX = Mathf.Max(trace.Start.X, trace.End.X);
-            return point.X >= minX && point.X <= maxX;
-        }
-
         private void CancelRouting()
         {
             _state = RoutingState.Idle;
             _startPin = default;
-            HidePreview();
+            _wirePreviewManager?.Hide();
 
             if (_wiringModeActive)
             {
                 UpdateStatusForWiringMode();
             }
-            else if (_statusLabel != null)
+            else if (_statusLabel is not null)
             {
                 _statusLabel.text = StatusReady;
             }
@@ -494,13 +387,13 @@ namespace CircuitCraft.Controllers
             _wiringModeActive = false;
             CancelRouting();
 
-            if (_statusLabel != null)
+            if (_statusLabel is not null)
                 _statusLabel.text = StatusReady;
         }
 
         private void UpdateStatusForWiringMode()
         {
-            if (_statusLabel != null)
+            if (_statusLabel is not null)
                 _statusLabel.text = StatusWiringMode;
         }
 
@@ -516,50 +409,10 @@ namespace CircuitCraft.Controllers
             }
         }
 
-        private void EnsurePreviewLine()
-        {
-            var previewObject = new GameObject("WirePreview");
-            previewObject.transform.SetParent(transform, false);
-
-            _previewLine = previewObject.AddComponent<LineRenderer>();
-            _previewLine.useWorldSpace = true;
-            _previewLine.positionCount = 0;
-            _previewLine.startWidth = _previewWidth;
-            _previewLine.endWidth = _previewWidth;
-            _previewLine.startColor = _previewColor;
-            _previewLine.endColor = _previewColor;
-            _previewLine.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            _previewLine.receiveShadows = false;
-            var shader = _previewShader != null ? _previewShader : Shader.Find("Sprites/Default");
-            _previewLine.material = new Material(shader);
-        }
-
-        private void ShowPreview()
-        {
-            if (_previewLine != null)
-            {
-                _previewLine.enabled = true;
-            }
-        }
-
-        private void HidePreview()
-        {
-            if (_previewLine != null)
-            {
-                _previewLine.positionCount = 0;
-                _previewLine.enabled = false;
-            }
-        }
-
         private void OnDestroy()
         {
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= HandleBoardReset;
-
-            if (_previewLine != null && _previewLine.material != null)
-            {
-                Destroy(_previewLine.material);
-            }
         }
 
         /// <summary>
@@ -581,11 +434,13 @@ namespace CircuitCraft.Controllers
         /// <summary>
         /// Gets whether there is at least one command available to undo.
         /// </summary>
+        /// <returns>True if an undo operation is available; otherwise false.</returns>
         public bool CanUndo => _commandHistory.CanUndo;
 
         /// <summary>
         /// Gets whether there is at least one command available to redo.
         /// </summary>
+        /// <returns>True if a redo operation is available; otherwise false.</returns>
         public bool CanRedo => _commandHistory.CanRedo;
         
     }

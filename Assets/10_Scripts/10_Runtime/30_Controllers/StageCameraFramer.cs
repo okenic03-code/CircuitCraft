@@ -11,8 +11,13 @@ namespace CircuitCraft.Controllers
     /// </summary>
     public class StageCameraFramer : MonoBehaviour
     {
+        [Tooltip("Stage manager that raises stage load events.")]
         [SerializeField] private StageManager _stageManager;
+
+        [Tooltip("Camera controller to frame the board area.")]
         [SerializeField] private CameraController _cameraController;
+
+        [Tooltip("Grid settings used to convert stage area to world-space framing.")]
         [SerializeField] private GridSettings _gridSettings;
 
         private void OnEnable()
