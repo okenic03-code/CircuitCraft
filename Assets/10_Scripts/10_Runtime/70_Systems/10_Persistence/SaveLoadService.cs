@@ -21,7 +21,7 @@ namespace CircuitCraft.Systems
         /// <returns>JSON string representation of the board solution.</returns>
         public string Serialize(BoardState boardState, string stageId)
         {
-            if (boardState == null)
+            if (boardState is null)
                 throw new ArgumentNullException(nameof(boardState));
             if (string.IsNullOrWhiteSpace(stageId))
                 throw new ArgumentException("Stage ID cannot be null or empty.", nameof(stageId));
@@ -52,22 +52,22 @@ namespace CircuitCraft.Systems
         /// <param name="data">Save data to restore from.</param>
         public void RestoreToBoard(BoardState boardState, BoardSaveData data)
         {
-            if (boardState == null)
+            if (boardState is null)
                 throw new ArgumentNullException(nameof(boardState));
-            if (data == null)
+            if (data is null)
                 throw new ArgumentNullException(nameof(data));
 
             // Maps from saved IDs to newly assigned IDs (BoardState auto-assigns IDs).
-            var componentIdMap = new Dictionary<int, int>();
-            var netIdMap = new Dictionary<int, int>();
+            Dictionary<int, int> componentIdMap = new();
+            Dictionary<int, int> netIdMap = new();
 
             // 1. Place components
-            if (data.components != null)
+            if (data.components is not null)
             {
                 foreach (var compData in data.components)
                 {
-                    var pins = new List<PinInstance>();
-                    if (compData.pins != null)
+                    List<PinInstance> pins = new();
+                    if (compData.pins is not null)
                     {
                         foreach (var pinData in compData.pins)
                         {
@@ -94,7 +94,7 @@ namespace CircuitCraft.Systems
             }
 
             // 2. Create nets
-            if (data.nets != null)
+            if (data.nets is not null)
             {
                 foreach (var netData in data.nets)
                 {
@@ -104,7 +104,7 @@ namespace CircuitCraft.Systems
             }
 
             // 3. Add traces (using mapped net IDs)
-            if (data.traces != null)
+            if (data.traces is not null)
             {
                 foreach (var traceData in data.traces)
                 {
@@ -120,7 +120,7 @@ namespace CircuitCraft.Systems
             }
 
             // 4. Connect pins to nets (using mapped IDs)
-            if (data.pinConnections != null)
+            if (data.pinConnections is not null)
             {
                 foreach (var conn in data.pinConnections)
                 {
@@ -131,7 +131,7 @@ namespace CircuitCraft.Systems
 
                     // Recalculate world position from the placed component
                     var component = boardState.GetComponent(mappedCompId);
-                    if (component == null)
+                    if (component is null)
                         continue;
 
                     var worldPos = component.GetPinWorldPosition(conn.pinIndex);
@@ -194,7 +194,7 @@ namespace CircuitCraft.Systems
             // Serialize components and their pins
             foreach (var comp in boardState.Components)
             {
-                var compData = new ComponentSaveData
+                ComponentSaveData compData = new()
                 {
                     instanceId = comp.InstanceId,
                     componentDefId = comp.ComponentDefinitionId,
@@ -208,7 +208,7 @@ namespace CircuitCraft.Systems
 
                 foreach (var pin in comp.Pins)
                 {
-                    compData.pins.Add(new PinInstanceSaveData
+                    compData.pins.Add(new()
                     {
                         pinIndex = pin.PinIndex,
                         pinName = pin.PinName,
@@ -223,7 +223,7 @@ namespace CircuitCraft.Systems
             // Serialize nets and pin connections
             foreach (var net in boardState.Nets)
             {
-                data.nets.Add(new NetSaveData
+                data.nets.Add(new()
                 {
                     netId = net.NetId,
                     netName = net.NetName
@@ -231,7 +231,7 @@ namespace CircuitCraft.Systems
 
                 foreach (var pinRef in net.ConnectedPins)
                 {
-                    data.pinConnections.Add(new PinConnectionSaveData
+                    data.pinConnections.Add(new()
                     {
                         componentInstanceId = pinRef.ComponentInstanceId,
                         pinIndex = pinRef.PinIndex,
@@ -245,7 +245,7 @@ namespace CircuitCraft.Systems
             // Serialize traces
             foreach (var trace in boardState.Traces)
             {
-                data.traces.Add(new TraceSaveData
+                data.traces.Add(new()
                 {
                     netId = trace.NetId,
                     startX = trace.Start.X,

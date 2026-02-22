@@ -20,16 +20,16 @@ namespace CircuitCraft.Systems
         public int boardHeight;
 
         /// <summary>All placed components.</summary>
-        public List<ComponentSaveData> components = new List<ComponentSaveData>();
+        public List<ComponentSaveData> components = new();
 
         /// <summary>All trace segments.</summary>
-        public List<TraceSaveData> traces = new List<TraceSaveData>();
+        public List<TraceSaveData> traces = new();
 
         /// <summary>All nets.</summary>
-        public List<NetSaveData> nets = new List<NetSaveData>();
+        public List<NetSaveData> nets = new();
 
         /// <summary>All pin-to-net connections.</summary>
-        public List<PinConnectionSaveData> pinConnections = new List<PinConnectionSaveData>();
+        public List<PinConnectionSaveData> pinConnections = new();
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ namespace CircuitCraft.Systems
         public bool hasCustomValue;
 
         /// <summary>Pin instances belonging to this component.</summary>
-        public List<PinInstanceSaveData> pins = new List<PinInstanceSaveData>();
+        public List<PinInstanceSaveData> pins = new();
     }
 
     /// <summary>

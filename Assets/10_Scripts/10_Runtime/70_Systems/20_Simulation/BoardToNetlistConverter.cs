@@ -44,7 +44,7 @@ namespace CircuitCraft.Systems
         /// <returns>A circuit netlist ready for simulation.</returns>
         public CircuitNetlist Convert(BoardState boardState, IEnumerable<ProbeDefinition> probes = null)
         {
-            if (boardState == null)
+            if (boardState is null)
                 throw new ArgumentNullException(nameof(boardState));
 
             var netlist = new CircuitNetlist
@@ -57,7 +57,7 @@ namespace CircuitCraft.Systems
             foreach (var component in boardState.Components)
             {
                 var definition = _componentProvider.GetDefinition(component.ComponentDefinitionId);
-                if (definition == null)
+                if (definition is null)
                 {
                     throw new InvalidOperationException(
                         $"Component definition '{component.ComponentDefinitionId}' not found.");
@@ -65,14 +65,14 @@ namespace CircuitCraft.Systems
 
                 // Map component to netlist element
                 var element = ConvertComponent(component, definition, boardState);
-                if (element != null)
+                if (element is not null)
                 {
                     netlist.AddElement(element);
                 }
             }
 
             // Add probes if provided
-            if (probes != null)
+            if (probes is not null)
             {
                 foreach (var probe in probes)
                 {
@@ -92,77 +92,46 @@ namespace CircuitCraft.Systems
             var nodes = GetComponentNodes(component, boardState);
             var elementId = $"{GetElementPrefix(definition.Kind)}{component.InstanceId}";
 
-            switch (definition.Kind)
+            return definition.Kind switch
             {
-                case ComponentKind.Resistor:
-                    if (nodes.Length >= 2)
-                        return NetlistElement.Resistor(elementId, nodes[0], nodes[1], GetResistance(definition, component));
-                    break;
-
-                case ComponentKind.Capacitor:
-                    if (nodes.Length >= 2)
-                        return NetlistElement.Capacitor(elementId, nodes[0], nodes[1], GetCapacitance(definition, component));
-                    break;
-
-                case ComponentKind.Inductor:
-                    if (nodes.Length >= 2)
-                        return CreateInductor(elementId, nodes[0], nodes[1], GetInductance(definition, component));
-                    break;
-
-                case ComponentKind.VoltageSource:
-                    if (nodes.Length >= 2)
-                        return NetlistElement.VoltageSource(elementId, nodes[0], nodes[1], GetVoltage(definition, component));
-                    break;
-
-                case ComponentKind.CurrentSource:
-                    if (nodes.Length >= 2)
-                        return NetlistElement.CurrentSource(elementId, nodes[0], nodes[1], GetCurrent(definition, component));
-                    break;
-
-                case ComponentKind.Diode:
-                case ComponentKind.LED:
-                case ComponentKind.ZenerDiode:
-                    if (nodes.Length >= 2)
-                        return NetlistElement.Diode(elementId, nodes[0], nodes[1],
-                            GetDiodeModelName(definition),
-                            definition.SaturationCurrent,
-                            definition.EmissionCoefficient,
-                            definition.BreakdownVoltage,
-                            definition.BreakdownCurrent);
-                    break;
-
-                case ComponentKind.BJT:
-                    if (nodes.Length >= 3)
-                        return NetlistElement.BJT(elementId, nodes[0], nodes[1], nodes[2],
-                            GetBJTModelName(definition),
-                            definition.BJTPolarity == BJTPolarity.NPN,
-                            definition.Beta,
-                            definition.EarlyVoltage);
-                    break;
-
-                case ComponentKind.MOSFET:
-                    if (nodes.Length >= 3)
-                        // Pass nodes[2] (Source) as Bulk to auto-connect
-                        return NetlistElement.MOSFET(elementId, nodes[0], nodes[1], nodes[2], nodes[2],
-                            GetMOSFETModelName(definition),
-                            definition.FETPolarity == FETPolarity.NChannel,
-                            definition.ThresholdVoltage,
-                            definition.Transconductance);
-                    break;
-
-                case ComponentKind.Ground:
-                    // Ground is handled via net names, not as a component
-                    return null;
-
-                case ComponentKind.Probe:
-                    // Probes are handled separately, not as circuit elements
-                    return null;
-
-                default:
-                    throw new NotSupportedException($"Component kind '{definition.Kind}' not yet supported in netlist conversion.");
-            }
-
-            return null;
+                ComponentKind.Resistor when nodes.Length >= 2 => NetlistElement.Resistor(elementId, nodes[0], nodes[1], GetResistance(definition, component)),
+                ComponentKind.Capacitor when nodes.Length >= 2 => NetlistElement.Capacitor(elementId, nodes[0], nodes[1], GetCapacitance(definition, component)),
+                ComponentKind.Inductor when nodes.Length >= 2 => CreateInductor(elementId, nodes[0], nodes[1], GetInductance(definition, component)),
+                ComponentKind.VoltageSource when nodes.Length >= 2 => NetlistElement.VoltageSource(elementId, nodes[0], nodes[1], GetVoltage(definition, component)),
+                ComponentKind.CurrentSource when nodes.Length >= 2 => NetlistElement.CurrentSource(elementId, nodes[0], nodes[1], GetCurrent(definition, component)),
+                ComponentKind.Diode when nodes.Length >= 2 => NetlistElement.Diode(elementId, nodes[0], nodes[1],
+                    GetDiodeModelName(definition),
+                    definition.SaturationCurrent,
+                    definition.EmissionCoefficient,
+                    definition.BreakdownVoltage,
+                    definition.BreakdownCurrent),
+                ComponentKind.LED when nodes.Length >= 2 => NetlistElement.Diode(elementId, nodes[0], nodes[1],
+                    GetDiodeModelName(definition),
+                    definition.SaturationCurrent,
+                    definition.EmissionCoefficient,
+                    definition.BreakdownVoltage,
+                    definition.BreakdownCurrent),
+                ComponentKind.ZenerDiode when nodes.Length >= 2 => NetlistElement.Diode(elementId, nodes[0], nodes[1],
+                    GetDiodeModelName(definition),
+                    definition.SaturationCurrent,
+                    definition.EmissionCoefficient,
+                    definition.BreakdownVoltage,
+                    definition.BreakdownCurrent),
+                ComponentKind.BJT when nodes.Length >= 3 => NetlistElement.BJT(elementId, nodes[0], nodes[1], nodes[2],
+                    GetBJTModelName(definition),
+                    definition.BJTPolarity == BJTPolarity.NPN,
+                    definition.Beta,
+                    definition.EarlyVoltage),
+                ComponentKind.MOSFET when nodes.Length >= 3 => NetlistElement.MOSFET(elementId, nodes[0], nodes[1], nodes[2], nodes[2],
+                    GetMOSFETModelName(definition),
+                    definition.FETPolarity == FETPolarity.NChannel,
+                    definition.ThresholdVoltage,
+                    definition.Transconductance),
+                ComponentKind.Resistor or ComponentKind.Capacitor or ComponentKind.Inductor or ComponentKind.VoltageSource or ComponentKind.CurrentSource or ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode or ComponentKind.BJT or ComponentKind.MOSFET => null,
+                ComponentKind.Ground => null,
+                ComponentKind.Probe => null,
+                _ => throw new NotSupportedException($"Component kind '{definition.Kind}' not yet supported in netlist conversion.")
+            };
         }
 
         /// <summary>
@@ -170,12 +139,12 @@ namespace CircuitCraft.Systems
         /// </summary>
         private NetlistElement CreateInductor(string id, string nodeA, string nodeB, double henrys)
         {
-            return new NetlistElement
+            return new()
             {
                 Id = id,
                 Type = ElementType.Inductor,
                 Value = henrys,
-                Nodes = new List<string> { nodeA, nodeB }
+                Nodes = new() { nodeA, nodeB }
             };
         }
 
@@ -184,14 +153,14 @@ namespace CircuitCraft.Systems
         /// </summary>
         private string[] GetComponentNodes(PlacedComponent component, BoardState boardState)
         {
-            var nodes = new List<string>();
+            List<string> nodes = new();
 
             foreach (var pin in component.Pins)
             {
                 if (pin.ConnectedNetId.HasValue)
                 {
                     var net = boardState.GetNet(pin.ConnectedNetId.Value);
-                    if (net != null)
+                    if (net is not null)
                     {
                         nodes.Add(net.NetName);
                     }
@@ -216,29 +185,18 @@ namespace CircuitCraft.Systems
         /// </summary>
         public static ElementType MapComponentKind(ComponentKind kind)
         {
-            switch (kind)
+            return kind switch
             {
-                case ComponentKind.Resistor:
-                    return ElementType.Resistor;
-                case ComponentKind.Capacitor:
-                    return ElementType.Capacitor;
-                case ComponentKind.Inductor:
-                    return ElementType.Inductor;
-                case ComponentKind.VoltageSource:
-                    return ElementType.VoltageSource;
-                case ComponentKind.CurrentSource:
-                    return ElementType.CurrentSource;
-                case ComponentKind.Diode:
-                case ComponentKind.LED:
-                case ComponentKind.ZenerDiode:
-                    return ElementType.Diode;
-                case ComponentKind.BJT:
-                    return ElementType.BJT;
-                case ComponentKind.MOSFET:
-                    return ElementType.MOSFET;
-                default:
-                    throw new NotSupportedException($"Component kind '{kind}' not mapped to ElementType.");
-            }
+                ComponentKind.Resistor => ElementType.Resistor,
+                ComponentKind.Capacitor => ElementType.Capacitor,
+                ComponentKind.Inductor => ElementType.Inductor,
+                ComponentKind.VoltageSource => ElementType.VoltageSource,
+                ComponentKind.CurrentSource => ElementType.CurrentSource,
+                ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode => ElementType.Diode,
+                ComponentKind.BJT => ElementType.BJT,
+                ComponentKind.MOSFET => ElementType.MOSFET,
+                _ => throw new NotSupportedException($"Component kind '{kind}' not mapped to ElementType.")
+            };
         }
 
         /// <summary>
@@ -246,29 +204,18 @@ namespace CircuitCraft.Systems
         /// </summary>
         public static string GetElementPrefix(ComponentKind kind)
         {
-            switch (kind)
+            return kind switch
             {
-                case ComponentKind.Resistor:
-                    return "R";
-                case ComponentKind.Capacitor:
-                    return "C";
-                case ComponentKind.Inductor:
-                    return "L";
-                case ComponentKind.VoltageSource:
-                    return "V";
-                case ComponentKind.CurrentSource:
-                    return "I";
-                case ComponentKind.Diode:
-                case ComponentKind.LED:
-                case ComponentKind.ZenerDiode:
-                    return "D";
-                case ComponentKind.BJT:
-                    return "Q";
-                case ComponentKind.MOSFET:
-                    return "M";
-                default:
-                    return "X";
-            }
+                ComponentKind.Resistor => "R",
+                ComponentKind.Capacitor => "C",
+                ComponentKind.Inductor => "L",
+                ComponentKind.VoltageSource => "V",
+                ComponentKind.CurrentSource => "I",
+                ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode => "D",
+                ComponentKind.BJT => "Q",
+                ComponentKind.MOSFET => "M",
+                _ => "X"
+            };
         }
 
         // Helper methods to extract component values from ComponentDefinition
@@ -288,25 +235,25 @@ namespace CircuitCraft.Systems
         /// </summary>
         private static string GetBJTModelName(ComponentDefinition definition)
         {
-            switch (definition.BJTModel)
+            return definition.BJTModel switch
             {
-                case BJTModel._2N2222: return "2N2222";
-                case BJTModel._2N3904: return "2N3904";
-                case BJTModel._2N3906: return "2N3906";
-                case BJTModel.BC547: return "BC547";
-                case BJTModel.BC557: return "BC557";
-                case BJTModel.BC548: return "BC548";
-                case BJTModel.BC558: return "BC558";
-                case BJTModel.BC556: return "BC556";
-                case BJTModel.BC337: return "BC337";
-                case BJTModel.TIP31: return "TIP31";
-                case BJTModel.TIP32: return "TIP32";
-                case BJTModel._2N696: return "2N696";
-                case BJTModel.Generic_NPN: return "Generic_NPN";
-                case BJTModel.Generic_PNP: return "Generic_PNP";
-                case BJTModel.Custom: return "Custom_BJT";
-                default: return "2N2222";
-            }
+                BJTModel._2N2222 => "2N2222",
+                BJTModel._2N3904 => "2N3904",
+                BJTModel._2N3906 => "2N3906",
+                BJTModel.BC547 => "BC547",
+                BJTModel.BC557 => "BC557",
+                BJTModel.BC548 => "BC548",
+                BJTModel.BC558 => "BC558",
+                BJTModel.BC556 => "BC556",
+                BJTModel.BC337 => "BC337",
+                BJTModel.TIP31 => "TIP31",
+                BJTModel.TIP32 => "TIP32",
+                BJTModel._2N696 => "2N696",
+                BJTModel.Generic_NPN => "Generic_NPN",
+                BJTModel.Generic_PNP => "Generic_PNP",
+                BJTModel.Custom => "Custom_BJT",
+                _ => "2N2222"
+            };
         }
 
         /// <summary>
@@ -314,25 +261,25 @@ namespace CircuitCraft.Systems
         /// </summary>
         private static string GetMOSFETModelName(ComponentDefinition definition)
         {
-            switch (definition.MOSFETModel)
+            return definition.MOSFETModel switch
             {
-                case MOSFETModel._2N7000: return "2N7000";
-                case MOSFETModel.BS170: return "BS170";
-                case MOSFETModel.IRF540: return "IRF540";
-                case MOSFETModel.IRF9540: return "IRF9540";
-                case MOSFETModel.BS250: return "BS250";
-                case MOSFETModel.IRF3205: return "IRF3205";
-                case MOSFETModel.IRF530: return "IRF530";
-                case MOSFETModel.IRLZ44N: return "IRLZ44N";
-                case MOSFETModel.IRF520: return "IRF520";
-                case MOSFETModel.BSS84: return "BSS84";
-                case MOSFETModel.TP0610L: return "TP0610L";
-                case MOSFETModel.FQP27P06: return "FQP27P06";
-                case MOSFETModel.Generic_NMOS: return "Generic_NMOS";
-                case MOSFETModel.Generic_PMOS: return "Generic_PMOS";
-                case MOSFETModel.Custom: return "Custom_MOSFET";
-                default: return "NMOS";
-            }
+                MOSFETModel._2N7000 => "2N7000",
+                MOSFETModel.BS170 => "BS170",
+                MOSFETModel.IRF540 => "IRF540",
+                MOSFETModel.IRF9540 => "IRF9540",
+                MOSFETModel.BS250 => "BS250",
+                MOSFETModel.IRF3205 => "IRF3205",
+                MOSFETModel.IRF530 => "IRF530",
+                MOSFETModel.IRLZ44N => "IRLZ44N",
+                MOSFETModel.IRF520 => "IRF520",
+                MOSFETModel.BSS84 => "BSS84",
+                MOSFETModel.TP0610L => "TP0610L",
+                MOSFETModel.FQP27P06 => "FQP27P06",
+                MOSFETModel.Generic_NMOS => "Generic_NMOS",
+                MOSFETModel.Generic_PMOS => "Generic_PMOS",
+                MOSFETModel.Custom => "Custom_MOSFET",
+                _ => "NMOS"
+            };
         }
 
         /// <summary>
@@ -340,40 +287,40 @@ namespace CircuitCraft.Systems
         /// </summary>
         private static string GetDiodeModelName(ComponentDefinition definition)
         {
-            switch (definition.DiodeModel)
+            return definition.DiodeModel switch
             {
-                case DiodeModel._1N4148: return "1N4148";
-                case DiodeModel._1N4001: return "1N4001";
-                case DiodeModel._1N5819: return "1N5819";
-                case DiodeModel._1N4007: return "1N4007";
-                case DiodeModel._1N914: return "1N914";
-                case DiodeModel._1N4002: return "1N4002";
-                case DiodeModel._1N4004: return "1N4004";
-                case DiodeModel._1N5408: return "1N5408";
-                case DiodeModel.BAS40: return "BAS40";
-                case DiodeModel.BAT85: return "BAT85";
-                case DiodeModel.LED_Red: return "LED_Red";
-                case DiodeModel.LED_Green: return "LED_Green";
-                case DiodeModel.LED_Blue: return "LED_Blue";
-                case DiodeModel.LED_White: return "LED_White";
-                case DiodeModel.LED_Yellow: return "LED_Yellow";
-                case DiodeModel.Zener_3V3: return "1N4728A";
-                case DiodeModel.Zener_3V6: return "1N4729A";
-                case DiodeModel.Zener_3V9: return "1N4730A";
-                case DiodeModel.Zener_4V3: return "1N4731A";
-                case DiodeModel.Zener_4V7: return "1N4732A";
-                case DiodeModel.Zener_5V1: return "1N4733A";
-                case DiodeModel.Zener_5V6: return "1N4734A";
-                case DiodeModel.Zener_6V8: return "1N4736A";
-                case DiodeModel.Zener_8V2: return "1N4738A";
-                case DiodeModel.Zener_9V1: return "1N4739A";
-                case DiodeModel.Zener_12V: return "1N4742A";
-                case DiodeModel.Zener_15V: return "1N4744A";
-                case DiodeModel.Zener_27V: return "1N4750A";
-                case DiodeModel.Generic: return "Generic_Diode";
-                case DiodeModel.Custom: return "Custom_Diode";
-                default: return "1N4148";
-            }
+                DiodeModel._1N4148 => "1N4148",
+                DiodeModel._1N4001 => "1N4001",
+                DiodeModel._1N5819 => "1N5819",
+                DiodeModel._1N4007 => "1N4007",
+                DiodeModel._1N914 => "1N914",
+                DiodeModel._1N4002 => "1N4002",
+                DiodeModel._1N4004 => "1N4004",
+                DiodeModel._1N5408 => "1N5408",
+                DiodeModel.BAS40 => "BAS40",
+                DiodeModel.BAT85 => "BAT85",
+                DiodeModel.LED_Red => "LED_Red",
+                DiodeModel.LED_Green => "LED_Green",
+                DiodeModel.LED_Blue => "LED_Blue",
+                DiodeModel.LED_White => "LED_White",
+                DiodeModel.LED_Yellow => "LED_Yellow",
+                DiodeModel.Zener_3V3 => "1N4728A",
+                DiodeModel.Zener_3V6 => "1N4729A",
+                DiodeModel.Zener_3V9 => "1N4730A",
+                DiodeModel.Zener_4V3 => "1N4731A",
+                DiodeModel.Zener_4V7 => "1N4732A",
+                DiodeModel.Zener_5V1 => "1N4733A",
+                DiodeModel.Zener_5V6 => "1N4734A",
+                DiodeModel.Zener_6V8 => "1N4736A",
+                DiodeModel.Zener_8V2 => "1N4738A",
+                DiodeModel.Zener_9V1 => "1N4739A",
+                DiodeModel.Zener_12V => "1N4742A",
+                DiodeModel.Zener_15V => "1N4744A",
+                DiodeModel.Zener_27V => "1N4750A",
+                DiodeModel.Generic => "Generic_Diode",
+                DiodeModel.Custom => "Custom_Diode",
+                _ => "1N4148"
+            };
         }
     }
 }
