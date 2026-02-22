@@ -148,23 +148,19 @@ namespace CircuitCraft.Views
                     continue;
                 }
 
-                var direction = Mathf.Sign(current);
-                if (Mathf.Approximately(direction, 0f))
-                {
-                    continue;
-                }
-
-                var speed = Mathf.Abs(current) * _flowAnimationSpeedScale + _flowAnimationBaseSpeed;
-                speed = Mathf.Min(speed, _flowAnimationMaxSpeed);
-
                 float offset = 0f;
                 if (_segmentFlowOffsets.TryGetValue(segmentId, out var currentOffset))
                 {
                     offset = currentOffset;
                 }
 
-                offset += direction * speed * Time.deltaTime;
-                offset = Mathf.Repeat(offset, 1f);
+                offset = TraceGeometryBuilder.CalculateFlowOffset(
+                    offset,
+                    current,
+                    _flowAnimationBaseSpeed,
+                    _flowAnimationSpeedScale,
+                    _flowAnimationMaxSpeed,
+                    Time.deltaTime);
                 _segmentFlowOffsets[segmentId] = offset;
 
                 var flowMaterial = flowLine.sharedMaterial;
@@ -250,45 +246,25 @@ namespace CircuitCraft.Views
                 return;
             }
 
+            var traceColors = TraceGeometryBuilder.ComputeVoltageColors(
+                _boardState.Traces,
+                _boardState.GetNet,
+                nodeVoltages,
+                minVoltage,
+                maxVoltage,
+                _voltageMinColor,
+                _voltageMaxColor,
+                _wireColor);
+
             foreach (var pair in _traceLines)
             {
                 if (pair.Value == null)
                     continue;
 
-                TraceSegment targetTrace = null;
-                foreach (var trace in _boardState.Traces)
-                {
-                    if (trace.SegmentId == pair.Key)
-                    {
-                        targetTrace = trace;
-                        break;
-                    }
-                }
+                var color = traceColors.TryGetValue(pair.Key, out var mappedColor)
+                    ? mappedColor
+                    : _wireColor;
 
-                if (targetTrace == null)
-                {
-                    pair.Value.startColor = _wireColor;
-                    pair.Value.endColor = _wireColor;
-                    continue;
-                }
-
-                var net = _boardState.GetNet(targetTrace.NetId);
-                if (net == null || string.IsNullOrWhiteSpace(net.NetName))
-                {
-                    pair.Value.startColor = _wireColor;
-                    pair.Value.endColor = _wireColor;
-                    continue;
-                }
-
-                if (!nodeVoltages.TryGetValue(net.NetName, out var voltage))
-                {
-                    pair.Value.startColor = _wireColor;
-                    pair.Value.endColor = _wireColor;
-                    continue;
-                }
-
-                var color = Color.Lerp(_voltageMinColor, _voltageMaxColor,
-                    NormalizeVoltage((float)voltage, minVoltage, maxVoltage));
                 pair.Value.startColor = color;
                 pair.Value.endColor = color;
             }
@@ -361,17 +337,6 @@ namespace CircuitCraft.Views
                 line.startColor = _wireColor;
                 line.endColor = _wireColor;
             }
-        }
-
-        private static float NormalizeVoltage(float voltage, float minVoltage, float maxVoltage)
-        {
-            float range = maxVoltage - minVoltage;
-            if (range <= float.Epsilon)
-            {
-                return 0f;
-            }
-
-            return Mathf.Clamp01((voltage - minVoltage) / range);
         }
 
         private void HandleTraceAdded(TraceSegment trace)
@@ -524,19 +489,8 @@ namespace CircuitCraft.Views
                 filterMode = FilterMode.Bilinear
             };
 
-            for (int x = 0; x < FlowTextureWidth; x++)
-            {
-                float cycle = (x / (float)FlowTextureWidth) * 4f;
-                float saw = Mathf.Abs((cycle % 2f) - 1f);
-                float alpha = Mathf.Max(0f, 1f - saw * 2f);
-
-                for (int y = 0; y < FlowTextureHeight; y++)
-                {
-                    float distanceToCenter = Mathf.Abs(y - (FlowTextureHeight - 1f) * 0.5f);
-                    float vertical = Mathf.Clamp01(1f - (distanceToCenter / ((FlowTextureHeight - 1f) * 0.5f)));
-                    texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha * vertical));
-                }
-            }
+            var pixels = TraceGeometryBuilder.GenerateFlowTexturePixels(FlowTextureWidth, FlowTextureHeight);
+            texture.SetPixels(pixels);
 
             texture.Apply();
             return texture;

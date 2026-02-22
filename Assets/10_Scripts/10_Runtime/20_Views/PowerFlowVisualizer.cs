@@ -5,7 +5,6 @@ using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using CircuitCraft.Simulation;
-using CircuitCraft.Systems;
 using CircuitCraft.Utils;
 using UnityEngine;
 
@@ -112,7 +111,7 @@ namespace CircuitCraft.Views
                 return;
             }
 
-            var nodeVoltages = ExtractNodeVoltages(result);
+            var nodeVoltages = SimulationDataMapper.ExtractNodeVoltages(result);
             ApplyTraceColors(nodeVoltages);
             ApplyTraceCurrentFlow(result);
             ApplyComponentOverlays(nodeVoltages, result);
@@ -149,98 +148,13 @@ namespace CircuitCraft.Views
                 return;
             }
 
-            var segmentCurrents = BuildTraceSegmentCurrentMap(result);
+            var segmentCurrents = SimulationDataMapper.BuildTraceSegmentCurrentMap(
+                _boardState.Traces,
+                _boardView != null ? _boardView.ComponentViews : null,
+                _boardState,
+                result,
+                TraceCurrentThresholdAmps);
             _traceRenderer.ApplyCurrentFlow(segmentCurrents);
-        }
-
-        private Dictionary<int, float> BuildTraceSegmentCurrentMap(SimulationResult result)
-        {
-            var segmentCurrentMap = new Dictionary<int, float>();
-            if (result == null || _boardState == null || _boardView == null || _boardState.Traces.Count == 0)
-            {
-                return segmentCurrentMap;
-            }
-
-            var netCurrentMap = new Dictionary<int, float>();
-            var fallbackNetCurrentMap = new Dictionary<int, float>();
-            var fallbackNetAbsMap = new Dictionary<int, float>();
-
-            foreach (var componentPair in _boardView.ComponentViews)
-            {
-                var instanceId = componentPair.Key;
-                var componentView = componentPair.Value;
-                var placedComponent = _boardState.GetComponent(instanceId);
-                var definition = componentView != null ? componentView.Definition : null;
-                if (placedComponent == null || definition == null)
-                {
-                    continue;
-                }
-
-                var componentCurrent = GetComponentCurrent(definition, instanceId, result);
-                if (!componentCurrent.HasValue)
-                {
-                    continue;
-                }
-
-                var current = (float)componentCurrent.Value;
-                var absCurrent = Mathf.Abs(current);
-                if (absCurrent < TraceCurrentThresholdAmps)
-                {
-                    continue;
-                }
-
-                foreach (var pin in placedComponent.Pins)
-                {
-                    if (!pin.ConnectedNetId.HasValue)
-                    {
-                        continue;
-                    }
-
-                    int netId = pin.ConnectedNetId.Value;
-                    var signedContribution = GetPinSignedCurrentContribution(current, pin.PinIndex);
-                    if (!Mathf.Approximately(signedContribution, 0f))
-                    {
-                        netCurrentMap.TryGetValue(netId, out var aggregateCurrent);
-                        netCurrentMap[netId] = aggregateCurrent + signedContribution;
-                    }
-
-                    if (!fallbackNetAbsMap.TryGetValue(netId, out var trackedAbs) || absCurrent > trackedAbs)
-                    {
-                        fallbackNetCurrentMap[netId] = current;
-                        fallbackNetAbsMap[netId] = absCurrent;
-                    }
-                }
-            }
-
-            foreach (var trace in _boardState.Traces)
-            {
-                if (!netCurrentMap.TryGetValue(trace.NetId, out var netCurrent))
-                {
-                    if (!fallbackNetCurrentMap.TryGetValue(trace.NetId, out netCurrent))
-                    {
-                        continue;
-                    }
-                }
-
-                if (Mathf.Abs(netCurrent) < TraceCurrentThresholdAmps)
-                {
-                    continue;
-                }
-
-                segmentCurrentMap[trace.SegmentId] = netCurrent;
-            }
-
-            return segmentCurrentMap;
-        }
-
-        private static float GetPinSignedCurrentContribution(float current, int pinIndex)
-        {
-            return pinIndex switch
-            {
-                0 => current,
-                1 => -current,
-                _ => 0f
-            };
         }
 
         private void ApplyComponentOverlays(Dictionary<string, double> nodeVoltages, SimulationResult result)
@@ -250,7 +164,10 @@ namespace CircuitCraft.Views
                 return;
             }
 
-            var resistorPowerByInstanceId = GetResistorPowerMap(result);
+            var resistorPowerByInstanceId = SimulationDataMapper.GetResistorPowerMap(
+                _boardView.ComponentViews,
+                _boardState,
+                result);
             double maxPower = 0d;
             foreach (var power in resistorPowerByInstanceId.Values)
             {
@@ -318,7 +235,7 @@ namespace CircuitCraft.Views
                 }
 
                 var averageVoltage = voltageSum / measuredPinVoltages.Count;
-                var currentProbeValue = GetComponentCurrent(componentView.Definition, placedComponent.InstanceId, result);
+                var currentProbeValue = SimulationDataMapper.GetComponentCurrent(componentView.Definition, placedComponent.InstanceId, result);
                 var currentText = currentProbeValue.HasValue
                     ? $"I: {CircuitUnitFormatter.FormatCurrent(currentProbeValue.Value)}"
                     : "I: n/a";
@@ -346,89 +263,6 @@ namespace CircuitCraft.Views
             }
         }
 
-        private Dictionary<int, double> GetResistorPowerMap(SimulationResult result)
-        {
-            var resistorPowerByInstanceId = new Dictionary<int, double>();
-
-            if (_boardState == null || result == null)
-            {
-                return resistorPowerByInstanceId;
-            }
-
-            foreach (var pair in _boardView.ComponentViews)
-            {
-                int instanceId = pair.Key;
-                var componentView = pair.Value;
-                var definition = componentView != null ? componentView.Definition : null;
-                var placedComponent = _boardState.GetComponent(instanceId);
-
-                if (definition == null || placedComponent == null || definition.Kind != ComponentKind.Resistor)
-                {
-                    continue;
-                }
-
-                var current = GetComponentCurrent(definition, instanceId, result);
-                if (!current.HasValue)
-                {
-                    continue;
-                }
-
-                float resistance = ResolveResistorValue(definition, placedComponent);
-                if (resistance <= 0f)
-                {
-                    continue;
-                }
-
-                var power = current.Value * current.Value * resistance;
-                resistorPowerByInstanceId[instanceId] = power;
-            }
-
-            return resistorPowerByInstanceId;
-        }
-
-        private static float ResolveResistorValue(ComponentDefinition definition, PlacedComponent component)
-        {
-            if (component?.CustomValue.HasValue == true)
-            {
-                return component.CustomValue.Value;
-            }
-
-            if (definition == null)
-            {
-                return 0f;
-            }
-
-            if (definition.ResistanceOhms > 0f)
-            {
-                return definition.ResistanceOhms;
-            }
-
-            return 1000f;
-        }
-
-        private double? GetComponentCurrent(ComponentDefinition definition, int instanceId, SimulationResult result)
-        {
-            if (result == null || definition == null)
-            {
-                return null;
-            }
-
-            if (definition.Kind == ComponentKind.Ground || definition.Kind == ComponentKind.Probe)
-            {
-                return null;
-            }
-
-            try
-            {
-                var elementId = $"{BoardToNetlistConverter.GetElementPrefix(definition.Kind)}{instanceId}";
-                return result.GetCurrent(elementId);
-            }
-            catch (NotSupportedException)
-            {
-                return null;
-            }
-        }
-
         private void ClearVisualization()
         {
             if (_traceRenderer != null)
@@ -453,33 +287,6 @@ namespace CircuitCraft.Views
                 view.ShowLEDGlow(false, _ledGlowColor);
                 view.HideResistorHeatGlow();
             }
-        }
-
-        private static Dictionary<string, double> ExtractNodeVoltages(SimulationResult result)
-        {
-            var nodeVoltages = new Dictionary<string, double>(StringComparer.Ordinal);
-            if (result?.ProbeResults == null)
-            {
-                return nodeVoltages;
-            }
-
-            for (int i = 0; i < result.ProbeResults.Count; i++)
-            {
-                var probe = result.ProbeResults[i];
-                if (probe == null || probe.Type != ProbeType.Voltage)
-                {
-                    continue;
-                }
-
-                if (string.IsNullOrWhiteSpace(probe.Target))
-                {
-                    continue;
-                }
-
-                nodeVoltages[probe.Target] = probe.Value;
-            }
-
-            return nodeVoltages;
         }
 
         private void SubscribeToBoardState(BoardState boardState)
