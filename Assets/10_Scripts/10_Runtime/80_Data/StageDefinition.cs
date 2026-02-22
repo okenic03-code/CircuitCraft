@@ -3,21 +3,29 @@ using UnityEngine.Serialization;
 
 namespace CircuitCraft.Data
 {
+    /// <summary>
+    /// Defines a fixed component placement that is seeded on stage load.
+    /// </summary>
     [System.Serializable]
     public struct FixedPlacement
     {
+        /// <summary>The component to place at stage load.</summary>
         [Tooltip("The component to place (e.g., VoltageSource_5V, Ground).")]
         public ComponentDefinition component;
 
+        /// <summary>Grid position where the component is placed.</summary>
         [Tooltip("Grid position where the component is placed.")]
         public Vector2Int position;
 
+        /// <summary>Rotation in degrees (0, 90, 180, 270).</summary>
         [Tooltip("Rotation in degrees (0, 90, 180, 270).")]
         public int rotation;
 
+        /// <summary>Whether to override the component default electrical value.</summary>
         [Tooltip("Whether to override the component's default electrical value.")]
         public bool overrideCustomValue;
 
+        /// <summary>Custom electrical value used when <see cref="overrideCustomValue"/> is true.</summary>
         [Tooltip("Custom electrical value (only used when overrideCustomValue is true).")]
         public float customValue;
     }

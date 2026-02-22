@@ -16,16 +16,16 @@ namespace CircuitCraft.Data
         /// </summary>
         public static List<PinInstance> CreatePinInstances(ComponentDefinition definition)
         {
-            var pinInstances = new List<PinInstance>();
+            List<PinInstance> pinInstances = new();
             var pins = definition.Pins;
 
             // Fallback to standard pin definitions for components without explicit pins.
-            if (pins == null || pins.Length == 0)
+            if (pins is null || pins.Length == 0)
             {
                 pins = GetStandardPins(definition.Kind);
             }
 
-            if (pins != null)
+            if (pins is not null)
             {
                 for (int i = 0; i < pins.Length; i++)
                 {
@@ -45,22 +45,14 @@ namespace CircuitCraft.Data
 
         private static PinDefinition[] GetStandardPins(ComponentKind kind)
         {
-            switch (kind)
+            return kind switch
             {
-                case ComponentKind.BJT:
-                    return StandardPinDefinitions.BJT;
-                case ComponentKind.MOSFET:
-                    return StandardPinDefinitions.MOSFET;
-                case ComponentKind.Diode:
-                case ComponentKind.LED:
-                case ComponentKind.ZenerDiode:
-                    return StandardPinDefinitions.Diode;
-                case ComponentKind.VoltageSource:
-                case ComponentKind.CurrentSource:
-                    return StandardPinDefinitions.VerticalTwoPin;
-                default:
-                    return StandardPinDefinitions.TwoPin;
-            }
+                ComponentKind.BJT => StandardPinDefinitions.BJT,
+                ComponentKind.MOSFET => StandardPinDefinitions.MOSFET,
+                ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode => StandardPinDefinitions.Diode,
+                ComponentKind.VoltageSource or ComponentKind.CurrentSource => StandardPinDefinitions.VerticalTwoPin,
+                _ => StandardPinDefinitions.TwoPin
+            };
         }
     }
 }

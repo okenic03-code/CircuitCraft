@@ -13,8 +13,8 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] TwoPin => new[]
         {
-            new PinDefinition("A", new Vector2Int(0, 0)),
-            new PinDefinition("B", new Vector2Int(1, 0))
+            new("A", new(0, 0)),
+            new("B", new(1, 0))
         };
 
         /// <summary>
@@ -23,8 +23,8 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] VerticalTwoPin => new[]
         {
-            new PinDefinition("-", new Vector2Int(0, 0)),
-            new PinDefinition("+", new Vector2Int(0, 1))
+            new("-", new(0, 0)),
+            new("+", new(0, 1))
         };
         
         /// <summary>
@@ -33,9 +33,9 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] BJT => new[]
         {
-            new PinDefinition("C", new Vector2Int(0, 1)),
-            new PinDefinition("B", new Vector2Int(0, 0)),
-            new PinDefinition("E", new Vector2Int(0, -1))
+            new("C", new(0, 1)),
+            new("B", new(0, 0)),
+            new("E", new(0, -1))
         };
         
         /// <summary>
@@ -45,9 +45,9 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] MOSFET => new[]
         {
-            new PinDefinition("D", new Vector2Int(1, 1)),
-            new PinDefinition("G", new Vector2Int(0, 0)),
-            new PinDefinition("S", new Vector2Int(1, -1))
+            new("D", new(1, 1)),
+            new("G", new(0, 0)),
+            new("S", new(1, -1))
         };
         
         /// <summary>
@@ -56,8 +56,8 @@ namespace CircuitCraft.Data
         /// </summary>
         public static PinDefinition[] Diode => new[]
         {
-            new PinDefinition("Anode", new Vector2Int(0, 0)),
-            new PinDefinition("Cathode", new Vector2Int(1, 0))
+            new("Anode", new(0, 0)),
+            new("Cathode", new(1, 0))
         };
     }
 }
