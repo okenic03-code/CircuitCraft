@@ -3,7 +3,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using CircuitCraft.Commands;
 using CircuitCraft.Controllers;
+using CircuitCraft.Data;
 using CircuitCraft.Managers;
+using CircuitCraft.Views;
 
 namespace CircuitCraft.UI
 {

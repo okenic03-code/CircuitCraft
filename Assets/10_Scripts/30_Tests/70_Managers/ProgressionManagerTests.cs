@@ -424,7 +424,7 @@ namespace CircuitCraft.Tests.Managers
         public void InitializeDefaults_WithNullAllStages_DoesNotThrow()
         {
             // If _allStages is null, InitializeDefaults should do nothing (not throw)
-            SetPrivateField(_progressionManager, "_allStages", null);
+            SetPrivateField<StageDefinition[]>(_progressionManager, "_allStages", null);
 
             var initMethod = typeof(ProgressionManager).GetMethod(
                 "InitializeDefaults",
@@ -552,7 +552,7 @@ namespace CircuitCraft.Tests.Managers
         [Test]
         public void SaveProgress_WithNullAllStages_DoesNotThrow()
         {
-            SetPrivateField(_progressionManager, "_allStages", null);
+            SetPrivateField<StageDefinition[]>(_progressionManager, "_allStages", null);
 
             Assert.DoesNotThrow(() => _progressionManager.SaveProgress(),
                 "SaveProgress with null _allStages should not throw");
@@ -561,7 +561,7 @@ namespace CircuitCraft.Tests.Managers
         [Test]
         public void LoadProgress_WithNullAllStages_DoesNotThrow()
         {
-            SetPrivateField(_progressionManager, "_allStages", null);
+            SetPrivateField<StageDefinition[]>(_progressionManager, "_allStages", null);
 
             Assert.DoesNotThrow(() => _progressionManager.LoadProgress(),
                 "LoadProgress with null _allStages should not throw");
@@ -570,7 +570,7 @@ namespace CircuitCraft.Tests.Managers
         [Test]
         public void ClearProgress_WithNullAllStages_DoesNotThrow()
         {
-            SetPrivateField(_progressionManager, "_allStages", null);
+            SetPrivateField<StageDefinition[]>(_progressionManager, "_allStages", null);
 
             Assert.DoesNotThrow(() => _progressionManager.ClearProgress(),
                 "ClearProgress with null _allStages should not throw");

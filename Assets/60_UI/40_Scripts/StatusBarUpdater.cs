@@ -1,6 +1,7 @@
 using CircuitCraft.Commands;
 using CircuitCraft.Controllers;
 using CircuitCraft.Data;
+using CircuitCraft.Views;
 using UnityEngine;
 using UnityEngine.UIElements;
 
