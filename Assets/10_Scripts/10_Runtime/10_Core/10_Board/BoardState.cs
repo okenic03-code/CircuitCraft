@@ -10,14 +10,14 @@ namespace CircuitCraft.Core
     /// </summary>
     public class BoardState
     {
-        private readonly List<PlacedComponent> _components = new List<PlacedComponent>();
-        private readonly Dictionary<GridPosition, PlacedComponent> _componentsByPosition = new Dictionary<GridPosition, PlacedComponent>();
-        private readonly List<Net> _nets = new List<Net>();
-        private readonly List<TraceSegment> _traces = new List<TraceSegment>();
-        private readonly Dictionary<int, PlacedComponent> _componentsById = new Dictionary<int, PlacedComponent>();
-        private readonly Dictionary<int, Net> _netsById = new Dictionary<int, Net>();
-        private readonly Dictionary<int, TraceSegment> _tracesById = new Dictionary<int, TraceSegment>();
-        private readonly Dictionary<int, List<TraceSegment>> _tracesByNetId = new Dictionary<int, List<TraceSegment>>();
+        private readonly List<PlacedComponent> _components = new();
+        private readonly Dictionary<GridPosition, PlacedComponent> _componentsByPosition = new();
+        private readonly List<Net> _nets = new();
+        private readonly List<TraceSegment> _traces = new();
+        private readonly Dictionary<int, PlacedComponent> _componentsById = new();
+        private readonly Dictionary<int, Net> _netsById = new();
+        private readonly Dictionary<int, TraceSegment> _tracesById = new();
+        private readonly Dictionary<int, List<TraceSegment>> _tracesByNetId = new();
         private readonly IReadOnlyList<PlacedComponent> _readOnlyComponents;
         private readonly IReadOnlyList<Net> _readOnlyNets;
         private readonly IReadOnlyList<TraceSegment> _readOnlyTraces;
@@ -128,7 +128,7 @@ namespace CircuitCraft.Core
                 netsToCheck.Add(netId);
 
                 var net = GetNet(netId);
-                if (net == null)
+                if (net is null)
                 {
                     continue;
                 }
@@ -141,7 +141,7 @@ namespace CircuitCraft.Core
             foreach (var netId in netsToCheck)
             {
                 var net = GetNet(netId);
-                if (net != null && net.ConnectedPins.Count == 0)
+                if (net is not null && net.ConnectedPins.Count == 0)
                 {
                     _nets.Remove(net);
                     _netsById.Remove(netId);
@@ -175,7 +175,7 @@ namespace CircuitCraft.Core
         public TraceSegment AddTrace(int netId, GridPosition start, GridPosition end)
         {
             var net = GetNet(netId);
-            if (net == null)
+            if (net is null)
                 throw new ArgumentException($"Net {netId} not found.", nameof(netId));
 
             var trace = new TraceSegment(_nextTraceId++, netId, start, end);
@@ -183,7 +183,7 @@ namespace CircuitCraft.Core
             _tracesById.Add(trace.SegmentId, trace);
             if (!_tracesByNetId.TryGetValue(netId, out var netTraces))
             {
-                netTraces = new List<TraceSegment>();
+                netTraces = new();
                 _tracesByNetId[netId] = netTraces;
             }
 
@@ -243,16 +243,16 @@ namespace CircuitCraft.Core
             OnTraceRemoved?.Invoke(segmentId);
 
             // If the net has no remaining traces, clear pin links and remove it.
-            if (netTraceList == null || netTraceList.Count == 0)
+            if (netTraceList is null || netTraceList.Count == 0)
             {
                 var net = GetNet(trace.NetId);
-                if (net != null)
+                if (net is not null)
                 {
                     foreach (var pin in net.ConnectedPins.ToList())
                     {
                         var component = GetComponent(pin.ComponentInstanceId);
                         var pinInstance = component?.Pins.FirstOrDefault(p => p.PinIndex == pin.PinIndex);
-                        if (pinInstance != null && pinInstance.ConnectedNetId == net.NetId)
+                        if (pinInstance is not null && pinInstance.ConnectedNetId == net.NetId)
                         {
                             pinInstance.ConnectedNetId = null;
                         }
@@ -307,22 +307,22 @@ namespace CircuitCraft.Core
         public void ConnectPinToNet(int netId, PinReference pin)
         {
             var net = GetNet(netId);
-            if (net == null)
+            if (net is null)
                 throw new ArgumentException($"Net {netId} not found.", nameof(netId));
 
             // Update component's pin instance
             var component = GetComponent(pin.ComponentInstanceId);
-            if (component == null)
+            if (component is null)
                 throw new ArgumentException($"Component {pin.ComponentInstanceId} not found.");
 
             var pinInstance = component.Pins.FirstOrDefault(p => p.PinIndex == pin.PinIndex);
-            if (pinInstance == null)
+            if (pinInstance is null)
                 throw new ArgumentException($"Pin {pin.PinIndex} not found on component {pin.ComponentInstanceId}.");
 
             if (pinInstance.ConnectedNetId.HasValue && pinInstance.ConnectedNetId.Value != netId)
             {
                 var previousNet = GetNet(pinInstance.ConnectedNetId.Value);
-                if (previousNet != null)
+                if (previousNet is not null)
                 {
                     previousNet.RemovePin(pin);
                     if (previousNet.ConnectedPins.Count == 0)

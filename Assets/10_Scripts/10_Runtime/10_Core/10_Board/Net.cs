@@ -9,7 +9,7 @@ namespace CircuitCraft.Core
     /// </summary>
     public class Net
     {
-        private readonly List<PinReference> _connectedPins = new List<PinReference>();
+        private readonly List<PinReference> _connectedPins = new();
 
         /// <summary>Gets the unique identifier for this net.</summary>
         public int NetId { get; }

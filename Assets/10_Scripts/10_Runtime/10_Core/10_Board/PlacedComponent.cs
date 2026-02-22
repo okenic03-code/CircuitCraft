@@ -18,7 +18,7 @@ namespace CircuitCraft.Core
     /// </summary>
     public class PlacedComponent
     {
-        private readonly List<PinInstance> _pins = new List<PinInstance>();
+        private readonly List<PinInstance> _pins = new();
         private readonly IReadOnlyList<PinInstance> _readOnlyPins;
 
         /// <summary>Gets the unique instance ID for this component.</summary>
@@ -61,7 +61,7 @@ namespace CircuitCraft.Core
                 throw new ArgumentException("Component definition ID cannot be null or empty.", nameof(componentDefId));
             if (Array.IndexOf(RotationConstants.ValidRotations, rotation) < 0)
                 throw new ArgumentOutOfRangeException(nameof(rotation), "Rotation must be 0, 90, 180, or 270 degrees.");
-            if (pins == null)
+            if (pins is null)
                 throw new ArgumentNullException(nameof(pins));
 
             InstanceId = instanceId;
@@ -81,7 +81,7 @@ namespace CircuitCraft.Core
         /// <returns>World grid position of the pin.</returns>
         public GridPosition GetPinWorldPosition(int pinIndex)
         {
-            if (pinIndex < 0 || pinIndex >= _pins.Count)
+            if (pinIndex is < 0 or >= _pins.Count)
                 throw new ArgumentException($"Pin index {pinIndex} not found on component {InstanceId}.", nameof(pinIndex));
 
             var pin = _pins[pinIndex];
@@ -105,22 +105,17 @@ namespace CircuitCraft.Core
         /// <returns>Rotated position.</returns>
         private GridPosition RotatePosition(GridPosition localPos, int degrees)
         {
-            switch (degrees)
+            return degrees switch
             {
-                case RotationConstants.None:
-                    return localPos;
-                case RotationConstants.Quarter:
-                    // Rotate 90° clockwise: (x, y) -> (y, -x)
-                    return new GridPosition(localPos.Y, -localPos.X);
-                case RotationConstants.Half:
-                    // Rotate 180°: (x, y) -> (-x, -y)
-                    return new GridPosition(-localPos.X, -localPos.Y);
-                case RotationConstants.ThreeQuarter:
-                    // Rotate 270° clockwise (90° counter-clockwise): (x, y) -> (-y, x)
-                    return new GridPosition(-localPos.Y, localPos.X);
-                default:
-                    throw new ArgumentException($"Invalid rotation: {degrees}");
-            }
+                RotationConstants.None => localPos,
+                // Rotate 90° clockwise: (x, y) -> (y, -x)
+                RotationConstants.Quarter => new GridPosition(localPos.Y, -localPos.X),
+                // Rotate 180°: (x, y) -> (-x, -y)
+                RotationConstants.Half => new GridPosition(-localPos.X, -localPos.Y),
+                // Rotate 270° clockwise (90° counter-clockwise): (x, y) -> (-y, x)
+                RotationConstants.ThreeQuarter => new GridPosition(-localPos.Y, localPos.X),
+                _ => throw new ArgumentException($"Invalid rotation: {degrees}")
+            };
         }
 
         /// <summary>

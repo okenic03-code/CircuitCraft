@@ -19,7 +19,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// </summary>
         public SpiceSharpSimulationService()
         {
-            _netlistBuilder = new NetlistBuilder();
+            _netlistBuilder = new();
             _simulationRunner = new SimulationRunner(_netlistBuilder);
         }
 
@@ -30,8 +30,8 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// <param name="simulationRunner">Custom simulation runner.</param>
         public SpiceSharpSimulationService(NetlistBuilder netlistBuilder, SimulationRunner simulationRunner)
         {
-            _netlistBuilder = netlistBuilder ?? new NetlistBuilder();
-            _simulationRunner = simulationRunner ?? new SimulationRunner(_netlistBuilder);
+            _netlistBuilder = netlistBuilder ?? new();
+            _simulationRunner = simulationRunner ?? new(_netlistBuilder);
         }
 
         /// <inheritdoc/>
@@ -39,13 +39,13 @@ namespace CircuitCraft.Simulation.SpiceSharp
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (request == null)
+            if (request is null)
             {
                 return SimulationResult.Failure(SimulationType.DCOperatingPoint,
                     SimulationStatus.InvalidCircuit, "Request is null");
             }
 
-            if (request.Netlist == null)
+            if (request.Netlist is null)
             {
                 return SimulationResult.Failure(request.SimulationType,
                     SimulationStatus.InvalidCircuit, "Netlist is null");
@@ -74,7 +74,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                         break;
 
                     case SimulationType.Transient:
-                        if (request.TransientConfig == null)
+                        if (request.TransientConfig is null)
                         {
                             return SimulationResult.Failure(SimulationType.Transient,
                                 SimulationStatus.InvalidCircuit, "Transient config is required for transient analysis");
@@ -87,7 +87,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                         break;
 
                     case SimulationType.DCSweep:
-                        if (request.DCSweepConfig == null)
+                        if (request.DCSweepConfig is null)
                         {
                             return SimulationResult.Failure(SimulationType.DCSweep,
                                 SimulationStatus.InvalidCircuit, "DC Sweep config is required");

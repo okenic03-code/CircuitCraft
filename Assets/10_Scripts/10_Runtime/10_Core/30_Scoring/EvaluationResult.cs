@@ -79,7 +79,7 @@ namespace CircuitCraft.Core
         public EvaluationResult(bool passed, List<TestCaseResult> results, string summary)
         {
             Passed = passed;
-            Results = results ?? new List<TestCaseResult>();
+            Results = results ?? new();
             Summary = summary ?? string.Empty;
         }
 
@@ -90,7 +90,7 @@ namespace CircuitCraft.Core
         {
             return new EvaluationResult(
                 false,
-                new List<TestCaseResult>(),
+                new(),
                 $"Evaluation failed: simulation did not succeed. {reason}"
             );
         }

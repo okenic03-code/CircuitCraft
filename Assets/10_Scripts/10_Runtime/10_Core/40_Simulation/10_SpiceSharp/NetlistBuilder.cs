@@ -21,7 +21,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// <exception cref="InvalidOperationException">If netlist contains invalid elements.</exception>
         public Circuit Build(CircuitNetlist netlist)
         {
-            if (netlist == null)
+            if (netlist is null)
                 throw new ArgumentNullException(nameof(netlist));
 
             var circuit = new Circuit();
@@ -31,7 +31,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                 var entities = CreateEntities(element);
                 foreach (var entity in entities)
                 {
-                    if (entity != null)
+                    if (entity is not null)
                     {
                         circuit.Add(entity);
                     }
@@ -47,11 +47,11 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// </summary>
         private IEnumerable<IEntity> CreateEntities(NetlistElement element)
         {
-            if (element == null || string.IsNullOrEmpty(element.Id))
+            if (element is null || string.IsNullOrEmpty(element.Id))
                 yield break;
 
             // Validate we have enough nodes
-            if (element.Nodes == null || element.Nodes.Count < 2)
+            if (element.Nodes is null || element.Nodes.Count < 2)
             {
                 throw new InvalidOperationException(
                     $"Element '{element.Id}' must have at least 2 nodes");
@@ -112,7 +112,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// </summary>
         private IEntity CreateComponent(NetlistElement element)
         {
-            var entities = new List<IEntity>(CreateEntities(element));
+            List<IEntity> entities = new(CreateEntities(element));
             return entities.Count > 0 ? entities[0] : null;
         }
 
@@ -246,15 +246,15 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// <returns>List of validation issues found.</returns>
         public List<SimulationIssue> Validate(CircuitNetlist netlist)
         {
-            var issues = new List<SimulationIssue>();
+            List<SimulationIssue> issues = new();
 
-            if (netlist == null)
+            if (netlist is null)
             {
                 issues.Add(new SimulationIssue(IssueSeverity.Error, IssueCategory.General, "Netlist is null"));
                 return issues;
             }
 
-            if (netlist.Elements == null || netlist.Elements.Count == 0)
+            if (netlist.Elements is null || netlist.Elements.Count == 0)
             {
                 issues.Add(new SimulationIssue(IssueSeverity.Error, IssueCategory.Topology, "Netlist has no elements"));
                 return issues;
@@ -294,7 +294,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                     continue;
                 }
 
-                if (element.Nodes == null || element.Nodes.Count < 2)
+                if (element.Nodes is null || element.Nodes.Count < 2)
                 {
                     issues.Add(new SimulationIssue(IssueSeverity.Error, IssueCategory.Topology, 
                         $"Element '{element.Id}' has fewer than 2 nodes", element.Id));

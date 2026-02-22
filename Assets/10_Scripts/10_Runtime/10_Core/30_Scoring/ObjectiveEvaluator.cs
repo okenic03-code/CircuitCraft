@@ -19,9 +19,9 @@ namespace CircuitCraft.Core
         /// <returns>An EvaluationResult with pass/fail and per-test details.</returns>
         public EvaluationResult Evaluate(SimulationResult simResult, TestCaseInput[] testCases)
         {
-            if (simResult == null)
+            if (simResult is null)
                 throw new ArgumentNullException(nameof(simResult));
-            if (testCases == null)
+            if (testCases is null)
                 throw new ArgumentNullException(nameof(testCases));
 
             // If simulation itself failed, auto-fail the evaluation

@@ -11,7 +11,7 @@ namespace CircuitCraft.Core
     public class DRCChecker
     {
         private readonly Dictionary<GridPosition, HashSet<int>> _positionToNets =
-            new Dictionary<GridPosition, HashSet<int>>();
+            new();
 
         /// <summary>
         /// Runs all design rule checks on the given board state.
@@ -20,7 +20,7 @@ namespace CircuitCraft.Core
         /// <returns>A DRCResult containing all detected violations.</returns>
         public DRCResult Check(BoardState board)
         {
-            if (board == null)
+            if (board is null)
                 throw new ArgumentNullException(nameof(board));
 
             var violations = new List<DRCViolationItem>();
@@ -47,7 +47,7 @@ namespace CircuitCraft.Core
                 {
                     if (!_positionToNets.TryGetValue(position, out var netIds))
                     {
-                        netIds = new HashSet<int>();
+                        netIds = new();
                         _positionToNets[position] = netIds;
                     }
                     netIds.Add(trace.NetId);
@@ -65,7 +65,7 @@ namespace CircuitCraft.Core
                     foreach (var netId in netIdList)
                     {
                         var net = board.GetNet(netId);
-                        netNames.Add(net != null ? net.NetName : $"Net{netId}");
+                        netNames.Add(net is not null ? net.NetName : $"Net{netId}");
                     }
 
                     violations.Add(new DRCViolationItem(

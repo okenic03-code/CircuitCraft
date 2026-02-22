@@ -110,7 +110,7 @@ namespace CircuitCraft.Core
             TotalScore = totalScore;
             Stars = stars;
             Passed = passed;
-            LineItems = lineItems ?? new List<ScoreLineItem>();
+            LineItems = lineItems ?? new();
             Summary = summary ?? string.Empty;
         }
     }

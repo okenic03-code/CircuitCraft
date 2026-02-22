@@ -9,7 +9,7 @@ namespace CircuitCraft.Core
     public readonly struct BoardBounds : IEquatable<BoardBounds>
     {
         /// <summary>Gets an unbounded sentinel value.</summary>
-        public static BoardBounds Unbounded { get; } = new BoardBounds(int.MinValue / 2, int.MinValue / 2, int.MaxValue, int.MaxValue);
+        public static BoardBounds Unbounded { get; } = new(int.MinValue / 2, int.MinValue / 2, int.MaxValue, int.MaxValue);
 
         /// <summary>Gets the minimum X coordinate (inclusive).</summary>
         public int MinX { get; }
@@ -63,7 +63,7 @@ namespace CircuitCraft.Core
         /// <returns>Computed bounds, or a 1x1 bounds at origin if empty.</returns>
         public static BoardBounds FromContent(IEnumerable<GridPosition> positions)
         {
-            if (positions == null)
+            if (positions is null)
                 throw new ArgumentNullException(nameof(positions));
 
             using (var enumerator = positions.GetEnumerator())

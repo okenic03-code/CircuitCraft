@@ -28,13 +28,13 @@ namespace CircuitCraft.Simulation
         /// Time series data for transient simulations.
         /// Empty for DC operating point.
         /// </summary>
-        public List<double> TimePoints { get; set; } = new List<double>();
+        public List<double> TimePoints { get; set; } = new();
 
         /// <summary>
         /// Value series data for transient simulations.
         /// Empty for DC operating point.
         /// </summary>
-        public List<double> Values { get; set; } = new List<double>();
+        public List<double> Values { get; set; } = new();
 
         /// <summary>Minimum value observed (for transient).</summary>
         public double MinValue { get; set; }
@@ -146,12 +146,12 @@ namespace CircuitCraft.Simulation
         /// <summary>
         /// Probe measurement results.
         /// </summary>
-        public List<ProbeResult> ProbeResults { get; set; } = new List<ProbeResult>();
+        public List<ProbeResult> ProbeResults { get; set; } = new();
 
         /// <summary>
         /// Issues, warnings, and errors encountered.
         /// </summary>
-        public List<SimulationIssue> Issues { get; set; } = new List<SimulationIssue>();
+        public List<SimulationIssue> Issues { get; set; } = new();
 
         /// <summary>
         /// Optional tag from the request.

@@ -75,7 +75,7 @@ namespace CircuitCraft.Core
         /// <param name="violations">List of detected violations.</param>
         public DRCResult(List<DRCViolationItem> violations)
         {
-            _violations = violations ?? new List<DRCViolationItem>();
+            _violations = violations ?? new();
             Violations = _violations.AsReadOnly();
 
             int shortCount = 0;

@@ -32,7 +32,7 @@ namespace CircuitCraft.Simulation
         public ElementType Type { get; set; }
 
         /// <summary>Node names this element connects to.</summary>
-        public List<string> Nodes { get; set; } = new List<string>();
+        public List<string> Nodes { get; set; } = new();
 
         /// <summary>Primary value (resistance, capacitance, voltage, etc.).</summary>
         public double Value { get; set; }
@@ -41,7 +41,7 @@ namespace CircuitCraft.Simulation
         public string ModelName { get; set; }
 
         /// <summary>Optional additional parameters.</summary>
-        public Dictionary<string, double> Parameters { get; set; } = new Dictionary<string, double>();
+        public Dictionary<string, double> Parameters { get; set; } = new();
 
         /// <summary>Maximum rated current in amps (for safety checking).</summary>
         public double? MaxCurrentAmps { get; set; }
@@ -67,7 +67,7 @@ namespace CircuitCraft.Simulation
                 Id = id,
                 Type = ElementType.Resistor,
                 Value = ohms,
-                Nodes = new List<string> { nodeA, nodeB },
+                Nodes = new() { nodeA, nodeB },
                 MaxPowerWatts = maxPowerWatts
             };
         }
@@ -80,7 +80,7 @@ namespace CircuitCraft.Simulation
                 Id = id,
                 Type = ElementType.Capacitor,
                 Value = farads,
-                Nodes = new List<string> { nodeA, nodeB }
+                Nodes = new() { nodeA, nodeB }
             };
         }
 
@@ -92,7 +92,7 @@ namespace CircuitCraft.Simulation
                 Id = id,
                 Type = ElementType.VoltageSource,
                 Value = volts,
-                Nodes = new List<string> { nodePositive, nodeNegative }
+                Nodes = new() { nodePositive, nodeNegative }
             };
         }
 
@@ -104,7 +104,7 @@ namespace CircuitCraft.Simulation
                 Id = id,
                 Type = ElementType.CurrentSource,
                 Value = amps,
-                Nodes = new List<string> { nodePositive, nodeNegative }
+                Nodes = new() { nodePositive, nodeNegative }
             };
         }
 
@@ -130,7 +130,7 @@ namespace CircuitCraft.Simulation
                 Type = ElementType.Diode,
                 Value = 0, // Diode uses model, not value
                 ModelName = modelName,
-                Nodes = new List<string> { anode, cathode }
+                Nodes = new() { anode, cathode }
             };
 
             if (saturationCurrent.HasValue)
@@ -166,7 +166,7 @@ namespace CircuitCraft.Simulation
                 Type = ElementType.BJT,
                 Value = isNPN ? 1 : -1, // Use value to store polarity
                 ModelName = modelName,
-                Nodes = new List<string> { collector, base_, emitter }
+                Nodes = new() { collector, base_, emitter }
             };
 
             if (beta.HasValue)
@@ -199,7 +199,7 @@ namespace CircuitCraft.Simulation
                 Type = ElementType.MOSFET,
                 Value = isNChannel ? 1 : -1, // Use value to store polarity
                 ModelName = modelName,
-                Nodes = new List<string> { drain, gate, source, bulk }
+                Nodes = new() { drain, gate, source, bulk }
             };
 
             if (thresholdVoltage.HasValue)
@@ -288,12 +288,12 @@ namespace CircuitCraft.Simulation
         /// <summary>
         /// List of circuit elements (resistors, sources, etc.).
         /// </summary>
-        public List<NetlistElement> Elements { get; set; } = new List<NetlistElement>();
+        public List<NetlistElement> Elements { get; set; } = new();
 
         /// <summary>
         /// List of probes defining what to measure.
         /// </summary>
-        public List<ProbeDefinition> Probes { get; set; } = new List<ProbeDefinition>();
+        public List<ProbeDefinition> Probes { get; set; } = new();
 
         /// <summary>
         /// Ground node name (default is "0").

@@ -23,7 +23,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// </summary>
         public SimulationRunner(NetlistBuilder netlistBuilder = null)
         {
-            _netlistBuilder = netlistBuilder ?? new NetlistBuilder();
+            _netlistBuilder = netlistBuilder ?? new();
         }
 
         /// <summary>
@@ -108,12 +108,12 @@ namespace CircuitCraft.Simulation.SpiceSharp
                     var exports = CreateExports(tran, netlist);
 
                     // Create temporary storage for time series data
-                    var probeData = new Dictionary<string, List<double>>();
-                    var timePoints = new List<double>();
+                    Dictionary<string, List<double>> probeData = new();
+                    List<double> timePoints = new();
 
                     foreach (var probe in netlist.Probes)
                     {
-                        probeData[probe.Id] = new List<double>();
+                        probeData[probe.Id] = new();
                     }
 
                     tran.ExportSimulationData += (sender, args) =>
@@ -178,12 +178,12 @@ namespace CircuitCraft.Simulation.SpiceSharp
                     var exports = CreateExports(dc, netlist);
 
                     // Create temporary storage for sweep data
-                    var probeData = new Dictionary<string, List<double>>();
-                    var sweepPoints = new List<double>();
+                    Dictionary<string, List<double>> probeData = new();
+                    List<double> sweepPoints = new();
 
                     foreach (var probe in netlist.Probes)
                     {
-                        probeData[probe.Id] = new List<double>();
+                        probeData[probe.Id] = new();
                     }
 
                     dc.ExportSimulationData += (sender, args) =>
@@ -211,8 +211,8 @@ namespace CircuitCraft.Simulation.SpiceSharp
                             MaxValue = data.Count > 0 ? data.Max() : 0,
                             AverageValue = data.Count > 0 ? data.Average() : 0,
                             Value = data.Count > 0 ? data[data.Count - 1] : 0,
-                            TimePoints = new List<double>(sweepPoints),
-                            Values = new List<double>(data)
+                            TimePoints = new(sweepPoints),
+                            Values = new(data)
                         });
                     }
 
@@ -242,11 +242,11 @@ namespace CircuitCraft.Simulation.SpiceSharp
         /// </summary>
         private Dictionary<string, IExport<double>> CreateExports(ISimulation simulation, CircuitNetlist netlist)
         {
-            var exports = new Dictionary<string, IExport<double>>();
+            Dictionary<string, IExport<double>> exports = new();
             var biasingSimulation = simulation as IBiasingSimulation;
             var eventfulSimulation = simulation as IEventfulSimulation;
 
-            if (biasingSimulation == null)
+            if (biasingSimulation is null)
             {
                 throw new InvalidOperationException("Simulation does not support biasing exports.");
             }
@@ -276,7 +276,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                     case ProbeType.Power:
                         // Power requires separate voltage and current exports
                         // For now, use the property export if available
-                        if (eventfulSimulation == null)
+                        if (eventfulSimulation is null)
                         {
                             throw new InvalidOperationException("Simulation does not support property exports.");
                         }
@@ -284,7 +284,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                         break;
                 }
 
-                if (export != null)
+                if (export is not null)
                 {
                     exports[probe.Id] = export;
                 }
@@ -357,7 +357,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                     ProbeId = probe.Id,
                     Type = probe.Type,
                     Target = probe.Target,
-                    TimePoints = new List<double>(timePoints),
+                    TimePoints = new(timePoints),
                     Values = values
                 };
 
