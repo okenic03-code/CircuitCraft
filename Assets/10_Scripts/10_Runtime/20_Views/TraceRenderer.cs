@@ -13,8 +13,11 @@ namespace CircuitCraft.Views
     public class TraceRenderer : MonoBehaviour
     {
         [Header("Dependencies")]
+        [Tooltip("GameManager that owns the active BoardState.")]
         [SerializeField] private GameManager _gameManager;
+        [Tooltip("StageManager used to rebuild traces when a stage loads.")]
         [SerializeField] private StageManager _stageManager;
+        [Tooltip("Grid settings asset used for grid-to-world conversion.")]
         [SerializeField] private GridSettings _gridSettings;
 
         [Header("Visual Settings")]
@@ -39,10 +42,10 @@ namespace CircuitCraft.Views
         private Material _lineMaterial;
         private Material _flowLineMaterial;
         private Texture2D _flowTexture;
-        private readonly Dictionary<int, LineRenderer> _traceLines = new Dictionary<int, LineRenderer>();
-        private readonly Dictionary<int, LineRenderer> _flowLines = new Dictionary<int, LineRenderer>();
-        private readonly Dictionary<int, float> _segmentCurrents = new Dictionary<int, float>();
-        private readonly Dictionary<int, float> _segmentFlowOffsets = new Dictionary<int, float>();
+        private readonly Dictionary<int, LineRenderer> _traceLines = new();
+        private readonly Dictionary<int, LineRenderer> _flowLines = new();
+        private readonly Dictionary<int, float> _segmentCurrents = new();
+        private readonly Dictionary<int, float> _segmentFlowOffsets = new();
 
         private static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
         private const int FlowTextureWidth = 64;
@@ -63,7 +66,7 @@ namespace CircuitCraft.Views
             }
 
             _boardState = _gameManager.BoardState;
-            if (_boardState == null)
+            if (_boardState is null)
             {
                 Debug.LogWarning("TraceRenderer: BoardState is not available.");
                 return;
@@ -80,8 +83,6 @@ namespace CircuitCraft.Views
                 CreateTraceLine(trace);
             }
 
-            if (_stageManager == null)
-                _stageManager = FindFirstObjectByType<StageManager>();
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
         }
@@ -179,7 +180,7 @@ namespace CircuitCraft.Views
 
         private void Unsubscribe()
         {
-            if (_boardState == null)
+            if (_boardState is null)
                 return;
 
             _boardState.OnTraceAdded -= HandleTraceAdded;
@@ -218,7 +219,7 @@ namespace CircuitCraft.Views
             if (_gameManager != null)
             {
                 _boardState = _gameManager.BoardState;
-                if (_boardState != null)
+                if (_boardState is not null)
                 {
                     Subscribe();
                     foreach (var trace in _boardState.Traces)
@@ -235,12 +236,12 @@ namespace CircuitCraft.Views
         /// <param name="maxVoltage">Highest voltage in the map used for normalization.</param>
         public void ApplyVoltageColors(Dictionary<string, double> nodeVoltages, float minVoltage, float maxVoltage)
         {
-            if (_boardState == null)
+            if (_boardState is null)
             {
                 return;
             }
 
-            if (nodeVoltages == null)
+            if (nodeVoltages is null)
             {
                 ResetColors();
                 return;
@@ -278,7 +279,7 @@ namespace CircuitCraft.Views
         {
             StopCurrentFlow();
 
-            if (segmentCurrents == null || segmentCurrents.Count == 0)
+            if (segmentCurrents is null || segmentCurrents.Count == 0)
             {
                 return;
             }
@@ -361,7 +362,7 @@ namespace CircuitCraft.Views
 
         private void CreateTraceLine(TraceSegment trace)
         {
-            if (trace == null || _traceLines.ContainsKey(trace.SegmentId))
+            if (trace is null || _traceLines.ContainsKey(trace.SegmentId))
                 return;
 
             var lineObject = new GameObject($"Trace_{trace.SegmentId}");

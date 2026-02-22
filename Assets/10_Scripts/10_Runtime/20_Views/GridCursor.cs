@@ -12,12 +12,15 @@ namespace CircuitCraft.Views
     public class GridCursor : MonoBehaviour
     {
         [Header("Camera Settings")]
+        [Tooltip("Camera used to project mouse position onto the board plane.")]
         [SerializeField] private Camera _camera;
         
         [Header("Grid Settings")]
+        [Tooltip("Grid settings asset used for screen-to-grid and grid-to-world conversion.")]
         [SerializeField] private GridSettings _gridSettings;
         
         [Header("Visual Settings")]
+        [Tooltip("Sprite renderer for the cursor visual.")]
         [SerializeField] private SpriteRenderer _cursorSprite;
         [SerializeField] private Color _validColor = new Color(0f, 1f, 0f, 0.5f);
         [SerializeField] private Color _invalidColor = new Color(1f, 0f, 0f, 0.5f);
@@ -26,6 +29,9 @@ namespace CircuitCraft.Views
         private Vector3 _lastMousePosition;
         private bool _isOverGrid;
 
+        /// <summary>
+        /// Raised when the snapped grid cursor position changes.
+        /// </summary>
         public event Action OnPositionChanged;
         
         private void Awake() => Init();
@@ -155,18 +161,12 @@ namespace CircuitCraft.Views
         /// <summary>
         /// Gets the current grid position under the cursor.
         /// </summary>
-        public Vector2Int GetCurrentGridPosition()
-        {
-            return _currentGridPosition;
-        }
+        public Vector2Int GetCurrentGridPosition() => _currentGridPosition;
         
         /// <summary>
         /// Checks if the cursor is currently over a valid grid position.
         /// </summary>
-        public bool IsOverValidGrid()
-        {
-            return _isOverGrid;
-        }
+        public bool IsOverValidGrid() => _isOverGrid;
         
         /// <summary>
         /// Sets cursor to invalid state (for preview of blocked placement).

@@ -4,10 +4,15 @@ using CircuitCraft.Data;
 
 namespace CircuitCraft.Views
 {
+    /// <summary>
+    /// Renders an infinite scrolling grid aligned to the configured board origin and cell size.
+    /// </summary>
     public class GridRenderer : MonoBehaviour
     {
         [Header("Grid Configuration")]
+        [Tooltip("Grid settings asset that defines origin and cell size.")]
         [SerializeField] private GridSettings _gridSettings;
+        [Tooltip("Orthographic camera used to determine visible grid extents.")]
         [SerializeField] private Camera _camera;
 
         [Header("Visual Settings")]
@@ -17,8 +22,8 @@ namespace CircuitCraft.Views
         [SerializeField] private Shader _defaultShader;
 
         private GameObject _gridContainer;
-        private readonly List<LineRenderer> _horizontalLines = new List<LineRenderer>();
-        private readonly List<LineRenderer> _verticalLines = new List<LineRenderer>();
+        private readonly List<LineRenderer> _horizontalLines = new();
+        private readonly List<LineRenderer> _verticalLines = new();
 
         private Vector3 _cachedCamPos;
         private float _cachedOrthoSize;
@@ -245,10 +250,7 @@ namespace CircuitCraft.Views
             return _runtimeLineMaterial;
         }
 
-        private void ConfigureLineRenderer(LineRenderer line)
-        {
-            ConfigureLineRenderer(line, _gridColor, _lineWidth);
-        }
+        private void ConfigureLineRenderer(LineRenderer line) => ConfigureLineRenderer(line, _gridColor, _lineWidth);
 
         private void ConfigureLineRenderer(LineRenderer line, Color lineColor, float width)
         {

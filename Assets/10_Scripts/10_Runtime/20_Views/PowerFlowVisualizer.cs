@@ -17,9 +17,13 @@ namespace CircuitCraft.Views
     public class PowerFlowVisualizer : MonoBehaviour
     {
         [Header("Dependencies")]
+        [Tooltip("GameManager that publishes simulation and board lifecycle events.")]
         [SerializeField] private GameManager _gameManager;
+        [Tooltip("StageManager used to clear visuals on stage transitions.")]
         [SerializeField] private StageManager _stageManager;
+        [Tooltip("BoardView used to access active ComponentView instances.")]
         [SerializeField] private BoardView _boardView;
+        [Tooltip("TraceRenderer used to apply voltage and current visual states.")]
         [SerializeField] private TraceRenderer _traceRenderer;
 
         [Header("LED Glow")]
@@ -32,26 +36,6 @@ namespace CircuitCraft.Views
 
         private void Start()
         {
-            if (_gameManager == null)
-            {
-                _gameManager = FindFirstObjectByType<GameManager>();
-            }
-
-            if (_stageManager == null)
-            {
-                _stageManager = FindFirstObjectByType<StageManager>();
-            }
-
-            if (_boardView == null)
-            {
-                _boardView = FindFirstObjectByType<BoardView>();
-            }
-
-            if (_traceRenderer == null)
-            {
-                _traceRenderer = FindFirstObjectByType<TraceRenderer>();
-            }
-
             if (_gameManager == null)
             {
                 Debug.LogError("PowerFlowVisualizer: GameManager reference is missing.");
@@ -99,13 +83,13 @@ namespace CircuitCraft.Views
 
         private void HandleSimulationCompleted(SimulationResult result)
         {
-            if (_boardState == null)
+            if (_boardState is null)
             {
                 ClearVisualization();
                 return;
             }
 
-            if (result == null || !result.IsSuccess)
+            if (result is null || !result.IsSuccess)
             {
                 ClearVisualization();
                 return;
@@ -124,7 +108,7 @@ namespace CircuitCraft.Views
                 return;
             }
 
-            if (nodeVoltages == null || nodeVoltages.Count == 0)
+            if (nodeVoltages is null || nodeVoltages.Count == 0)
             {
                 _traceRenderer.ResetColors();
                 return;
@@ -143,7 +127,7 @@ namespace CircuitCraft.Views
 
         private void ApplyTraceCurrentFlow(SimulationResult result)
         {
-            if (_traceRenderer == null || _boardState == null)
+            if (_traceRenderer == null || _boardState is null)
             {
                 return;
             }
@@ -183,7 +167,7 @@ namespace CircuitCraft.Views
                 }
 
                 var placedComponent = _boardState.GetComponent(pair.Key);
-                if (placedComponent == null)
+                if (placedComponent is null)
                 {
                     componentView.HideSimulationOverlay();
                     componentView.ShowLEDGlow(false, _ledGlowColor);
@@ -209,7 +193,7 @@ namespace CircuitCraft.Views
                     }
 
                     var net = _boardState.GetNet(pin.ConnectedNetId.Value);
-                    if (net == null)
+                    if (net is null)
                     {
                         continue;
                     }
@@ -299,7 +283,7 @@ namespace CircuitCraft.Views
             UnsubscribeFromBoardState();
             _boardState = boardState;
 
-            if (_boardState == null)
+            if (_boardState is null)
             {
                 return;
             }
@@ -312,7 +296,7 @@ namespace CircuitCraft.Views
 
         private void UnsubscribeFromBoardState()
         {
-            if (_boardState == null)
+            if (_boardState is null)
             {
                 return;
             }

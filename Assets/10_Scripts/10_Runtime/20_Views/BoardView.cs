@@ -16,8 +16,11 @@ namespace CircuitCraft.Views
     public class BoardView : MonoBehaviour
     {
         [Header("Dependencies")]
+        [Tooltip("GameManager that owns the active BoardState instance.")]
         [SerializeField] private GameManager _gameManager;
+        [Tooltip("SimulationManager used to resolve component definitions for spawned views.")]
         [SerializeField] private SimulationManager _simulationManager;
+        [Tooltip("StageManager used to reset and rebind visuals on stage load.")]
         [SerializeField] private StageManager _stageManager;
 
         [Header("Prefabs")]
@@ -26,6 +29,7 @@ namespace CircuitCraft.Views
         private GameObject _componentViewPrefab;
 
         [Header("Grid Configuration")]
+        [Tooltip("Grid settings asset used to map grid coordinates to world space.")]
         [SerializeField] private GridSettings _gridSettings;
 
         private BoardState _boardState;
@@ -33,7 +37,7 @@ namespace CircuitCraft.Views
         /// <summary>
         /// Maps component InstanceId to its visual <see cref="ComponentView"/> representation.
         /// </summary>
-        private readonly Dictionary<int, ComponentView> _componentViews = new Dictionary<int, ComponentView>();
+        private readonly Dictionary<int, ComponentView> _componentViews = new();
 
         /// <summary>
         /// Gets the read-only mapping of component instance IDs to their views.
@@ -51,7 +55,7 @@ namespace CircuitCraft.Views
             {
                 _boardState = _gameManager.BoardState;
 
-                if (_boardState != null)
+                if (_boardState is not null)
                 {
                     SubscribeToBoardEvents();
 #if UNITY_EDITOR
@@ -67,12 +71,6 @@ namespace CircuitCraft.Views
             {
                 Debug.LogError("BoardView: No GameManager assigned!");
             }
-            
-            if (_simulationManager == null)
-                _simulationManager = FindFirstObjectByType<SimulationManager>();
-            
-            if (_stageManager == null)
-                _stageManager = FindFirstObjectByType<StageManager>();
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
             
@@ -96,7 +94,7 @@ namespace CircuitCraft.Views
         /// </summary>
         private void SubscribeToBoardEvents()
         {
-            if (_boardState == null) return;
+            if (_boardState is null) return;
 
             _boardState.OnComponentPlaced += HandleComponentPlaced;
             _boardState.OnComponentRemoved += HandleComponentRemoved;
@@ -108,7 +106,7 @@ namespace CircuitCraft.Views
         /// </summary>
         private void UnsubscribeFromBoardEvents()
         {
-            if (_boardState == null) return;
+            if (_boardState is null) return;
 
             _boardState.OnComponentPlaced -= HandleComponentPlaced;
             _boardState.OnComponentRemoved -= HandleComponentRemoved;
@@ -136,7 +134,7 @@ namespace CircuitCraft.Views
             if (_gameManager != null)
             {
                 _boardState = _gameManager.BoardState;
-                if (_boardState != null)
+                if (_boardState is not null)
                 {
                     SubscribeToBoardEvents();
                     SyncExistingComponents();
@@ -150,7 +148,7 @@ namespace CircuitCraft.Views
         /// </summary>
         private void SyncExistingComponents()
         {
-            if (_boardState == null) return;
+            if (_boardState is null) return;
 
             foreach (var component in _boardState.Components)
             {
@@ -166,7 +164,7 @@ namespace CircuitCraft.Views
         /// <param name="component">The placed component data from BoardState.</param>
         private void HandleComponentPlaced(PlacedComponent component)
         {
-            if (component == null)
+            if (component is null)
             {
                 Debug.LogWarning("BoardView: Received null PlacedComponent in HandleComponentPlaced");
                 return;
@@ -186,10 +184,7 @@ namespace CircuitCraft.Views
         /// Finds and destroys the corresponding <see cref="ComponentView"/>.
         /// </summary>
         /// <param name="instanceId">The instance ID of the removed component.</param>
-        private void HandleComponentRemoved(int instanceId)
-        {
-            DestroyComponentView(instanceId);
-        }
+        private void HandleComponentRemoved(int instanceId) => DestroyComponentView(instanceId);
 
         /// <summary>
         /// Instantiates a <see cref="ComponentView"/> prefab at the grid position of the placed component.
