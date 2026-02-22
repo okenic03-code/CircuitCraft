@@ -85,13 +85,6 @@ namespace CircuitCraft.UI
             if (_stageSelectScreen == null && _stageSelectController != null)
                 _stageSelectScreen = _stageSelectController.gameObject;
 
-            if (_gamePlayScreen == null)
-            {
-                var uiController = FindFirstObjectByType<UIController>(FindObjectsInactive.Include);
-                if (uiController != null)
-                    _gamePlayScreen = uiController.gameObject;
-            }
-
             if (_endingScreen == null && _endingController != null)
                 _endingScreen = _endingController.gameObject;
         }

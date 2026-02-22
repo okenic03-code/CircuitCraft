@@ -1,0 +1,14 @@
+{
+    "name": "CircuitCraft.Views",
+    "rootNamespace": "CircuitCraft.Views",
+    "references": ["CircuitCraft.Core", "CircuitCraft.Components", "CircuitCraft.Data", "CircuitCraft.Managers", "CircuitCraft.Systems", "CircuitCraft.Utils"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -5,6 +5,13 @@
         "CircuitCraft.Core",
         "CircuitCraft.Data",
         "CircuitCraft.Systems",
+        "CircuitCraft.Commands",
+        "CircuitCraft.Components",
+        "CircuitCraft.Managers",
+        "CircuitCraft.Views",
+        "CircuitCraft.Controllers",
+        "CircuitCraft.UI",
+        "CircuitCraft.Utils",
         "UniTask"
     ],
     "includePlatforms": [
