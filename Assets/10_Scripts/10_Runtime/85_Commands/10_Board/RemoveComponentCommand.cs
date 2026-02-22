@@ -4,6 +4,9 @@ using CircuitCraft.Core;
 
 namespace CircuitCraft.Commands
 {
+    /// <summary>
+    /// Removes an existing component and captures topology state for undo restoration.
+    /// </summary>
     public class RemoveComponentCommand : ICommand
     {
         private readonly BoardState _boardState;
@@ -16,12 +19,20 @@ namespace CircuitCraft.Commands
         private List<PinInstance> _pins;
         private bool _hasCapturedState;
         private float? _capturedCustomValue;
-        private readonly List<(int netId, string netName)> _capturedNets = new List<(int, string)>();
-        private readonly List<(int netId, GridPosition start, GridPosition end)> _capturedTraces = new List<(int, GridPosition, GridPosition)>();
-        private readonly List<(int netId, int pinIndex)> _capturedPinConnections = new List<(int, int)>();
+        private readonly List<(int netId, string netName)> _capturedNets = new();
+        private readonly List<(int netId, GridPosition start, GridPosition end)> _capturedTraces = new();
+        private readonly List<(int netId, int pinIndex)> _capturedPinConnections = new();
 
+        /// <summary>
+        /// Gets a user-facing description of this component removal command.
+        /// </summary>
         public string Description => $"Remove component {_instanceId}";
 
+        /// <summary>
+        /// Creates a command that removes the specified component instance.
+        /// </summary>
+        /// <param name="boardState">The board state to mutate.</param>
+        /// <param name="instanceId">The component instance identifier to remove.</param>
         public RemoveComponentCommand(BoardState boardState, int instanceId)
         {
             _boardState = boardState;
@@ -29,10 +40,13 @@ namespace CircuitCraft.Commands
             _currentInstanceId = instanceId;
         }
 
+        /// <summary>
+        /// Executes the component removal and captures connected topology for undo.
+        /// </summary>
         public void Execute()
         {
             var component = _boardState.GetComponent(_currentInstanceId);
-            if (component == null)
+            if (component is null)
                 return;
 
             // Fixed components cannot be removed.
@@ -52,6 +66,9 @@ namespace CircuitCraft.Commands
             _boardState.RemoveComponent(_currentInstanceId);
         }
 
+        /// <summary>
+        /// Restores the removed component and its captured topology.
+        /// </summary>
         public void Undo()
         {
             if (!_hasCapturedState)
@@ -64,7 +81,7 @@ namespace CircuitCraft.Commands
             foreach (var (capturedNetId, capturedNetName) in _capturedNets)
             {
                 var existingNet = _boardState.GetNet(capturedNetId);
-                if (existingNet != null)
+                if (existingNet is not null)
                 {
                     netIdMap[capturedNetId] = existingNet.NetId;
                     continue;

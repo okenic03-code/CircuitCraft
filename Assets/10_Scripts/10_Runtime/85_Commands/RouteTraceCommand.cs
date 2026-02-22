@@ -24,7 +24,7 @@ namespace CircuitCraft.Commands
         private int _netId;
         private string _netName;
         private int? _restoredRouteNetId;
-        private readonly List<int> _addedSegmentIds = new List<int>();
+        private readonly List<int> _addedSegmentIds = new();
         // ReSharper disable once NotAccessedField.Local
         private bool _createdNewNet;
         private int? _startPinPreviousNetId;
@@ -33,10 +33,13 @@ namespace CircuitCraft.Commands
         private bool _didMerge;
         private int _mergedSourceNetId;
         private string _mergedSourceNetName;
-        private readonly List<(GridPosition start, GridPosition end)> _mergedSourceTraces = new List<(GridPosition, GridPosition)>();
-        private readonly List<PinReference> _mergedSourcePins = new List<PinReference>();
-        private readonly List<int> _mergedTargetTraceIds = new List<int>();
+        private readonly List<(GridPosition start, GridPosition end)> _mergedSourceTraces = new();
+        private readonly List<PinReference> _mergedSourcePins = new();
+        private readonly List<int> _mergedTargetTraceIds = new();
 
+        /// <summary>
+        /// Gets a user-facing description of this routing command.
+        /// </summary>
         public string Description => $"Route trace from {_startPin} to {_endPin}";
 
         /// <summary>
@@ -58,6 +61,9 @@ namespace CircuitCraft.Commands
             _segments = segments;
         }
 
+        /// <summary>
+        /// Executes trace routing, net resolution, and optional net merge behavior.
+        /// </summary>
         public void Execute()
         {
             // Capture previous pin net connections for undo
@@ -84,6 +90,9 @@ namespace CircuitCraft.Commands
             }
         }
 
+        /// <summary>
+        /// Undoes routed trace segments and restores previous pin and net state.
+        /// </summary>
         public void Undo()
         {
             // Remove all trace segments added by this command (reverse order)
@@ -97,7 +106,7 @@ namespace CircuitCraft.Commands
             // (disconnects all pins, removes net). Check if net still exists.
             var net = _boardState.GetNet(_netId);
 
-            if (net != null)
+            if (net is not null)
             {
                 // Net still has other traces. Only disconnect pins that we newly
                 // connected (skip pins that were already on this net before Execute).
@@ -180,16 +189,14 @@ namespace CircuitCraft.Commands
         private bool IsGroundPin(PinReference pinRef)
         {
             var component = _boardState.GetComponent(pinRef.ComponentInstanceId);
-            if (component == null)
+            if (component is null)
                 return false;
 
             return string.Equals(component.ComponentDefinitionId, GroundComponentDefinitionId, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsGroundNet(Net net)
-        {
-            return net != null && IsGroundNetName(net.NetName);
-        }
+            => net is not null && IsGroundNetName(net.NetName);
 
         private static bool IsGroundNetName(string netName)
         {
@@ -203,7 +210,7 @@ namespace CircuitCraft.Commands
                 return;
 
             var sourceNet = _boardState.GetNet(sourceNetId);
-            if (sourceNet == null)
+            if (sourceNet is null)
                 return;
 
             _didMerge = true;
@@ -261,7 +268,7 @@ namespace CircuitCraft.Commands
         private int? GetPinConnectedNetId(PinReference pinRef)
         {
             var component = _boardState.GetComponent(pinRef.ComponentInstanceId);
-            if (component == null)
+            if (component is null)
                 return null;
 
             var pin = component.Pins.FirstOrDefault(p => p.PinIndex == pinRef.PinIndex);
@@ -273,11 +280,11 @@ namespace CircuitCraft.Commands
             net.RemovePin(pinRef);
 
             var component = _boardState.GetComponent(pinRef.ComponentInstanceId);
-            if (component == null)
+            if (component is null)
                 return;
 
             var pinInstance = component.Pins.FirstOrDefault(p => p.PinIndex == pinRef.PinIndex);
-            if (pinInstance != null && pinInstance.ConnectedNetId == _netId)
+            if (pinInstance is not null && pinInstance.ConnectedNetId == _netId)
             {
                 pinInstance.ConnectedNetId = null;
             }
@@ -295,7 +302,7 @@ namespace CircuitCraft.Commands
             }
 
             var previousNet = _boardState.GetNet(targetNetId);
-            if (previousNet == null)
+            if (previousNet is null)
             {
                 if (previousNetId.Value != _netId || string.IsNullOrEmpty(_netName))
                     return;

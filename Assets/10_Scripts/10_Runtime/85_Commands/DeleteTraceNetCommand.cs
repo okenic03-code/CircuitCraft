@@ -4,6 +4,9 @@ using CircuitCraft.Core;
 
 namespace CircuitCraft.Commands
 {
+    /// <summary>
+    /// Deletes all traces from a net and restores them on undo.
+    /// </summary>
     public class DeleteTraceNetCommand : ICommand
     {
         private readonly BoardState _boardState;
@@ -11,12 +14,20 @@ namespace CircuitCraft.Commands
 
         private int _currentNetId;
         private string _savedNetName;
-        private readonly List<(GridPosition start, GridPosition end)> _savedTraces = new List<(GridPosition, GridPosition)>();
-        private readonly List<PinReference> _savedPins = new List<PinReference>();
+        private readonly List<(GridPosition start, GridPosition end)> _savedTraces = new();
+        private readonly List<PinReference> _savedPins = new();
         private bool _hasCapturedState;
 
+        /// <summary>
+        /// Gets a user-facing description of this trace net deletion command.
+        /// </summary>
         public string Description => $"Delete trace net {_initialNetId}";
 
+        /// <summary>
+        /// Creates a command that removes trace segments for the specified net.
+        /// </summary>
+        /// <param name="boardState">The board state to mutate.</param>
+        /// <param name="netId">The target net identifier.</param>
         public DeleteTraceNetCommand(BoardState boardState, int netId)
         {
             _boardState = boardState;
@@ -24,10 +35,13 @@ namespace CircuitCraft.Commands
             _currentNetId = netId;
         }
 
+        /// <summary>
+        /// Executes trace deletion for the current net while capturing undo state.
+        /// </summary>
         public void Execute()
         {
             var net = _boardState.GetNet(_currentNetId);
-            if (net == null)
+            if (net is null)
             {
                 _hasCapturedState = false;
                 return;
@@ -52,6 +66,9 @@ namespace CircuitCraft.Commands
             }
         }
 
+        /// <summary>
+        /// Restores the previously deleted net traces and pin connections.
+        /// </summary>
         public void Undo()
         {
             if (!_hasCapturedState)
