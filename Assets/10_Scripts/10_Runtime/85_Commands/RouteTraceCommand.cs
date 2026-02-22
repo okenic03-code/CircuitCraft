@@ -271,7 +271,16 @@ namespace CircuitCraft.Commands
             if (component is null)
                 return null;
 
-            var pin = component.Pins.FirstOrDefault(p => p.PinIndex == pinRef.PinIndex);
+            PinInstance pin = null;
+            foreach (var existingPin in component.Pins)
+            {
+                if (existingPin.PinIndex == pinRef.PinIndex)
+                {
+                    pin = existingPin;
+                    break;
+                }
+            }
+
             return pin?.ConnectedNetId;
         }
 
@@ -283,7 +292,16 @@ namespace CircuitCraft.Commands
             if (component is null)
                 return;
 
-            var pinInstance = component.Pins.FirstOrDefault(p => p.PinIndex == pinRef.PinIndex);
+            PinInstance pinInstance = null;
+            foreach (var existingPin in component.Pins)
+            {
+                if (existingPin.PinIndex == pinRef.PinIndex)
+                {
+                    pinInstance = existingPin;
+                    break;
+                }
+            }
+
             if (pinInstance is not null && pinInstance.ConnectedNetId == _netId)
             {
                 pinInstance.ConnectedNetId = null;

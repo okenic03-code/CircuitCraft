@@ -1,4 +1,3 @@
-using System.Linq;
 using CircuitCraft.Commands;
 using CircuitCraft.Components;
 using CircuitCraft.Core;
@@ -221,7 +220,16 @@ namespace CircuitCraft.Controllers
             if (!Input.GetKeyDown(KeyCode.Delete) || _selectedTraceSegmentId < 0)
                 return;
 
-            var selectedTrace = _boardState.Traces.FirstOrDefault(t => t.SegmentId == _selectedTraceSegmentId);
+            TraceSegment selectedTrace = null;
+            foreach (var trace in _boardState.Traces)
+            {
+                if (trace.SegmentId == _selectedTraceSegmentId)
+                {
+                    selectedTrace = trace;
+                    break;
+                }
+            }
+
             if (selectedTrace is null)
             {
                 _selectedTraceSegmentId = -1;

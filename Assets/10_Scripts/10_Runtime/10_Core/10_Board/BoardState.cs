@@ -251,7 +251,18 @@ namespace CircuitCraft.Core
                     foreach (var pin in net.ConnectedPins.ToList())
                     {
                         var component = GetComponent(pin.ComponentInstanceId);
-                        var pinInstance = component?.Pins.FirstOrDefault(p => p.PinIndex == pin.PinIndex);
+                        PinInstance pinInstance = null;
+                        if (component?.Pins is not null)
+                        {
+                            foreach (var existingPin in component.Pins)
+                            {
+                                if (existingPin.PinIndex == pin.PinIndex)
+                                {
+                                    pinInstance = existingPin;
+                                    break;
+                                }
+                            }
+                        }
                         if (pinInstance is not null && pinInstance.ConnectedNetId == net.NetId)
                         {
                             pinInstance.ConnectedNetId = null;
@@ -315,7 +326,15 @@ namespace CircuitCraft.Core
             if (component is null)
                 throw new ArgumentException($"Component {pin.ComponentInstanceId} not found.");
 
-            var pinInstance = component.Pins.FirstOrDefault(p => p.PinIndex == pin.PinIndex);
+            PinInstance pinInstance = null;
+            foreach (var existingPin in component.Pins)
+            {
+                if (existingPin.PinIndex == pin.PinIndex)
+                {
+                    pinInstance = existingPin;
+                    break;
+                }
+            }
             if (pinInstance is null)
                 throw new ArgumentException($"Pin {pin.PinIndex} not found on component {pin.ComponentInstanceId}.");
 
@@ -374,7 +393,13 @@ namespace CircuitCraft.Core
         /// <returns>The net, or null if not found.</returns>
         public Net GetNetByName(string netName)
         {
-            return _nets.FirstOrDefault(n => n.NetName == netName);
+            foreach (var net in _nets)
+            {
+                if (net.NetName == netName)
+                    return net;
+            }
+
+            return null;
         }
 
         /// <summary>
