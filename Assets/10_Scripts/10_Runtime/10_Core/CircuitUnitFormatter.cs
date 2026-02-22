@@ -1,19 +1,33 @@
-using System;
-
 namespace CircuitCraft.Utils
 {
     public static class CircuitUnitFormatter
     {
+        private const float One = 1f;
+        private const float Mega = 1_000_000f;
+        private const float Kilo = 1_000f;
+        private const float Milli = 0.001f;
+        private const float Micro = 0.000_001f;
+        private const float Nano = 0.000_000_001f;
+        private const float Giga = 1_000_000_000f;
+        private const float Pico = 1_000_000_000_000f;
+
+        private const double OneDouble = 1d;
+        private const double ZeroDouble = 0d;
+        private const double KiloDouble = 1e3;
+        private const double MilliDouble = 1e-3;
+        private const double MicroDouble = 1e-6;
+        private const double NanoDouble = 1e-9;
+
         public static string FormatResistance(float ohms)
         {
-            if (ohms >= 1_000_000)
+            if (ohms >= Mega)
             {
-                return $"{ohms / 1_000_000:0.##}MΩ";
+                return $"{ohms / Mega:0.##}MΩ";
             }
 
-            if (ohms >= 1_000)
+            if (ohms >= Kilo)
             {
-                return $"{ohms / 1_000:0.##}kΩ";
+                return $"{ohms / Kilo:0.##}kΩ";
             }
 
             return $"{ohms:0.##}Ω";
@@ -21,47 +35,47 @@ namespace CircuitCraft.Utils
 
         public static string FormatCapacitance(float farads)
         {
-            if (farads >= 1)
+            if (farads >= One)
             {
                 return $"{farads:0.##}F";
             }
 
-            if (farads >= 0.001)
+            if (farads >= Milli)
             {
-                return $"{farads * 1_000:0.##}mF";
+                return $"{farads * Kilo:0.##}mF";
             }
 
-            if (farads >= 0.000_001)
+            if (farads >= Micro)
             {
-                return $"{farads * 1_000_000:0.##}µF";
+                return $"{farads * Mega:0.##}µF";
             }
 
-            if (farads >= 0.000_000_001)
+            if (farads >= Nano)
             {
-                return $"{farads * 1_000_000_000:0.##}nF";
+                return $"{farads * Giga:0.##}nF";
             }
 
-            return $"{farads * 1_000_000_000_000:0.##}pF";
+            return $"{farads * Pico:0.##}pF";
         }
 
         public static string FormatInductance(float henrys)
         {
-            if (henrys >= 1)
+            if (henrys >= One)
             {
                 return $"{henrys:0.##}H";
             }
 
-            if (henrys >= 0.001)
+            if (henrys >= Milli)
             {
-                return $"{henrys * 1_000:0.##}mH";
+                return $"{henrys * Kilo:0.##}mH";
             }
 
-            if (henrys >= 0.000_001)
+            if (henrys >= Micro)
             {
-                return $"{henrys * 1_000_000:0.##}µH";
+                return $"{henrys * Mega:0.##}µH";
             }
 
-            return $"{henrys * 1_000_000_000:0.##}nH";
+            return $"{henrys * Giga:0.##}nH";
         }
 
         public static string FormatVoltage(double value)
@@ -73,28 +87,28 @@ namespace CircuitCraft.Utils
 
         public static string FormatCurrent(double value)
         {
-            var absValue = Math.Abs(value);
-            if (absValue >= 1e3)
+            var absValue = value >= ZeroDouble ? value : -value;
+            if (absValue >= KiloDouble)
             {
-                return $"{value / 1e3:0.###} kA";
+                return $"{value / KiloDouble:0.###} kA";
             }
 
-            if (absValue >= 1)
+            if (absValue >= OneDouble)
             {
                 return $"{value:0.###} A";
             }
 
-            if (absValue >= 1e-3)
+            if (absValue >= MilliDouble)
             {
-                return $"{value * 1e3:0.###} mA";
+                return $"{value * KiloDouble:0.###} mA";
             }
 
-            if (absValue >= 1e-6)
+            if (absValue >= MicroDouble)
             {
-                return $"{value * 1e6:0.###} µA";
+                return $"{value / MicroDouble:0.###} µA";
             }
 
-            return $"{value * 1e9:0.###} nA";
+            return $"{value / NanoDouble:0.###} nA";
         }
     }
 }

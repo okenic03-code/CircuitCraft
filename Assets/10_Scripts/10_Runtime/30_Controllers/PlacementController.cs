@@ -137,7 +137,7 @@ namespace CircuitCraft.Controllers
                 if (_selectedComponent != null)
                 {
                     // Cycle rotation: 0 → 90 → 180 → 270 → 0
-                    _currentRotation = (_currentRotation + 90) % 360;
+                    _currentRotation = (_currentRotation + RotationConstants.Quarter) % RotationConstants.Full;
                     // Invalidate mouse cache so preview updates after rotation
                     _lastMousePosition = Vector3.negativeInfinity;
                     

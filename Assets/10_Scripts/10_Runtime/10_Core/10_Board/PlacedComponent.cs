@@ -3,6 +3,16 @@ using System.Collections.Generic;
 
 namespace CircuitCraft.Core
 {
+    public static class RotationConstants
+    {
+        public const int None = 0;
+        public const int Quarter = 90;
+        public const int Half = 180;
+        public const int ThreeQuarter = 270;
+        public const int Full = 360;
+        public static readonly int[] ValidRotations = { None, Quarter, Half, ThreeQuarter };
+    }
+
     /// <summary>
     /// Represents a component instance placed on the circuit board.
     /// </summary>
@@ -49,7 +59,7 @@ namespace CircuitCraft.Core
                 throw new ArgumentOutOfRangeException(nameof(instanceId), "Instance ID must be non-negative.");
             if (string.IsNullOrWhiteSpace(componentDefId))
                 throw new ArgumentException("Component definition ID cannot be null or empty.", nameof(componentDefId));
-            if (rotation != 0 && rotation != 90 && rotation != 180 && rotation != 270)
+            if (Array.IndexOf(RotationConstants.ValidRotations, rotation) < 0)
                 throw new ArgumentOutOfRangeException(nameof(rotation), "Rotation must be 0, 90, 180, or 270 degrees.");
             if (pins == null)
                 throw new ArgumentNullException(nameof(pins));
@@ -97,15 +107,15 @@ namespace CircuitCraft.Core
         {
             switch (degrees)
             {
-                case 0:
+                case RotationConstants.None:
                     return localPos;
-                case 90:
+                case RotationConstants.Quarter:
                     // Rotate 90° clockwise: (x, y) -> (y, -x)
                     return new GridPosition(localPos.Y, -localPos.X);
-                case 180:
+                case RotationConstants.Half:
                     // Rotate 180°: (x, y) -> (-x, -y)
                     return new GridPosition(-localPos.X, -localPos.Y);
-                case 270:
+                case RotationConstants.ThreeQuarter:
                     // Rotate 270° clockwise (90° counter-clockwise): (x, y) -> (-y, x)
                     return new GridPosition(-localPos.Y, localPos.X);
                 default:
