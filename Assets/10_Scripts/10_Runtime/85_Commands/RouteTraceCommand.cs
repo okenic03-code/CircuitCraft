@@ -25,8 +25,6 @@ namespace CircuitCraft.Commands
         private string _netName;
         private int? _restoredRouteNetId;
         private readonly List<int> _addedSegmentIds = new();
-        // ReSharper disable once NotAccessedField.Local
-        private bool _createdNewNet;
         private int? _startPinPreviousNetId;
         private int? _endPinPreviousNetId;
 
@@ -141,23 +139,19 @@ namespace CircuitCraft.Commands
                     int sourceNetId = targetNetId == startNetId.Value ? endNetId.Value : startNetId.Value;
                     MergeNets(targetNetId, sourceNetId);
 
-                    _createdNewNet = false;
                     return targetNetId;
                 }
 
-                _createdNewNet = false;
                 return startNetId.Value;
             }
 
             if (startNetId.HasValue)
             {
-                _createdNewNet = false;
                 return startNetId.Value;
             }
 
             if (endNetId.HasValue)
             {
-                _createdNewNet = false;
                 return endNetId.Value;
             }
 
@@ -165,7 +159,6 @@ namespace CircuitCraft.Commands
             string netName = IsGroundPin(_startPin) || IsGroundPin(_endPin)
                 ? GroundNetName
                 : $"NET{_boardState.Nets.Count + 1}";
-            _createdNewNet = true;
             return _boardState.CreateNet(netName).NetId;
         }
 
