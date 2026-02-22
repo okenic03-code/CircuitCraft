@@ -3,8 +3,14 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using System.Linq;
 
+/// <summary>
+/// Editor utility to auto-assign scene references via SerializedObject.
+/// </summary>
 public static class AutoAssignReferences
 {
+    /// <summary>
+    /// Finds required assets and scene objects, assigns references, and saves open scenes.
+    /// </summary>
     [MenuItem("Tools/CircuitCraft/Auto-Assign Scene References")]
     public static void AssignAll()
     {
@@ -42,7 +48,7 @@ public static class AutoAssignReferences
             var comp = go.GetComponent(typeName);
             if (comp == null) continue;
 
-            var so = new SerializedObject(comp);
+            SerializedObject so = new(comp);
             var prop = so.FindProperty("_gridSettings");
             if (prop == null)
             {
@@ -64,7 +70,7 @@ public static class AutoAssignReferences
                 var comp = go.GetComponent("SimulationManager");
                 if (comp != null)
                 {
-                    var so = new SerializedObject(comp);
+                    SerializedObject so = new(comp);
                     var prop = so.FindProperty("_componentDefinitions");
                     if (prop != null && prop.isArray)
                     {
@@ -94,7 +100,7 @@ public static class AutoAssignReferences
                 var comp = go.GetComponent("ComponentPaletteController");
                 if (comp != null)
                 {
-                    var so = new SerializedObject(comp);
+                    SerializedObject so = new(comp);
                     var prop = so.FindProperty("_componentDefinitions");
                     if (prop != null && prop.isArray)
                     {
@@ -122,6 +128,9 @@ public static class AutoAssignReferences
         Debug.Log($"[AutoAssign] Complete! {assignedCount} assignments made. Scene saved.");
     }
 
+    /// <summary>
+    /// Finds the first active scene object that contains a component with the provided type name.
+    /// </summary>
     private static GameObject FindGameObjectWithComponent(string typeName)
     {
         var allMBs = Object.FindObjectsOfType<MonoBehaviour>();

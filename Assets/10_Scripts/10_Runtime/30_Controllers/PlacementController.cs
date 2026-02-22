@@ -215,34 +215,6 @@ namespace CircuitCraft.Controllers
         }
 
         /// <summary>
-        /// Undoes the last placement-related command.
-        /// </summary>
-        public void UndoLastAction()
-        {
-            _commandHistory.Undo();
-        }
-
-        /// <summary>
-        /// Redoes the most recently undone placement-related command.
-        /// </summary>
-        public void RedoLastAction()
-        {
-            _commandHistory.Redo();
-        }
-
-        /// <summary>
-        /// Gets whether there is at least one command available to undo.
-        /// </summary>
-        /// <returns>True if an undo operation is available; otherwise false.</returns>
-        public bool CanUndo => _commandHistory.CanUndo;
-
-        /// <summary>
-        /// Gets whether there is at least one command available to redo.
-        /// </summary>
-        /// <returns>True if a redo operation is available; otherwise false.</returns>
-        public bool CanRedo => _commandHistory.CanRedo;
-
-        /// <summary>
         /// Gets the currently selected component definition.
         /// </summary>
         /// <returns>Selected component definition, or null when no component is selected.</returns>

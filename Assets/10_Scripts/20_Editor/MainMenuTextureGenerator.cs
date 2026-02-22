@@ -5,17 +5,26 @@ using UnityEngine;
 
 namespace CircuitCraft.Editor
 {
+    /// <summary>
+    /// Generates and imports main menu icon textures used by the UI.
+    /// </summary>
     public static class MainMenuTextureGenerator
     {
-        private const int IconSize = 128;
-        private const string OutputPath = "Assets/60_UI/10_Sprites/10_MainMenu";
+        [Tooltip("Generated icon texture size in pixels.")]
+        private const int k_IconSize = 128;
 
+        [Tooltip("Output folder for generated main menu textures.")]
+        private const string k_OutputPath = "Assets/60_UI/10_Sprites/10_MainMenu";
+
+        /// <summary>
+        /// Generates all main menu icon textures and configures them as sprites.
+        /// </summary>
         [MenuItem("Tools/CircuitCraft/Generate MainMenu Textures")]
         public static void GenerateAll()
         {
-            if (!Directory.Exists(OutputPath))
+            if (!Directory.Exists(k_OutputPath))
             {
-                Directory.CreateDirectory(OutputPath);
+                Directory.CreateDirectory(k_OutputPath);
             }
 
             GenerateIconPlay();
@@ -33,9 +42,9 @@ namespace CircuitCraft.Editor
 
         private static void GenerateIconPlay()
         {
-            Vector2 a = new Vector2(-22f, 30f);
-            Vector2 b = new Vector2(-22f, -30f);
-            Vector2 c = new Vector2(30f, 0f);
+            Vector2 a = new(-22f, 30f);
+            Vector2 b = new(-22f, -30f);
+            Vector2 c = new(30f, 0f);
 
             GenerateTexture("IconPlay.png", p =>
             {
@@ -68,10 +77,10 @@ namespace CircuitCraft.Editor
 
         private static void GenerateIconQuit()
         {
-            Vector2 a0 = new Vector2(-24f, -24f);
-            Vector2 b0 = new Vector2(24f, 24f);
-            Vector2 a1 = new Vector2(-24f, 24f);
-            Vector2 b1 = new Vector2(24f, -24f);
+            Vector2 a0 = new(-24f, -24f);
+            Vector2 b0 = new(24f, 24f);
+            Vector2 a1 = new(-24f, 24f);
+            Vector2 b1 = new(24f, -24f);
 
             GenerateTexture("IconQuit.png", p =>
             {
@@ -84,24 +93,25 @@ namespace CircuitCraft.Editor
 
         private static void GenerateTexture(string fileName, Func<Vector2, float> alphaEvaluator)
         {
-            var tex = new Texture2D(IconSize, IconSize, TextureFormat.RGBA32, false);
-            var pixels = new Color32[IconSize * IconSize];
-            Vector2 center = new Vector2((IconSize - 1) * 0.5f, (IconSize - 1) * 0.5f);
+            var tex = new Texture2D(k_IconSize, k_IconSize, TextureFormat.RGBA32, false);
+            var pixels = new Color32[k_IconSize * k_IconSize];
+            Vector2 center = new((k_IconSize - 1) * 0.5f, (k_IconSize - 1) * 0.5f);
 
-            for (int y = 0; y < IconSize; y++)
+            for (int y = 0; y < k_IconSize; y++)
             {
-                for (int x = 0; x < IconSize; x++)
+                for (int x = 0; x < k_IconSize; x++)
                 {
-                    Vector2 p = new Vector2(x, y) - center;
+                    Vector2 p = new(x, y);
+                    p -= center;
                     float alpha = Mathf.Clamp01(alphaEvaluator(p));
-                    pixels[y * IconSize + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(alpha * 255f));
+                    pixels[y * k_IconSize + x] = new Color32(255, 255, 255, (byte)Mathf.RoundToInt(alpha * 255f));
                 }
             }
 
             tex.SetPixels32(pixels);
             tex.Apply(false, false);
 
-            File.WriteAllBytes(Path.Combine(OutputPath, fileName), tex.EncodeToPNG());
+            File.WriteAllBytes(Path.Combine(k_OutputPath, fileName), tex.EncodeToPNG());
             UnityEngine.Object.DestroyImmediate(tex);
         }
 
@@ -160,7 +170,7 @@ namespace CircuitCraft.Editor
 
         private static void ConfigureAsSprite(string fileName)
         {
-            string assetPath = OutputPath + "/" + fileName;
+            string assetPath = k_OutputPath + "/" + fileName;
             AssetDatabase.ImportAsset(assetPath, ImportAssetOptions.ForceUpdate);
 
             var importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
