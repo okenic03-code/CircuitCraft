@@ -38,8 +38,16 @@ namespace CircuitCraft.Simulation
         /// <summary>Use initial conditions from DC operating point.</summary>
         public bool IsUsingInitialConditions { get; set; } = true;
 
+        /// <summary>
+        /// Creates a transient configuration with default timing values.
+        /// </summary>
         public TransientConfig() { }
 
+        /// <summary>
+        /// Creates a transient configuration with explicit stop and max-step values.
+        /// </summary>
+        /// <param name="stopTime">End time of the transient simulation in seconds.</param>
+        /// <param name="maxStep">Maximum integration step size in seconds.</param>
         public TransientConfig(double stopTime, double maxStep = 0)
         {
             StopTime = stopTime;
@@ -65,8 +73,18 @@ namespace CircuitCraft.Simulation
         /// <summary>Step increment for sweep.</summary>
         public double StepValue { get; set; }
 
+        /// <summary>
+        /// Creates an empty DC sweep configuration for serialization.
+        /// </summary>
         public DCSweepConfig() { }
 
+        /// <summary>
+        /// Creates a DC sweep configuration for a source and value range.
+        /// </summary>
+        /// <param name="sourceId">Source ID to sweep.</param>
+        /// <param name="start">Start value of the sweep range.</param>
+        /// <param name="stop">End value of the sweep range.</param>
+        /// <param name="step">Increment applied between sweep points.</param>
         public DCSweepConfig(string sourceId, double start, double stop, double step)
         {
             SourceId = sourceId;
@@ -118,6 +136,9 @@ namespace CircuitCraft.Simulation
         /// </summary>
         public string Tag { get; set; }
 
+        /// <summary>
+        /// Creates an empty simulation request for serialization.
+        /// </summary>
         public SimulationRequest() { }
 
         /// <summary>

@@ -6,6 +6,12 @@ namespace CircuitCraft.Simulation.SpiceSharp
 {
     internal static class AnalysisStrategyUtilities
     {
+        /// <summary>
+        /// Creates SpiceSharp export bindings for all probes in the netlist.
+        /// </summary>
+        /// <param name="simulation">Simulation instance that owns export objects.</param>
+        /// <param name="netlist">Netlist containing probe definitions.</param>
+        /// <returns>Map of probe IDs to export handles.</returns>
         public static Dictionary<string, IExport<double>> CreateExports(ISimulation simulation, CircuitNetlist netlist)
         {
             Dictionary<string, IExport<double>> exports = new();
@@ -45,6 +51,12 @@ namespace CircuitCraft.Simulation.SpiceSharp
             return exports;
         }
 
+        /// <summary>
+        /// Reads scalar probe exports and appends DC results.
+        /// </summary>
+        /// <param name="exports">Lookup of export objects keyed by probe ID.</param>
+        /// <param name="probes">Probe definitions to evaluate.</param>
+        /// <param name="result">Result object receiving probe values and warnings.</param>
         public static void CollectDCResults(
             Dictionary<string, IExport<double>> exports,
             List<ProbeDefinition> probes,
@@ -70,6 +82,12 @@ namespace CircuitCraft.Simulation.SpiceSharp
             }
         }
 
+        /// <summary>
+        /// Captures one sample point for transient or sweep probe series.
+        /// </summary>
+        /// <param name="exports">Lookup of export objects keyed by probe ID.</param>
+        /// <param name="probes">Probe definitions to evaluate.</param>
+        /// <param name="probeData">Per-probe sampled values collection.</param>
         public static void CollectSeriesPoint(
             Dictionary<string, IExport<double>> exports,
             List<ProbeDefinition> probes,
@@ -91,6 +109,13 @@ namespace CircuitCraft.Simulation.SpiceSharp
             }
         }
 
+        /// <summary>
+        /// Builds final probe result objects from sampled series data.
+        /// </summary>
+        /// <param name="probes">Probe definitions that were sampled.</param>
+        /// <param name="probeData">Per-probe sampled value lists.</param>
+        /// <param name="xPoints">Shared X-axis points (time or sweep values).</param>
+        /// <param name="result">Result object receiving aggregated probe outputs.</param>
         public static void BuildSeriesResults(
             List<ProbeDefinition> probes,
             Dictionary<string, List<double>> probeData,

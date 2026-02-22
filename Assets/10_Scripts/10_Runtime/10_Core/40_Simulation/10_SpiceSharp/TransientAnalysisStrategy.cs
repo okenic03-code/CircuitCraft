@@ -7,15 +7,23 @@ using SpiceSharp.Simulations;
 
 namespace CircuitCraft.Simulation.SpiceSharp
 {
+    /// <summary>
+    /// Runs transient time-domain analysis with configured timing parameters.
+    /// </summary>
     public class TransientAnalysisStrategy : IAnalysisStrategy
     {
         private readonly TransientConfig _config;
 
+        /// <summary>
+        /// Creates a transient analysis strategy with a required configuration.
+        /// </summary>
+        /// <param name="config">Transient timing configuration.</param>
         public TransientAnalysisStrategy(TransientConfig config)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
+        /// <inheritdoc />
         public SimulationResult Execute(Circuit circuit, CircuitNetlist netlist, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();

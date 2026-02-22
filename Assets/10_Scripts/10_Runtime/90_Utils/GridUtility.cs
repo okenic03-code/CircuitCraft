@@ -20,7 +20,7 @@ namespace CircuitCraft.Utils
         public static Vector2Int ScreenToGridPosition(Vector3 screenPosition, Camera camera, float cellSize, Vector3 gridOrigin)
         {
             Ray ray = camera.ScreenPointToRay(screenPosition);
-            Plane gridPlane = new Plane(Vector3.up, gridOrigin);
+            Plane gridPlane = new(Vector3.up, gridOrigin);
             
             if (gridPlane.Raycast(ray, out float enter))
             {
@@ -30,7 +30,7 @@ namespace CircuitCraft.Utils
                 int x = Mathf.RoundToInt((worldPos.x - gridOrigin.x) / cellSize);
                 int z = Mathf.RoundToInt((worldPos.z - gridOrigin.z) / cellSize);
                 
-                return new Vector2Int(x, z);
+                return new(x, z);
             }
             
             return Vector2Int.zero;
@@ -48,7 +48,7 @@ namespace CircuitCraft.Utils
             float worldX = gridOrigin.x + (gridPosition.x * cellSize);
             float worldZ = gridOrigin.z + (gridPosition.y * cellSize);
             
-            return new Vector3(worldX, gridOrigin.y, worldZ);
+            return new(worldX, gridOrigin.y, worldZ);
         }
         
         /// <summary>

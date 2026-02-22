@@ -6,8 +6,12 @@ using SpiceSharp.Simulations;
 
 namespace CircuitCraft.Simulation.SpiceSharp
 {
+    /// <summary>
+    /// Runs a DC operating point analysis and maps probe outputs.
+    /// </summary>
     public class DCOperatingPointStrategy : IAnalysisStrategy
     {
+        /// <inheritdoc />
         public SimulationResult Execute(Circuit circuit, CircuitNetlist netlist, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();

@@ -1,5 +1,8 @@
 namespace CircuitCraft.Utils
 {
+    /// <summary>
+    /// Formats electrical quantities into compact human-readable strings.
+    /// </summary>
     public static class CircuitUnitFormatter
     {
         private const float One = 1f;
@@ -18,6 +21,11 @@ namespace CircuitCraft.Utils
         private const double MicroDouble = 1e-6;
         private const double NanoDouble = 1e-9;
 
+        /// <summary>
+        /// Formats resistance with ohm prefixes.
+        /// </summary>
+        /// <param name="ohms">Resistance value in ohms.</param>
+        /// <returns>Formatted resistance string such as "4.7kΩ".</returns>
         public static string FormatResistance(float ohms)
         {
             if (ohms >= Mega)
@@ -33,6 +41,11 @@ namespace CircuitCraft.Utils
             return $"{ohms:0.##}Ω";
         }
 
+        /// <summary>
+        /// Formats capacitance with SI prefixes.
+        /// </summary>
+        /// <param name="farads">Capacitance value in farads.</param>
+        /// <returns>Formatted capacitance string such as "100nF".</returns>
         public static string FormatCapacitance(float farads)
         {
             if (farads >= One)
@@ -58,6 +71,11 @@ namespace CircuitCraft.Utils
             return $"{farads * Pico:0.##}pF";
         }
 
+        /// <summary>
+        /// Formats inductance with SI prefixes.
+        /// </summary>
+        /// <param name="henrys">Inductance value in henrys.</param>
+        /// <returns>Formatted inductance string such as "10mH".</returns>
         public static string FormatInductance(float henrys)
         {
             if (henrys >= One)
@@ -78,6 +96,11 @@ namespace CircuitCraft.Utils
             return $"{henrys * Giga:0.##}nH";
         }
 
+        /// <summary>
+        /// Formats voltage using fixed precision.
+        /// </summary>
+        /// <param name="value">Voltage value in volts.</param>
+        /// <returns>Formatted voltage string with a volt unit suffix.</returns>
         public static string FormatVoltage(double value)
         {
             return value >= 0
@@ -85,6 +108,11 @@ namespace CircuitCraft.Utils
                 : $"{value:0.000} V";
         }
 
+        /// <summary>
+        /// Formats current with engineering prefixes.
+        /// </summary>
+        /// <param name="value">Current value in amps.</param>
+        /// <returns>Formatted current string with an ampere unit suffix.</returns>
         public static string FormatCurrent(double value)
         {
             var absValue = value >= ZeroDouble ? value : -value;

@@ -3,13 +3,22 @@ using System.Collections.Generic;
 
 namespace CircuitCraft.Core
 {
+    /// <summary>
+    /// Defines canonical rotation constants used for placed components.
+    /// </summary>
     public static class RotationConstants
     {
+        /// <summary>No rotation in degrees.</summary>
         public const int None = 0;
+        /// <summary>Quarter-turn clockwise rotation in degrees.</summary>
         public const int Quarter = 90;
+        /// <summary>Half-turn rotation in degrees.</summary>
         public const int Half = 180;
+        /// <summary>Three-quarter-turn clockwise rotation in degrees.</summary>
         public const int ThreeQuarter = 270;
+        /// <summary>Full turn in degrees.</summary>
         public const int Full = 360;
+        /// <summary>Set of valid component rotation values.</summary>
         public static readonly int[] ValidRotations = { None, Quarter, Half, ThreeQuarter };
     }
 

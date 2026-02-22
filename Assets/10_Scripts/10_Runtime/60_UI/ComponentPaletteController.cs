@@ -30,10 +30,19 @@ namespace CircuitCraft.UI
 
         private readonly struct PaletteSection
         {
+            /// <summary>Section header text shown in the palette.</summary>
             public readonly string Header;
+            /// <summary>USS class applied to the section header label.</summary>
             public readonly string HeaderClass;
+            /// <summary>Component kinds that belong to this section.</summary>
             public readonly ComponentKind[] Kinds;
 
+            /// <summary>
+            /// Creates a palette section definition.
+            /// </summary>
+            /// <param name="header">Header label text.</param>
+            /// <param name="headerClass">USS class applied to the header.</param>
+            /// <param name="kinds">Component kinds grouped under this section.</param>
             public PaletteSection(string header, string headerClass, params ComponentKind[] kinds)
             {
                 Header = header;

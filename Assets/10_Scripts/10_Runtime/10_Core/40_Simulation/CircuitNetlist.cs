@@ -49,8 +49,18 @@ namespace CircuitCraft.Simulation
         /// <summary>Maximum rated power in watts (for safety checking).</summary>
         public double? MaxPowerWatts { get; set; }
 
+        /// <summary>
+        /// Creates an empty netlist element for serialization.
+        /// </summary>
         public NetlistElement() { }
 
+        /// <summary>
+        /// Creates a netlist element with identifier, type, value, and nodes.
+        /// </summary>
+        /// <param name="id">Unique element identifier.</param>
+        /// <param name="type">Element type used by simulation backends.</param>
+        /// <param name="value">Primary element value.</param>
+        /// <param name="nodes">Node names this element is connected to.</param>
         public NetlistElement(string id, ElementType type, double value, params string[] nodes)
         {
             Id = id;
@@ -229,8 +239,18 @@ namespace CircuitCraft.Simulation
         /// <summary>Optional reference node for voltage measurements.</summary>
         public string ReferenceNode { get; set; }
 
+        /// <summary>
+        /// Creates an empty probe definition for serialization.
+        /// </summary>
         public ProbeDefinition() { }
 
+        /// <summary>
+        /// Creates a probe definition for a specific target.
+        /// </summary>
+        /// <param name="id">Unique probe identifier.</param>
+        /// <param name="type">Measurement type the probe should capture.</param>
+        /// <param name="target">Node or element ID to measure.</param>
+        /// <param name="referenceNode">Reference node used for differential voltage probes.</param>
         public ProbeDefinition(string id, ProbeType type, string target, string referenceNode = null)
         {
             Id = id;

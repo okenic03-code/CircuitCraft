@@ -11,10 +11,13 @@ namespace CircuitCraft.UI
     [RequireComponent(typeof(UIDocument))]
     public class PauseMenuController : MonoBehaviour
     {
-        // Events
+        /// <summary>Raised after the pause menu requests resume.</summary>
         public event Action OnResumeRequested;
+        /// <summary>Raised when the player requests restarting the stage.</summary>
         public event Action OnRestartRequested;
+        /// <summary>Raised when the player requests opening stage select.</summary>
         public event Action OnStageSelectRequested;
+        /// <summary>Raised when the player requests returning to the main menu.</summary>
         public event Action OnMainMenuRequested;
 
         [SerializeField]
@@ -29,6 +32,9 @@ namespace CircuitCraft.UI
         private Button _btnMainMenu;
 
         private bool _isPaused = false;
+        /// <summary>
+        /// Gets whether the pause overlay is currently active.
+        /// </summary>
         public bool IsPaused => _isPaused;
 
         private void OnEnable()

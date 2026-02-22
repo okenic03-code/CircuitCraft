@@ -20,6 +20,12 @@ namespace CircuitCraft.Core
         /// <summary>Allowable error margin.</summary>
         public double Tolerance { get; }
 
+        /// <summary>
+        /// Creates a simulation test case input record.
+        /// </summary>
+        /// <param name="testName">Node or probe identifier to validate.</param>
+        /// <param name="expectedVoltage">Expected voltage value for the target.</param>
+        /// <param name="tolerance">Allowed absolute difference from the expected value.</param>
         public TestCaseInput(string testName, double expectedVoltage, double tolerance)
         {
             TestName = testName ?? throw new ArgumentNullException(nameof(testName));
@@ -51,6 +57,15 @@ namespace CircuitCraft.Core
         /// <summary>Human-readable message describing the result.</summary>
         public string Message { get; }
 
+        /// <summary>
+        /// Creates a per-test-case evaluation result.
+        /// </summary>
+        /// <param name="testName">Name of the evaluated test case.</param>
+        /// <param name="expectedValue">Expected target value.</param>
+        /// <param name="actualValue">Measured value from simulation output.</param>
+        /// <param name="tolerance">Allowed absolute difference.</param>
+        /// <param name="passed">Whether the test case passed.</param>
+        /// <param name="message">Human-readable explanation of the outcome.</param>
         public TestCaseResult(string testName, double expectedValue, double actualValue, double tolerance, bool passed, string message)
         {
             TestName = testName;
@@ -76,6 +91,12 @@ namespace CircuitCraft.Core
         /// <summary>Human-readable summary of the evaluation.</summary>
         public string Summary { get; }
 
+        /// <summary>
+        /// Creates an aggregated evaluation result.
+        /// </summary>
+        /// <param name="passed">True when every test case passed.</param>
+        /// <param name="results">Detailed per-case evaluation results.</param>
+        /// <param name="summary">Human-readable summary text.</param>
         public EvaluationResult(bool passed, List<TestCaseResult> results, string summary)
         {
             Passed = passed;

@@ -8,15 +8,23 @@ using SpiceSharp.Simulations;
 
 namespace CircuitCraft.Simulation.SpiceSharp
 {
+    /// <summary>
+    /// Runs a DC sweep analysis over a configured source range.
+    /// </summary>
     public class DCSweepAnalysisStrategy : IAnalysisStrategy
     {
         private readonly DCSweepConfig _config;
 
+        /// <summary>
+        /// Creates a DC sweep strategy with a required configuration.
+        /// </summary>
+        /// <param name="config">Sweep configuration defining source and range.</param>
         public DCSweepAnalysisStrategy(DCSweepConfig config)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
         }
 
+        /// <inheritdoc />
         public SimulationResult Execute(Circuit circuit, CircuitNetlist netlist, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();

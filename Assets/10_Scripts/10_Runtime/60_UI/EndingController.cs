@@ -16,6 +16,9 @@ namespace CircuitCraft.UI
         [Tooltip("Wire in Inspector: UIDocument hosting ending screen elements.")]
         private UIDocument _uiDocument;
 
+        /// <summary>
+        /// Raised when the player requests returning to the main menu.
+        /// </summary>
         public event Action OnBackToMenu;
 
         private Button _backButton;

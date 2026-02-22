@@ -89,7 +89,14 @@ namespace CircuitCraft.Components
         private bool _isHovered;
         private bool _isSelected;
 
+        /// <summary>
+        /// Gets the currently bound component definition.
+        /// </summary>
         public ComponentDefinition Definition => _definition;
+
+        /// <summary>
+        /// Gets or sets the grid position used by controller-side bookkeeping.
+        /// </summary>
         public Vector2Int GridPosition { get; set; }
 
         private void Awake() => Init();

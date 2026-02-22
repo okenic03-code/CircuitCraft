@@ -27,6 +27,15 @@ namespace CircuitCraft.Core
         /// <summary>Number of traces (wires) on the board.</summary>
         public int TraceCount { get; }
 
+        /// <summary>
+        /// Creates an immutable scoring input payload.
+        /// </summary>
+        /// <param name="circuitPassed">Whether objective checks succeeded.</param>
+        /// <param name="totalComponentCost">Total placed component cost.</param>
+        /// <param name="budgetLimit">Stage budget limit used for bonus calculation.</param>
+        /// <param name="boardArea">Used board area for area bonus calculation.</param>
+        /// <param name="targetArea">Target board area for comparison.</param>
+        /// <param name="traceCount">Total number of placed traces.</param>
         public ScoringInput(
             bool circuitPassed,
             float totalComponentCost,
@@ -55,12 +64,21 @@ namespace CircuitCraft.Core
         /// <summary>Points awarded (or 0 if not earned).</summary>
         public int Points { get; }
 
+        /// <summary>
+        /// Creates a single score line item entry.
+        /// </summary>
+        /// <param name="label">Display label shown in the score breakdown.</param>
+        /// <param name="points">Points contributed by this line item.</param>
         public ScoreLineItem(string label, int points)
         {
             Label = label ?? throw new ArgumentNullException(nameof(label));
             Points = points;
         }
 
+        /// <summary>
+        /// Returns a display-friendly representation of this line item.
+        /// </summary>
+        /// <returns>Label and signed points in a single string.</returns>
         public override string ToString() => $"{Label}: {(Points >= 0 ? "+" : "")}{Points}";
     }
 
@@ -94,6 +112,17 @@ namespace CircuitCraft.Core
         /// <summary>Human-readable summary of the score.</summary>
         public string Summary { get; }
 
+        /// <summary>
+        /// Creates an immutable score breakdown result.
+        /// </summary>
+        /// <param name="baseScore">Base pass/fail score contribution.</param>
+        /// <param name="budgetBonus">Budget bonus contribution.</param>
+        /// <param name="areaBonus">Area-efficiency bonus contribution.</param>
+        /// <param name="totalScore">Final total score.</param>
+        /// <param name="stars">Awarded star count.</param>
+        /// <param name="passed">Whether stage objectives were passed.</param>
+        /// <param name="lineItems">Detailed score line items.</param>
+        /// <param name="summary">Human-readable result summary.</param>
         public ScoreBreakdown(
             int baseScore,
             int budgetBonus,

@@ -45,8 +45,18 @@ namespace CircuitCraft.Simulation
         /// <summary>Average/RMS value (for transient).</summary>
         public double AverageValue { get; set; }
 
+        /// <summary>
+        /// Creates an empty probe result for serialization.
+        /// </summary>
         public ProbeResult() { }
 
+        /// <summary>
+        /// Creates a scalar probe result.
+        /// </summary>
+        /// <param name="probeId">Probe identifier from the request.</param>
+        /// <param name="type">Measured quantity type.</param>
+        /// <param name="target">Measured node or element identifier.</param>
+        /// <param name="value">Measured value.</param>
         public ProbeResult(string probeId, ProbeType type, string target, double value)
         {
             ProbeId = probeId;

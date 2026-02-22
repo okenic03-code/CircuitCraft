@@ -22,8 +22,14 @@ namespace CircuitCraft.UI
         [Tooltip("Reference to the UIDocument component.")]
         private UIDocument _uiDocument;
 
-        // Events
+        /// <summary>
+        /// Raised when the player selects an unlocked stage card.
+        /// </summary>
         public event Action<StageDefinition> OnStageSelected;
+
+        /// <summary>
+        /// Raised when the player requests returning to the main menu.
+        /// </summary>
         public event Action OnBackToMenu;
 
         // Internal State

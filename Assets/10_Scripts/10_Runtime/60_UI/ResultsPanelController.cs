@@ -46,7 +46,14 @@ namespace CircuitCraft.UI
         private Label _totalScore;
         private Label _rechallengePrompt;
 
+        /// <summary>
+        /// Raised when the player requests retrying the current stage.
+        /// </summary>
         public event System.Action OnRetryRequested;
+
+        /// <summary>
+        /// Raised when the player requests advancing to the next stage.
+        /// </summary>
         public event System.Action OnNextStageRequested;
         
         private void Awake() => Init();

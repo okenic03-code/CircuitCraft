@@ -144,6 +144,10 @@ namespace CircuitCraft.Simulation
             };
         }
 
+        /// <summary>
+        /// Returns a severity-prefixed display string for this issue.
+        /// </summary>
+        /// <returns>Formatted issue string including severity and message.</returns>
         public override string ToString()
         {
             var prefix = Severity == IssueSeverity.Error ? "[ERROR]" 

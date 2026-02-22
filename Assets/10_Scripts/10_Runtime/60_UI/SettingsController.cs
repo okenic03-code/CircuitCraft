@@ -16,7 +16,9 @@ namespace CircuitCraft.UI
         [Tooltip("Wire in Inspector: UIDocument hosting settings menu elements.")]
         private UIDocument _uiDocument;
 
-        // Events
+        /// <summary>
+        /// Raised when the settings screen requests navigation back.
+        /// </summary>
         public event Action OnBackRequested;
 
         // UI Elements
