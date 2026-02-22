@@ -22,31 +22,35 @@ namespace CircuitCraft.Managers
         [SerializeField] private ComponentDefinition[] _componentDefinitions;
 
         private readonly Dictionary<string, ComponentDefinition> _componentDefinitionLookup =
-            new Dictionary<string, ComponentDefinition>();
+            new();
 
         private ISimulationService _simulationService;
         private BoardToNetlistConverter _netlistConverter;
         private bool _isSimulating;
         private SimulationResult _lastSimulationResult;
 
+        /// <summary>
+        /// Gets whether a simulation request is currently running.
+        /// </summary>
         public bool IsSimulating => _isSimulating;
+
+        /// <summary>
+        /// Gets the most recent simulation result, or null when no run has completed.
+        /// </summary>
         public SimulationResult LastSimulationResult => _lastSimulationResult;
 
+        /// <summary>
+        /// Raised when simulation execution completes, with either success or failure.
+        /// </summary>
         public event Action<SimulationResult> OnSimulationCompleted;
 
         private void Awake() => Init();
-
-        private void OnDestroy()
-        {
-            ServiceRegistry.Unregister(this);
-        }
 
         private void Init()
         {
             InitializeSimulationService();
             InitializeComponentLookup();
             InitializeNetlistConverter();
-            RegisterServices();
         }
 
         private void InitializeSimulationService()
@@ -61,17 +65,13 @@ namespace CircuitCraft.Managers
 
         private void InitializeNetlistConverter()
         {
-            _netlistConverter = new BoardToNetlistConverter(this);
-        }
-
-        private void RegisterServices()
-        {
-            ServiceRegistry.Register(this);
+            _netlistConverter = new(this);
         }
 
         /// <summary>
         /// Fire-and-forget simulation entry point.
         /// </summary>
+        /// <param name="boardState">Board state snapshot to simulate.</param>
         public void RunSimulation(BoardState boardState)
         {
             RunSimulationAsync(boardState, this.GetCancellationTokenOnDestroy()).Forget();
@@ -80,6 +80,9 @@ namespace CircuitCraft.Managers
         /// <summary>
         /// Runs a DC operating point simulation on the provided board state.
         /// </summary>
+        /// <param name="boardState">Board state snapshot to simulate.</param>
+        /// <param name="cancellationToken">Cancellation token controlling simulation lifetime.</param>
+        /// <returns>A task that completes when simulation execution finishes.</returns>
         public async UniTask RunSimulationAsync(BoardState boardState, CancellationToken cancellationToken = default)
         {
             await RunSimulationAsync(boardState, null, false, false, cancellationToken);
@@ -88,6 +91,11 @@ namespace CircuitCraft.Managers
         /// <summary>
         /// Runs a DC operating point simulation and optionally captures node voltages and currents.
         /// </summary>
+        /// <param name="boardState">Board state snapshot to simulate.</param>
+        /// <param name="captureAllNodeVoltages">Whether to add voltage probes for all nets.</param>
+        /// <param name="captureAllComponentCurrents">Whether to add current probes for all simulatable components.</param>
+        /// <param name="cancellationToken">Cancellation token controlling simulation lifetime.</param>
+        /// <returns>A task that completes when simulation execution finishes.</returns>
         public async UniTask RunSimulationAsync(
             BoardState boardState,
             bool captureAllNodeVoltages,
@@ -101,6 +109,12 @@ namespace CircuitCraft.Managers
         /// Runs a DC operating point simulation with optional auto probes while preserving
         /// caller-provided probes.
         /// </summary>
+        /// <param name="boardState">Board state snapshot to simulate.</param>
+        /// <param name="probes">Caller-provided probes to include alongside optional visualization probes.</param>
+        /// <param name="captureAllNodeVoltages">Whether to add voltage probes for all nets.</param>
+        /// <param name="captureAllComponentCurrents">Whether to add current probes for all simulatable components.</param>
+        /// <param name="cancellationToken">Cancellation token controlling simulation lifetime.</param>
+        /// <returns>A task that completes when simulation execution finishes.</returns>
         public async UniTask RunSimulationAsync(
             BoardState boardState,
             IEnumerable<ProbeDefinition> probes,
@@ -121,6 +135,10 @@ namespace CircuitCraft.Managers
         /// <summary>
         /// Runs a DC operating point simulation on the provided board state.
         /// </summary>
+        /// <param name="boardState">Board state snapshot to simulate.</param>
+        /// <param name="probes">Optional caller-provided probes to include in the simulation run.</param>
+        /// <param name="cancellationToken">Cancellation token controlling simulation lifetime.</param>
+        /// <returns>A task that completes when simulation execution finishes.</returns>
         public async UniTask RunSimulationAsync(
             BoardState boardState,
             IEnumerable<ProbeDefinition> probes = null,
@@ -132,7 +150,7 @@ namespace CircuitCraft.Managers
                 return;
             }
 
-            if (boardState == null)
+            if (boardState is null)
             {
                 Debug.LogError("SimulationManager: No BoardState available.");
                 return;
@@ -225,6 +243,11 @@ namespace CircuitCraft.Managers
             }
         }
 
+        /// <summary>
+        /// Gets a component definition by id from the current lookup table.
+        /// </summary>
+        /// <param name="componentDefId">Component definition identifier.</param>
+        /// <returns>The matching component definition, or null when not found.</returns>
         public ComponentDefinition GetComponentDefinition(string componentDefId)
         {
             if (string.IsNullOrEmpty(componentDefId))
@@ -236,10 +259,13 @@ namespace CircuitCraft.Managers
             return definition;
         }
 
+        /// <summary>
+        /// Gets a component definition by id.
+        /// </summary>
+        /// <param name="componentDefId">Component definition identifier.</param>
+        /// <returns>The matching component definition, or null when not found.</returns>
         public ComponentDefinition GetDefinition(string componentDefId)
-        {
-            return GetComponentDefinition(componentDefId);
-        }
+            => GetComponentDefinition(componentDefId);
 
         private IEnumerable<ProbeDefinition> AddVisualizationProbes(
             BoardState boardState,
@@ -247,13 +273,13 @@ namespace CircuitCraft.Managers
             bool addAllNodeVoltages,
             bool addAllComponentCurrents)
         {
-            if (boardState == null)
+            if (boardState is null)
             {
-                return additionalProbes != null ? new List<ProbeDefinition>(additionalProbes) : new List<ProbeDefinition>();
+                return additionalProbes is not null ? new List<ProbeDefinition>(additionalProbes) : new List<ProbeDefinition>();
             }
 
             var probes = new List<ProbeDefinition>();
-            if (additionalProbes != null)
+            if (additionalProbes is not null)
             {
                 probes.AddRange(additionalProbes);
             }
@@ -267,7 +293,7 @@ namespace CircuitCraft.Managers
             {
                 foreach (var net in boardState.Nets)
                 {
-                    if (net == null || string.IsNullOrWhiteSpace(net.NetName))
+                    if (net is null || string.IsNullOrWhiteSpace(net.NetName))
                     {
                         continue;
                     }
@@ -336,7 +362,7 @@ namespace CircuitCraft.Managers
         {
             _componentDefinitionLookup.Clear();
 
-            if (_componentDefinitions == null)
+            if (_componentDefinitions is null)
             {
                 return;
             }

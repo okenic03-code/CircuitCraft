@@ -17,8 +17,11 @@ namespace CircuitCraft.Managers
     public class StageManager : MonoBehaviour
     {
         [Header("Dependencies")]
-        [SerializeField] private GameManager _gameManager;
-        [SerializeField] private SimulationManager _simulationManager;
+        [SerializeField, Tooltip("Game manager that owns the active board state lifecycle.")]
+        private GameManager _gameManager;
+
+        [SerializeField, Tooltip("Simulation manager responsible for circuit simulation execution.")]
+        private SimulationManager _simulationManager;
 
         private StageDefinition _currentStage;
         private ObjectiveEvaluator _objectiveEvaluator;
@@ -39,9 +42,9 @@ namespace CircuitCraft.Managers
 
         private void Awake()
         {
-            _objectiveEvaluator = new ObjectiveEvaluator();
-            _scoringSystem = new ScoringSystem();
-            _drcChecker = new DRCChecker();
+            _objectiveEvaluator = new();
+            _scoringSystem = new();
+            _drcChecker = new();
         }
 
         /// <summary>
@@ -73,7 +76,7 @@ namespace CircuitCraft.Managers
         /// <param name="stage">The stage containing fixed placement definitions.</param>
         private void PlaceFixedComponents(StageDefinition stage)
         {
-            if (stage.FixedPlacements == null || stage.FixedPlacements.Length == 0)
+            if (stage.FixedPlacements is null || stage.FixedPlacements.Length == 0)
                 return;
 
             var boardState = _gameManager.BoardState;
@@ -166,13 +169,13 @@ namespace CircuitCraft.Managers
                 }
 
                 // 4. Run simulation and await completion
-                var probes = new List<ProbeDefinition>();
-                var testCaseInputs = new List<TestCaseInput>();
-                if (_currentStage.TestCases != null)
+                List<ProbeDefinition> probes = new();
+                List<TestCaseInput> testCaseInputs = new();
+                if (_currentStage.TestCases is not null)
                 {
                     foreach (var tc in _currentStage.TestCases)
                     {
-                        if (tc == null)
+                        if (tc is null)
                         {
                             Debug.LogWarning($"StageManager: Stage '{_currentStage.DisplayName}' contains a null test case entry.");
                             continue;
@@ -232,7 +235,7 @@ namespace CircuitCraft.Managers
                         "Marking objective evaluation as failed.");
                     evalResult = new EvaluationResult(
                         false,
-                        new List<TestCaseResult>(),
+                        new(),
                         "FAILED (0/0 test cases) - No valid ProbeNode configured."
                     );
                 }

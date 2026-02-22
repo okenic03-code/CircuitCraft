@@ -14,7 +14,8 @@ namespace CircuitCraft.Managers
     public class ProgressionManager : MonoBehaviour
     {
         [Header("Dependencies")]
-        [SerializeField] private StageManager _stageManager;
+        [SerializeField, Tooltip("Stage manager used to receive completion events for progression updates.")]
+        private StageManager _stageManager;
 
         [Header("Stage Data")]
         [SerializeField]
@@ -50,7 +51,7 @@ namespace CircuitCraft.Managers
         /// </summary>
         private void InitializeDefaults()
         {
-            if (_allStages == null) return;
+            if (_allStages is null) return;
 
             foreach (var stage in _allStages)
             {
@@ -66,7 +67,7 @@ namespace CircuitCraft.Managers
         /// </summary>
         private void HandleStageCompleted(ScoreBreakdown breakdown)
         {
-            if (breakdown == null) return;
+            if (breakdown is null) return;
 
             var currentStage = _stageManager.CurrentStage;
             if (currentStage == null)
@@ -164,7 +165,7 @@ namespace CircuitCraft.Managers
         /// <returns>The next StageDefinition, or null if there is no next stage.</returns>
         private StageDefinition FindNextStage(string currentStageId)
         {
-            if (_allStages == null) return null;
+            if (_allStages is null) return null;
 
             // First, find the current stage definition to get worldId and stageNumber
             StageDefinition current = null;
@@ -197,7 +198,7 @@ namespace CircuitCraft.Managers
         /// </summary>
         public void SaveProgress()
         {
-            if (_allStages == null) return;
+            if (_allStages is null) return;
 
             foreach (var stage in _allStages)
             {
@@ -223,7 +224,7 @@ namespace CircuitCraft.Managers
         /// </summary>
         public void LoadProgress()
         {
-            if (_allStages == null) return;
+            if (_allStages is null) return;
 
             foreach (var stage in _allStages)
             {
@@ -256,7 +257,7 @@ namespace CircuitCraft.Managers
         /// </summary>
         public void ClearProgress()
         {
-            if (_allStages == null) return;
+            if (_allStages is null) return;
 
             foreach (var stage in _allStages)
             {

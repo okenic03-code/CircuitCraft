@@ -21,30 +21,22 @@ namespace CircuitCraft.Managers
         [SerializeField, Tooltip("Suggested height (not a hard limit)")] private int _suggestedHeight = 20;
 
         [Header("Dependencies")]
-        [SerializeField] private BoardState _boardState;
-        [SerializeField] private SimulationManager _simulationManager;
+        [SerializeField, Tooltip("Runtime board state container for placed components, nets, and traces.")]
+        private BoardState _boardState;
+
+        [SerializeField, Tooltip("Simulation manager used to run circuit analysis requests.")]
+        private SimulationManager _simulationManager;
 
         private SaveLoadService _saveLoadService;
-        private CommandHistory _commandHistory = new CommandHistory();
+        private CommandHistory _commandHistory = new();
 
         private void Awake() => Init();
 
-        private void OnDestroy()
-        {
-            ServiceRegistry.Unregister(this);
-        }
-
         private void Init()
         {
-            InitializeServiceRegistry();
             ValidateSimulationManager();
             InitializeBoardState();
             InitializeSaveLoadService();
-        }
-
-        private void InitializeServiceRegistry()
-        {
-            ServiceRegistry.Register(this);
         }
 
         private void ValidateSimulationManager()
@@ -57,7 +49,7 @@ namespace CircuitCraft.Managers
 
         private void InitializeBoardState()
         {
-            if (_boardState == null)
+            if (_boardState is null)
             {
                 _boardState = new BoardState(_suggestedWidth, _suggestedHeight);
                 Debug.Log($"GameManager: BoardState initialized with suggested area ({_suggestedWidth}x{_suggestedHeight})");
@@ -66,7 +58,7 @@ namespace CircuitCraft.Managers
 
         private void InitializeSaveLoadService()
         {
-            _saveLoadService = new SaveLoadService();
+            _saveLoadService = new();
             Debug.Log("GameManager: SaveLoadService initialized.");
         }
 
@@ -75,6 +67,9 @@ namespace CircuitCraft.Managers
         /// </summary>
         public BoardState BoardState => _boardState;
 
+        /// <summary>
+        /// Gets the command history used for undo/redo board mutations.
+        /// </summary>
         public CommandHistory CommandHistory => _commandHistory;
 
         /// <summary>
@@ -153,6 +148,8 @@ namespace CircuitCraft.Managers
         /// <summary>
         /// Runs a DC operating point simulation on the current BoardState asynchronously.
         /// </summary>
+        /// <param name="cancellationToken">Cancellation token controlling the simulation request lifetime.</param>
+        /// <returns>A task that completes when simulation execution finishes.</returns>
         public async UniTask RunSimulationAsync(CancellationToken cancellationToken = default)
         {
             if (_simulationManager == null)
@@ -210,9 +207,7 @@ namespace CircuitCraft.Managers
             }
         }
 
-        private static string GetSaveFilePath(string stageId)
-        {
-            return Path.Combine(Application.persistentDataPath, "saves", $"{stageId}.json");
-        }
+        private static string GetSaveFilePath(string stageId) =>
+            Path.Combine(Application.persistentDataPath, "saves", $"{stageId}.json");
     }
 }
