@@ -90,7 +90,7 @@ namespace CircuitCraft.Core
         /// <returns>World grid position of the pin.</returns>
         public GridPosition GetPinWorldPosition(int pinIndex)
         {
-            if (pinIndex is < 0 or >= _pins.Count)
+            if (pinIndex < 0 || pinIndex >= _pins.Count)
                 throw new ArgumentException($"Pin index {pinIndex} not found on component {InstanceId}.", nameof(pinIndex));
 
             var pin = _pins[pinIndex];
