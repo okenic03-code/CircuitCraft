@@ -28,12 +28,12 @@ namespace CircuitCraft.UI
 
         // Internal State
         private VisualElement _root;
-        private List<VisualElement> _stageCards = new List<VisualElement>();
+        private List<VisualElement> _stageCards = new();
         
         // Callback references for cleanup
         private Button _btnBack;
         private readonly List<(VisualElement card, EventCallback<ClickEvent> callback)> _cardCallbacks 
-            = new List<(VisualElement, EventCallback<ClickEvent>)>();
+            = new();
         
         // Progression State (Simulated here until ProgressionManager is integrated)
         // Index matches _stages array.
@@ -42,8 +42,6 @@ namespace CircuitCraft.UI
 
         private void Awake()
         {
-            if (_uiDocument == null) _uiDocument = GetComponent<UIDocument>();
-            
             // Initialize default state if not set externally
             // Default: 5 stages supported by UI
             int capacity = (_stages != null && _stages.Length > 0) ? _stages.Length : 5;
@@ -58,7 +56,7 @@ namespace CircuitCraft.UI
         {
             if (_uiDocument == null) return;
             _root = _uiDocument.rootVisualElement;
-            if (_root == null) return;
+            if (_root is null) return;
 
             FindAndSetupUI();
             UpdateStageDisplay();
@@ -201,13 +199,13 @@ namespace CircuitCraft.UI
         private string GetStarString(int starCount)
         {
             // Simple mapping
-            switch (starCount)
+            return starCount switch
             {
-                case 1: return "★☆☆";
-                case 2: return "★★☆";
-                case 3: return "★★★";
-                default: return "☆☆☆";
-            }
+                1 => "★☆☆",
+                2 => "★★☆",
+                3 => "★★★",
+                _ => "☆☆☆"
+            };
         }
 
         /// <summary>

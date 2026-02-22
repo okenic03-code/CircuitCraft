@@ -10,8 +10,8 @@ namespace CircuitCraft.UI
     /// </summary>
     public class MainMenuController : MonoBehaviour
     {
-        [SerializeField] private UIDocument uiDocument;
-        [SerializeField] private GameObject _settingsScreen;
+        [SerializeField, Tooltip("UI document that contains main menu button elements.")] private UIDocument _uiDocument;
+        [SerializeField, Tooltip("Settings screen GameObject toggled from the main menu.")] private GameObject _settingsScreen;
 
         private Button _playButton;
         private Button _settingsButton;
@@ -34,13 +34,10 @@ namespace CircuitCraft.UI
 
         private void OnEnable()
         {
-            if (uiDocument == null)
-                uiDocument = GetComponent<UIDocument>();
+            if (_uiDocument == null) return;
 
-            if (uiDocument == null) return;
-
-            var root = uiDocument.rootVisualElement;
-            if (root == null) return;
+            var root = _uiDocument.rootVisualElement;
+            if (root is null) return;
 
             _playButton = root.Q<Button>("btn-play");
             _settingsButton = root.Q<Button>("btn-settings");

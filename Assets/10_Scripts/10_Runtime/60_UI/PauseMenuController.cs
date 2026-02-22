@@ -5,6 +5,9 @@ using UnityEngine.SceneManagement;
 
 namespace CircuitCraft.UI
 {
+    /// <summary>
+    /// Controls pause overlay visibility and pause menu actions.
+    /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class PauseMenuController : MonoBehaviour
     {
@@ -14,7 +17,9 @@ namespace CircuitCraft.UI
         public event Action OnStageSelectRequested;
         public event Action OnMainMenuRequested;
 
-        private UIDocument _document;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: UIDocument hosting pause menu elements.")]
+        private UIDocument _uiDocument;
         private VisualElement _root;
         private VisualElement _pauseOverlay;
         
@@ -26,17 +31,12 @@ namespace CircuitCraft.UI
         private bool _isPaused = false;
         public bool IsPaused => _isPaused;
 
-        private void Awake()
-        {
-            _document = GetComponent<UIDocument>();
-        }
-
         private void OnEnable()
         {
-            if (_document == null) return;
+            if (_uiDocument == null) return;
             
-            _root = _document.rootVisualElement;
-            if (_root == null) return;
+            _root = _uiDocument.rootVisualElement;
+            if (_root is null) return;
 
             _pauseOverlay = _root.Q<VisualElement>("pause-overlay");
             
@@ -45,13 +45,13 @@ namespace CircuitCraft.UI
             _btnStageSelect = _root.Q<Button>("btn-stage-select");
             _btnMainMenu = _root.Q<Button>("btn-main-menu");
 
-            if (_btnResume != null) _btnResume.clicked += OnResumeClicked;
-            if (_btnRestart != null) _btnRestart.clicked += OnRestartClicked;
-            if (_btnStageSelect != null) _btnStageSelect.clicked += OnStageSelectClicked;
-            if (_btnMainMenu != null) _btnMainMenu.clicked += OnMainMenuClicked;
+            if (_btnResume is not null) _btnResume.clicked += OnResumeClicked;
+            if (_btnRestart is not null) _btnRestart.clicked += OnRestartClicked;
+            if (_btnStageSelect is not null) _btnStageSelect.clicked += OnStageSelectClicked;
+            if (_btnMainMenu is not null) _btnMainMenu.clicked += OnMainMenuClicked;
             
             // Ensure we start hidden
-            if (_pauseOverlay != null)
+            if (_pauseOverlay is not null)
             {
                 _pauseOverlay.style.display = DisplayStyle.None;
             }
@@ -59,10 +59,10 @@ namespace CircuitCraft.UI
 
         private void OnDisable()
         {
-            if (_btnResume != null) _btnResume.clicked -= OnResumeClicked;
-            if (_btnRestart != null) _btnRestart.clicked -= OnRestartClicked;
-            if (_btnStageSelect != null) _btnStageSelect.clicked -= OnStageSelectClicked;
-            if (_btnMainMenu != null) _btnMainMenu.clicked -= OnMainMenuClicked;
+            if (_btnResume is not null) _btnResume.clicked -= OnResumeClicked;
+            if (_btnRestart is not null) _btnRestart.clicked -= OnRestartClicked;
+            if (_btnStageSelect is not null) _btnStageSelect.clicked -= OnStageSelectClicked;
+            if (_btnMainMenu is not null) _btnMainMenu.clicked -= OnMainMenuClicked;
         }
 
         private void Update()
@@ -73,6 +73,9 @@ namespace CircuitCraft.UI
             }
         }
 
+        /// <summary>
+        /// Toggles between paused and resumed game states.
+        /// </summary>
         public void TogglePause()
         {
             if (_isPaused)
@@ -90,7 +93,7 @@ namespace CircuitCraft.UI
             _isPaused = true;
             Time.timeScale = 0f;
             
-            if (_pauseOverlay != null)
+            if (_pauseOverlay is not null)
             {
                 _pauseOverlay.style.display = DisplayStyle.Flex;
             }
@@ -101,7 +104,7 @@ namespace CircuitCraft.UI
             _isPaused = false;
             Time.timeScale = 1f;
             
-            if (_pauseOverlay != null)
+            if (_pauseOverlay is not null)
             {
                 _pauseOverlay.style.display = DisplayStyle.None;
             }

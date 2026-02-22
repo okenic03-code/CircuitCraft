@@ -80,11 +80,7 @@ namespace CircuitCraft.UI
         {
             if (_uiDocument == null)
             {
-                _uiDocument = GetComponent<UIDocument>();
-                if (_uiDocument == null)
-                {
-                    Debug.LogError("ComponentPaletteController: UIDocument reference is missing!");
-                }
+                Debug.LogError("ComponentPaletteController: UIDocument reference is missing!");
             }
         }
 
@@ -98,7 +94,7 @@ namespace CircuitCraft.UI
 
         private void InitializeCallbacksList()
         {
-            _registeredCallbacks = new List<(Button, Action)>();
+            _registeredCallbacks = new();
         }
 
         private void OnEnable()
@@ -106,7 +102,7 @@ namespace CircuitCraft.UI
             if (_uiDocument == null) return;
 
             _root = _uiDocument.rootVisualElement;
-            if (_root == null) return;
+            if (_root is null) return;
 
             _paletteScroll = FindPaletteScroll();
 
@@ -115,7 +111,7 @@ namespace CircuitCraft.UI
 
         private ScrollView FindPaletteScroll()
         {
-            if (_root == null) return null;
+            if (_root is null) return null;
 
             return _root.Q<ScrollView>("palette-scroll")
                 ?? _root.Q<ScrollView>(null, "palette-scroll");
@@ -135,12 +131,12 @@ namespace CircuitCraft.UI
         {
             UnregisterCallbacks();
 
-            if (_paletteScroll == null && _root != null)
+            if (_paletteScroll is null && _root is not null)
             {
                 _paletteScroll = FindPaletteScroll();
             }
 
-            if (_paletteScroll == null)
+            if (_paletteScroll is null)
             {
                 return;
             }
@@ -153,7 +149,7 @@ namespace CircuitCraft.UI
                 return;
             }
 
-            var knownKinds = new HashSet<ComponentKind>();
+            HashSet<ComponentKind> knownKinds = new();
 
             foreach (var section in SectionOrder)
             {
@@ -261,7 +257,7 @@ namespace CircuitCraft.UI
         {
             if (_placementController == null) return;
 
-            if (_selectedButton != null)
+            if (_selectedButton is not null)
             {
                 _selectedButton.RemoveFromClassList("selected");
             }
@@ -282,7 +278,7 @@ namespace CircuitCraft.UI
         /// </summary>
         public void DeselectComponent()
         {
-            if (_selectedButton != null)
+            if (_selectedButton is not null)
             {
                 _selectedButton.RemoveFromClassList("selected");
                 _selectedButton = null;

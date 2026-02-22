@@ -13,25 +13,24 @@ namespace CircuitCraft.UI
     public class CircuitDiagramController : MonoBehaviour
     {
         [Header("Dependencies")]
-        [SerializeField] private StageManager _stageManager;
-
+        [SerializeField]
+        [Tooltip("Wire in Inspector: UIDocument hosting circuit diagram elements.")]
         private UIDocument _uiDocument;
+
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Stage manager providing current stage data.")]
+        private StageManager _stageManager;
         private VisualElement _modal;
         private Label _titleLabel;
         private Label _textLabel;
         private Button _openButton;
         private Button _closeButton;
 
-        private void Awake()
-        {
-            _uiDocument = GetComponent<UIDocument>();
-        }
-
         private void OnEnable()
         {
             if (_uiDocument == null) return;
             var root = _uiDocument.rootVisualElement;
-            if (root == null) return;
+            if (root is null) return;
 
             _modal = root.Q<VisualElement>("circuit-diagram-modal");
             _titleLabel = root.Q<Label>("circuit-diagram-title");
@@ -39,9 +38,9 @@ namespace CircuitCraft.UI
             _openButton = root.Q<Button>("CircuitDiagramButton");
             _closeButton = root.Q<Button>("circuit-diagram-close");
 
-            if (_openButton != null)
+            if (_openButton is not null)
                 _openButton.clicked += ToggleModal;
-            if (_closeButton != null)
+            if (_closeButton is not null)
                 _closeButton.clicked += HideModal;
 
             if (_stageManager != null)
@@ -50,9 +49,9 @@ namespace CircuitCraft.UI
 
         private void OnDisable()
         {
-            if (_openButton != null)
+            if (_openButton is not null)
                 _openButton.clicked -= ToggleModal;
-            if (_closeButton != null)
+            if (_closeButton is not null)
                 _closeButton.clicked -= HideModal;
 
             if (_stageManager != null)
@@ -64,10 +63,10 @@ namespace CircuitCraft.UI
             if (_stageManager == null || _stageManager.CurrentStage == null) return;
 
             var stage = _stageManager.CurrentStage;
-            if (_titleLabel != null)
+            if (_titleLabel is not null)
                 _titleLabel.text = $"Circuit: {stage.DisplayName}";
 
-            if (_textLabel != null)
+            if (_textLabel is not null)
             {
                 _textLabel.text = string.IsNullOrEmpty(stage.CircuitDiagramDescription)
                     ? "No circuit description available for this stage."
@@ -77,7 +76,7 @@ namespace CircuitCraft.UI
 
         private void ToggleModal()
         {
-            if (_modal == null) return;
+            if (_modal is null) return;
             bool isVisible = _modal.style.display != DisplayStyle.None;
             if (isVisible) HideModal();
             else ShowModal();
@@ -85,13 +84,13 @@ namespace CircuitCraft.UI
 
         private void ShowModal()
         {
-            if (_modal != null)
+            if (_modal is not null)
                 _modal.style.display = DisplayStyle.Flex;
         }
 
         private void HideModal()
         {
-            if (_modal != null)
+            if (_modal is not null)
                 _modal.style.display = DisplayStyle.None;
         }
     }

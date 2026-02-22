@@ -22,10 +22,16 @@ namespace CircuitCraft.UI
     public class ResultsPanelController : MonoBehaviour
     {
         [Header("Dependencies")]
-        [SerializeField] private GameManager _gameManager;
-        [SerializeField] private StageManager _stageManager;
-        
+        [SerializeField]
+        [Tooltip("Wire in Inspector: UIDocument hosting results panel elements.")]
         private UIDocument _uiDocument;
+
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Game manager that publishes simulation completion.")]
+        private GameManager _gameManager;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Stage manager that publishes stage evaluation results.")]
+        private StageManager _stageManager;
         private VisualElement _panel;
         private Label _resultsText;
         private Button _modifyButton;
@@ -53,7 +59,8 @@ namespace CircuitCraft.UI
 
         private void InitializeUIDocument()
         {
-            _uiDocument = GetComponent<UIDocument>();
+            if (_uiDocument == null)
+                Debug.LogError("ResultsPanelController: UIDocument reference is missing.");
         }
 
         private void ValidateDependencies()
@@ -69,7 +76,7 @@ namespace CircuitCraft.UI
             if (_uiDocument == null) return;
             
             var root = _uiDocument.rootVisualElement;
-            if (root == null) return;
+            if (root is null) return;
 
             // Query elements
             _panel = root.Q<VisualElement>("results-panel");
@@ -86,16 +93,16 @@ namespace CircuitCraft.UI
             _rechallengePrompt = root.Q<Label>("rechallenge-prompt");
             
             // Bind events
-            if (_modifyButton != null)
+            if (_modifyButton is not null)
                 _modifyButton.clicked += OnModifyCircuit;
 
-            if (_retryButton != null)
+            if (_retryButton is not null)
                 _retryButton.clicked += OnRetryStage;
 
-            if (_nextStageButton != null)
+            if (_nextStageButton is not null)
                 _nextStageButton.clicked += OnNextStage;
             
-            if (_toggleButton != null)
+            if (_toggleButton is not null)
                 _toggleButton.clicked += OnToggleClicked;
             
             if (_gameManager != null)
@@ -110,16 +117,16 @@ namespace CircuitCraft.UI
         
         private void OnDisable()
         {
-            if (_modifyButton != null)
+            if (_modifyButton is not null)
                 _modifyButton.clicked -= OnModifyCircuit;
 
-            if (_retryButton != null)
+            if (_retryButton is not null)
                 _retryButton.clicked -= OnRetryStage;
 
-            if (_nextStageButton != null)
+            if (_nextStageButton is not null)
                 _nextStageButton.clicked -= OnNextStage;
             
-            if (_toggleButton != null)
+            if (_toggleButton is not null)
                 _toggleButton.clicked -= OnToggleClicked;
             
             if (_gameManager != null)
@@ -131,29 +138,33 @@ namespace CircuitCraft.UI
         
         private void OnStageCompleted(ScoreBreakdown breakdown)
         {
-            if (_nextStageButton != null)
+            if (_nextStageButton is not null)
                 _nextStageButton.style.display = breakdown.Passed ? DisplayStyle.Flex : DisplayStyle.None;
 
             DisplayScoreBreakdown(breakdown);
             ShowPanel();
         }
 
+        /// <summary>
+        /// Updates score-related labels after stage evaluation.
+        /// </summary>
+        /// <param name="breakdown">Computed score breakdown for the current stage attempt.</param>
         public void DisplayScoreBreakdown(ScoreBreakdown breakdown)
         {
-            if (_resultStatus != null)
+            if (_resultStatus is not null)
             {
                 _resultStatus.text = breakdown.Passed ? "PASSED" : "FAILED";
                 _resultStatus.style.color = breakdown.Passed ? new StyleColor(new Color(0.2f, 0.8f, 0.2f)) : new StyleColor(new Color(0.8f, 0.2f, 0.2f));
             }
 
-            if (_starDisplay != null)
+            if (_starDisplay is not null)
             {
                 _starDisplay.text = GetStarString(breakdown.Stars);
             }
 
-            if (_scoreBreakdown != null)
+            if (_scoreBreakdown is not null)
             {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new();
                 foreach (var item in breakdown.LineItems)
                 {
                     sb.AppendLine($"{item.Label}: {item.Points}");
@@ -161,12 +172,12 @@ namespace CircuitCraft.UI
                 _scoreBreakdown.text = sb.ToString();
             }
 
-            if (_totalScore != null)
+            if (_totalScore is not null)
             {
                 _totalScore.text = $"Total Score: {breakdown.TotalScore}";
             }
 
-            if (_rechallengePrompt != null)
+            if (_rechallengePrompt is not null)
             {
                 _rechallengePrompt.text = breakdown.Stars switch
                 {
@@ -210,9 +221,9 @@ namespace CircuitCraft.UI
         
         private void DisplayResults(SimulationResult result)
         {
-            if (_resultsText == null) return;
+            if (_resultsText is null) return;
             
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             
             if (result.IsSuccess)
             {
@@ -269,7 +280,7 @@ namespace CircuitCraft.UI
         
         private void OnToggleClicked()
         {
-            if (_panel != null)
+            if (_panel is not null)
             {
                 bool isVisible = _panel.style.display != DisplayStyle.None;
                 if (isVisible)
@@ -281,7 +292,7 @@ namespace CircuitCraft.UI
         
         private void ShowPanel()
         {
-            if (_panel != null)
+            if (_panel is not null)
             {
                 _panel.style.display = DisplayStyle.Flex;
             }
@@ -290,7 +301,7 @@ namespace CircuitCraft.UI
         
         private void HidePanel()
         {
-            if (_panel != null)
+            if (_panel is not null)
             {
                 _panel.style.display = DisplayStyle.None;
             }
@@ -301,7 +312,7 @@ namespace CircuitCraft.UI
         {
             if (_toggleButton == null) return;
             
-            bool isVisible = _panel != null && _panel.style.display != DisplayStyle.None;
+            bool isVisible = _panel is not null && _panel.style.display != DisplayStyle.None;
             _toggleButton.text = isVisible ? "Hide Results" : "Show Results";
         }
     }

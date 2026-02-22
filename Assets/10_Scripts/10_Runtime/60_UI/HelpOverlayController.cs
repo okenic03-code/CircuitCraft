@@ -11,41 +11,40 @@ namespace CircuitCraft.UI
     [RequireComponent(typeof(UIDocument))]
     public class HelpOverlayController : MonoBehaviour
     {
+        [SerializeField]
+        [Tooltip("Wire in Inspector: UIDocument hosting Help overlay elements.")]
         private UIDocument _uiDocument;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: CameraController to disable while help overlay is open.")]
         private CameraController _cameraController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: WireRoutingController to disable while help overlay is open.")]
         private WireRoutingController _wireRoutingController;
         private VisualElement _modal;
         private Button _openButton;
         private Button _closeButton;
 
-        private void Awake()
-        {
-            _uiDocument = GetComponent<UIDocument>();
-            _cameraController = FindFirstObjectByType<CameraController>();
-            _wireRoutingController = FindFirstObjectByType<WireRoutingController>();
-        }
-
         private void OnEnable()
         {
             if (_uiDocument == null) return;
             var root = _uiDocument.rootVisualElement;
-            if (root == null) return;
+            if (root is null) return;
 
             _modal = root.Q<VisualElement>("help-overlay");
             _openButton = root.Q<Button>("HelpButton");
             _closeButton = root.Q<Button>("help-overlay-close");
 
-            if (_openButton != null)
+            if (_openButton is not null)
                 _openButton.clicked += ToggleModal;
-            if (_closeButton != null)
+            if (_closeButton is not null)
                 _closeButton.clicked += HideModal;
         }
 
         private void OnDisable()
         {
-            if (_openButton != null)
+            if (_openButton is not null)
                 _openButton.clicked -= ToggleModal;
-            if (_closeButton != null)
+            if (_closeButton is not null)
                 _closeButton.clicked -= HideModal;
         }
 
@@ -67,7 +66,7 @@ namespace CircuitCraft.UI
 
         private void ToggleModal()
         {
-            if (_modal == null) return;
+            if (_modal is null) return;
             bool isVisible = _modal.style.display != DisplayStyle.None;
             if (isVisible) HideModal();
             else ShowModal();
@@ -75,7 +74,7 @@ namespace CircuitCraft.UI
 
         private void ShowModal()
         {
-            if (_modal != null)
+            if (_modal is not null)
                 _modal.style.display = DisplayStyle.Flex;
 
             if (_cameraController != null)
@@ -86,7 +85,7 @@ namespace CircuitCraft.UI
 
         private void HideModal()
         {
-            if (_modal != null)
+            if (_modal is not null)
                 _modal.style.display = DisplayStyle.None;
 
             if (_cameraController != null)

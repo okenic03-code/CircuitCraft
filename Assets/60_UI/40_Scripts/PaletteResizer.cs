@@ -3,10 +3,13 @@ using UnityEngine.UIElements;
 
 namespace CircuitCraft.UI
 {
+    /// <summary>
+    /// Handles mouse-drag resizing of the component palette panel.
+    /// </summary>
     public class PaletteResizer
     {
-        private const float PaletteMinWidth = 280f;
-        private const float PaletteMaxWidth = 420f;
+        private const float k_PaletteMinWidth = 280f;
+        private const float k_PaletteMaxWidth = 420f;
 
         private readonly VisualElement _paletteElement;
         private readonly VisualElement _resizeHandle;
@@ -17,6 +20,9 @@ namespace CircuitCraft.UI
         private float _resizeStartX;
         private float _resizeStartWidth;
 
+        /// <summary>
+        /// Creates a palette resizer bound to the palette panel, resize handle, and root container.
+        /// </summary>
         public PaletteResizer(VisualElement paletteElement, VisualElement resizeHandle, VisualElement root)
         {
             _paletteElement = paletteElement;
@@ -24,9 +30,12 @@ namespace CircuitCraft.UI
             _root = root;
         }
 
+        /// <summary>
+        /// Registers pointer callbacks required for palette resizing.
+        /// </summary>
         public void RegisterCallbacks()
         {
-            if (_resizeHandle == null || _paletteElement == null || _root == null)
+            if (_resizeHandle is null || _paletteElement is null || _root is null)
                 return;
 
             _resizeHandle.RegisterCallback<PointerDownEvent>(OnPaletteResizePointerDown);
@@ -35,9 +44,12 @@ namespace CircuitCraft.UI
             _resizeHandle.RegisterCallback<PointerCaptureOutEvent>(OnPaletteResizePointerCaptureOut);
         }
 
+        /// <summary>
+        /// Unregisters pointer callbacks and ends any active resize interaction.
+        /// </summary>
         public void UnregisterCallbacks()
         {
-            if (_resizeHandle == null || _root == null)
+            if (_resizeHandle is null || _root is null)
             {
                 EndPaletteResize();
                 return;
@@ -52,12 +64,12 @@ namespace CircuitCraft.UI
 
         private void OnPaletteResizePointerDown(PointerDownEvent evt)
         {
-            if (_paletteElement == null || _resizeHandle == null || evt.button != 0)
+            if (_paletteElement is null || _resizeHandle is null || evt.button != 0)
                 return;
 
             float currentWidth = _paletteElement.resolvedStyle.width;
             if (currentWidth <= 0f)
-                currentWidth = PaletteMinWidth;
+                currentWidth = k_PaletteMinWidth;
 
             _isPaletteResizing = true;
             _activeResizePointerId = evt.pointerId;
@@ -70,11 +82,11 @@ namespace CircuitCraft.UI
 
         private void OnPaletteResizePointerMove(PointerMoveEvent evt)
         {
-            if (!_isPaletteResizing || evt.pointerId != _activeResizePointerId || _paletteElement == null)
+            if (!_isPaletteResizing || evt.pointerId != _activeResizePointerId || _paletteElement is null)
                 return;
 
             float delta = evt.position.x - _resizeStartX;
-            float nextWidth = Mathf.Clamp(_resizeStartWidth + delta, PaletteMinWidth, PaletteMaxWidth);
+            float nextWidth = Mathf.Clamp(_resizeStartWidth + delta, k_PaletteMinWidth, k_PaletteMaxWidth);
             _paletteElement.style.width = nextWidth;
             _paletteElement.style.minWidth = nextWidth;
             evt.StopPropagation();
@@ -97,7 +109,7 @@ namespace CircuitCraft.UI
 
         private void EndPaletteResize()
         {
-            if (_resizeHandle != null && _activeResizePointerId >= 0 && _resizeHandle.HasPointerCapture(_activeResizePointerId))
+            if (_resizeHandle is not null && _activeResizePointerId >= 0 && _resizeHandle.HasPointerCapture(_activeResizePointerId))
                 _resizeHandle.ReleasePointer(_activeResizePointerId);
 
             _isPaletteResizing = false;

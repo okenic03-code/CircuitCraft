@@ -14,18 +14,38 @@ namespace CircuitCraft.UI
     public class SceneFlowManager : MonoBehaviour
     {
         [Header("Screen References")]
-        [SerializeField] private GameObject _stageSelectScreen;
-        [SerializeField] private GameObject _gamePlayScreen;
-        [SerializeField] private GameObject _endingScreen;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Stage Select screen root GameObject.")]
+        private GameObject _stageSelectScreen;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Gameplay screen root GameObject.")]
+        private GameObject _gamePlayScreen;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Ending screen root GameObject.")]
+        private GameObject _endingScreen;
 
         [Header("Controllers")]
-        [SerializeField] private StageSelectController _stageSelectController;
-        [SerializeField] private EndingController _endingController;
-        [SerializeField] private StageManager _stageManager;
-        [SerializeField] private ProgressionManager _progressionManager;
-        [SerializeField] private ComponentPaletteController _paletteController;
-        [SerializeField] private ResultsPanelController _resultsPanelController;
-        [SerializeField] private PauseMenuController _pauseMenuController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Stage Select UI controller.")]
+        private StageSelectController _stageSelectController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Ending screen controller.")]
+        private EndingController _endingController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Stage manager instance in gameplay scene.")]
+        private StageManager _stageManager;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Progression manager for unlock and star data.")]
+        private ProgressionManager _progressionManager;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Component palette controller on gameplay HUD.")]
+        private ComponentPaletteController _paletteController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Results panel controller for retry and next flow.")]
+        private ResultsPanelController _resultsPanelController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Pause menu controller.")]
+        private PauseMenuController _pauseMenuController;
 
         [Header("Stage Data")]
         [SerializeField]
@@ -36,7 +56,6 @@ namespace CircuitCraft.UI
 
         private void Start()
         {
-            ResolveSceneReferences();
             WireStageSelectEvents();
             WireEndingEvents();
             WireStageManagerEvents();
@@ -57,37 +76,6 @@ namespace CircuitCraft.UI
         }
 
         // ─── Wiring ───────────────────────────────────────────────────────
-
-        private void ResolveSceneReferences()
-        {
-            if (_stageSelectController == null)
-                _stageSelectController = FindFirstObjectByType<StageSelectController>(FindObjectsInactive.Include);
-
-            if (_endingController == null)
-                _endingController = FindFirstObjectByType<EndingController>(FindObjectsInactive.Include);
-
-            if (_stageManager == null)
-                _stageManager = FindFirstObjectByType<StageManager>(FindObjectsInactive.Include);
-
-            if (_progressionManager == null)
-                _progressionManager = FindFirstObjectByType<ProgressionManager>(FindObjectsInactive.Include);
-
-            if (_paletteController == null)
-                _paletteController = FindFirstObjectByType<ComponentPaletteController>(FindObjectsInactive.Include);
-
-            if (_resultsPanelController == null)
-                _resultsPanelController = FindFirstObjectByType<ResultsPanelController>(FindObjectsInactive.Include);
-
-            if (_pauseMenuController == null)
-                _pauseMenuController = FindFirstObjectByType<PauseMenuController>(FindObjectsInactive.Include);
-
-            // Auto-discover screen GameObjects from controllers
-            if (_stageSelectScreen == null && _stageSelectController != null)
-                _stageSelectScreen = _stageSelectController.gameObject;
-
-            if (_endingScreen == null && _endingController != null)
-                _endingScreen = _endingController.gameObject;
-        }
 
         private void WireStageSelectEvents()
         {
@@ -159,15 +147,9 @@ namespace CircuitCraft.UI
 
         // ─── Event Handlers ───────────────────────────────────────────────
 
-        private void HandleBackToMenu()
-        {
-            SceneManager.LoadScene(0);
-        }
+        private void HandleBackToMenu() => SceneManager.LoadScene(0);
 
-        private void HandleEndingBackToMenu()
-        {
-            SceneManager.LoadScene(0);
-        }
+        private void HandleEndingBackToMenu() => SceneManager.LoadScene(0);
 
         private void HandleStageSelected(StageDefinition stage)
         {

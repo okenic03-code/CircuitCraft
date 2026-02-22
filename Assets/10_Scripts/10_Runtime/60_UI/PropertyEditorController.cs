@@ -13,9 +13,15 @@ namespace CircuitCraft.UI
     public class PropertyEditorController : MonoBehaviour
     {
         [Header("Dependencies")]
-        [SerializeField] private UIDocument _uiDocument;
-        [SerializeField] private PlacementController _placementController;
-        [SerializeField] private ComponentPaletteController _paletteController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: UIDocument hosting property editor elements.")]
+        private UIDocument _uiDocument;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Placement controller receiving edited custom values.")]
+        private PlacementController _placementController;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: Palette controller emitting component selection events.")]
+        private ComponentPaletteController _paletteController;
 
         // UXML element references
         private VisualElement _panel;          // name="PropertyEditor"
@@ -32,14 +38,10 @@ namespace CircuitCraft.UI
 
         private void OnEnable()
         {
-            // 1. Get UIDocument if not assigned
-            if (_uiDocument == null)
-                _uiDocument = GetComponent<UIDocument>();
-
             if (_uiDocument == null) return;
 
             var root = _uiDocument.rootVisualElement;
-            if (root == null) return;
+            if (root is null) return;
 
             // 2. Query all UXML elements
             _panel = root.Q<VisualElement>("PropertyEditor");
@@ -53,7 +55,7 @@ namespace CircuitCraft.UI
             _specsText = root.Q<Label>("PropSpecsText");
 
             // 3. Register TextField callback
-            if (_valueField != null)
+            if (_valueField is not null)
                 _valueField.RegisterValueChangedCallback(OnValueChanged);
 
             // 4. Subscribe to palette selection event
@@ -69,7 +71,7 @@ namespace CircuitCraft.UI
 
         private void OnDisable()
         {
-            if (_valueField != null)
+            if (_valueField is not null)
                 _valueField.UnregisterValueChangedCallback(OnValueChanged);
 
             if (_paletteController != null)
@@ -97,7 +99,7 @@ namespace CircuitCraft.UI
 
             // Show panel with component name
             ShowPanel();
-            if (_title != null)
+            if (_title is not null)
                 _title.text = def.DisplayName;
 
             if (def.Kind.SupportsCustomValue())
@@ -112,22 +114,22 @@ namespace CircuitCraft.UI
 
         private void ShowEditableMode(ComponentDefinition def)
         {
-            if (_editableSection != null)
+            if (_editableSection is not null)
                 _editableSection.style.display = DisplayStyle.Flex;
-            if (_readOnlySection != null)
+            if (_readOnlySection is not null)
                 _readOnlySection.style.display = DisplayStyle.None;
 
             float defaultValue = GetDefaultValue(def);
 
-            if (_valueLabel != null)
+            if (_valueLabel is not null)
                 _valueLabel.text = def.Kind.GetValueLabel();
-            if (_unitLabel != null)
+            if (_unitLabel is not null)
                 _unitLabel.text = def.Kind.GetValueUnit();
-            if (_defaultHint != null)
+            if (_defaultHint is not null)
                 _defaultHint.text = $"Default: {FormatValue(defaultValue)}";
 
             // Set field to default value (PlacementController resets CustomValue on selection)
-            if (_valueField != null)
+            if (_valueField is not null)
                 _valueField.SetValueWithoutNotify(FormatValue(defaultValue));
 
             // Set default value via PlacementController
@@ -137,12 +139,12 @@ namespace CircuitCraft.UI
 
         private void ShowReadOnlyMode(ComponentDefinition def)
         {
-            if (_editableSection != null)
+            if (_editableSection is not null)
                 _editableSection.style.display = DisplayStyle.None;
-            if (_readOnlySection != null)
+            if (_readOnlySection is not null)
                 _readOnlySection.style.display = DisplayStyle.Flex;
 
-            if (_specsText != null)
+            if (_specsText is not null)
                 _specsText.text = GetSpecsText(def);
         }
 
@@ -201,13 +203,13 @@ namespace CircuitCraft.UI
 
         private void ShowPanel()
         {
-            if (_panel != null)
+            if (_panel is not null)
                 _panel.style.display = DisplayStyle.Flex;
         }
 
         private void HidePanel()
         {
-            if (_panel != null)
+            if (_panel is not null)
                 _panel.style.display = DisplayStyle.None;
         }
     }

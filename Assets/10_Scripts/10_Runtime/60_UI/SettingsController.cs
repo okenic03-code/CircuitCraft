@@ -6,10 +6,15 @@ using UnityEngine.UIElements;
 
 namespace CircuitCraft.UI
 {
+    /// <summary>
+    /// Controls settings tabs and persists display, audio, and gameplay preferences.
+    /// </summary>
     [RequireComponent(typeof(UIDocument))]
     public class SettingsController : MonoBehaviour
     {
-        [SerializeField] private UIDocument _uiDocument;
+        [SerializeField]
+        [Tooltip("Wire in Inspector: UIDocument hosting settings menu elements.")]
+        private UIDocument _uiDocument;
 
         // Events
         public event Action OnBackRequested;
@@ -53,12 +58,6 @@ namespace CircuitCraft.UI
         private const string KEY_HINTS = "TutorialHints";
         private const string KEY_QUALITY = "QualityLevel";
 
-        private void Awake()
-        {
-            if (_uiDocument == null)
-                _uiDocument = GetComponent<UIDocument>();
-        }
-
         private void OnEnable()
         {
             if (_uiDocument == null) return;
@@ -91,9 +90,9 @@ namespace CircuitCraft.UI
             // Register Callbacks
             _btnBack?.RegisterCallback<ClickEvent>(OnBackClicked);
 
-            _tabDisplay?.RegisterCallback<ClickEvent>(evt => SwitchTab("display"));
-            _tabAudio?.RegisterCallback<ClickEvent>(evt => SwitchTab("audio"));
-            _tabGame?.RegisterCallback<ClickEvent>(evt => SwitchTab("game"));
+            _tabDisplay?.RegisterCallback<ClickEvent>(_ => SwitchTab("display"));
+            _tabAudio?.RegisterCallback<ClickEvent>(_ => SwitchTab("audio"));
+            _tabGame?.RegisterCallback<ClickEvent>(_ => SwitchTab("game"));
 
             _dropdownResolution?.RegisterValueChangedCallback(OnResolutionChanged);
             _toggleFullscreen?.RegisterValueChangedCallback(OnFullscreenChanged);
@@ -130,7 +129,7 @@ namespace CircuitCraft.UI
             // --- Display ---
             // Resolutions
             _resolutions = Screen.resolutions.Select(r => new Resolution { width = r.width, height = r.height }).Distinct().ToArray();
-            _resolutionOptions = new List<string>();
+            _resolutionOptions = new();
             int currentResolutionIndex = 0;
             
             for (int i = 0; i < _resolutions.Length; i++)
