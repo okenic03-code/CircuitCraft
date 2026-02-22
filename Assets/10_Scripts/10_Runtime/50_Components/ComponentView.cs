@@ -44,6 +44,10 @@ namespace CircuitCraft.Components
         [Tooltip("Optional material override for sprite rendering.")]
         private Material _spriteMaterial;
 
+        [SerializeField]
+        [Tooltip("Grid settings used for pin dot placement sizing.")]
+        private GridSettings _gridSettings;
+
         [Header("Simulation Visualization")]
         [SerializeField]
         [Tooltip("Offset for voltage/current overlay text.")]
@@ -115,7 +119,7 @@ namespace CircuitCraft.Components
             ApplySpriteMaterial();
 
             _highlight = new ComponentHighlight(_spriteRenderer, _normalColor);
-            _pinDots = new ComponentPinDots(transform, _spriteRenderer);
+            _pinDots = new ComponentPinDots(transform, _spriteRenderer, _gridSettings);
             _overlay = new ComponentOverlay(transform, _spriteRenderer, _simulationOverlayOffset, _simulationOverlayScale, _simulationOverlayColor);
             _effects = new ComponentEffects(transform, _spriteRenderer, _ledGlowScale, _ledGlowAlpha, _ledGlowDefaultColor, _heatGlowScale, _heatGlowMaxAlpha, _heatGlowColor);
         }

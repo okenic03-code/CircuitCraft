@@ -11,10 +11,10 @@ namespace CircuitCraft.Components
     internal sealed class ComponentPinDots
     {
         private static readonly Color _pinDotColor = new Color(0f, 0.83f, 1f, 0.6f);
-        private static GridSettings _cachedGridSettings;
 
         private readonly Transform _parent;
         private readonly SpriteRenderer _parentSprite;
+        private readonly GridSettings _gridSettings;
         private readonly List<GameObject> _pinDots = new();
 
         /// <summary>
@@ -22,10 +22,12 @@ namespace CircuitCraft.Components
         /// </summary>
         /// <param name="parent">Transform used as dot parent.</param>
         /// <param name="parentSprite">Sprite renderer used for sorting context.</param>
-        public ComponentPinDots(Transform parent, SpriteRenderer parentSprite)
+        /// <param name="gridSettings">Grid settings used for pin coordinate scaling.</param>
+        public ComponentPinDots(Transform parent, SpriteRenderer parentSprite, GridSettings gridSettings)
         {
             _parent = parent;
             _parentSprite = parentSprite;
+            _gridSettings = gridSettings;
         }
 
         /// <summary>
@@ -98,21 +100,11 @@ namespace CircuitCraft.Components
             ClearPinDots();
         }
 
-        private static float ResolveGridCellSize()
+        private float ResolveGridCellSize()
         {
-            if (_cachedGridSettings is not null && _cachedGridSettings.CellSize > Mathf.Epsilon)
+            if (_gridSettings is not null && _gridSettings.CellSize > Mathf.Epsilon)
             {
-                return _cachedGridSettings.CellSize;
-            }
-
-            if (_cachedGridSettings is null)
-            {
-                _cachedGridSettings = Object.FindFirstObjectByType<GridSettings>();
-            }
-
-            if (_cachedGridSettings is not null && _cachedGridSettings.CellSize > Mathf.Epsilon)
-            {
-                return _cachedGridSettings.CellSize;
+                return _gridSettings.CellSize;
             }
 
             return 1f;
