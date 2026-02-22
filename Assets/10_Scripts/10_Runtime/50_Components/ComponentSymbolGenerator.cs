@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Generates fallback component symbols and shared helper sprites.
+    /// </summary>
     internal static class ComponentSymbolGenerator
     {
         internal const float PinDotRadius = 0.18f;
@@ -13,11 +16,17 @@ namespace CircuitCraft.Components
         private static Sprite _pinDotSprite;
         private static Sprite _ledGlowSprite;
         private static Sprite _heatGlowSprite;
-        private static readonly Dictionary<ComponentKind, ISymbolDrawer> _drawers = new Dictionary<ComponentKind, ISymbolDrawer>();
-        private static readonly Dictionary<ComponentKind, Sprite> _fallbackSprites = new Dictionary<ComponentKind, Sprite>();
+        private static readonly Dictionary<ComponentKind, ISymbolDrawer> _drawers = new();
+        private static readonly Dictionary<ComponentKind, Sprite> _fallbackSprites = new();
+
+        /// <summary>
+        /// Returns an existing fallback sprite for a component kind or creates one.
+        /// </summary>
+        /// <param name="kind">Component kind to render.</param>
+        /// <returns>Generated or cached fallback sprite.</returns>
         internal static Sprite GetOrCreateFallbackSprite(ComponentKind kind)
         {
-            if (_fallbackSprites.TryGetValue(kind, out Sprite cachedSprite) && cachedSprite != null) { return cachedSprite; }
+            if (_fallbackSprites.TryGetValue(kind, out Sprite cachedSprite) && cachedSprite is not null) { return cachedSprite; }
             var texture = new Texture2D(FallbackSymbolTextureSize, FallbackSymbolTextureSize, TextureFormat.RGBA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = FilterMode.Point;
@@ -29,21 +38,32 @@ namespace CircuitCraft.Components
             _fallbackSprites[kind] = sprite;
             return sprite;
         }
+        /// <summary>
+        /// Returns the shared resistor heat glow sprite.
+        /// </summary>
         internal static Sprite GetHeatGlowSprite()
         {
-            if (_heatGlowSprite != null) { return _heatGlowSprite; }
+            if (_heatGlowSprite is not null) { return _heatGlowSprite; }
             _heatGlowSprite = CreateGlowSprite();
             return _heatGlowSprite;
         }
+
+        /// <summary>
+        /// Returns the shared LED glow sprite.
+        /// </summary>
         internal static Sprite GetLedGlowSprite()
         {
-            if (_ledGlowSprite != null) { return _ledGlowSprite; }
+            if (_ledGlowSprite is not null) { return _ledGlowSprite; }
             _ledGlowSprite = CreateGlowSprite();
             return _ledGlowSprite;
         }
+
+        /// <summary>
+        /// Returns the shared pin-dot sprite.
+        /// </summary>
         internal static Sprite GetPinDotSprite()
         {
-            if (_pinDotSprite != null) { return _pinDotSprite; }
+            if (_pinDotSprite is not null) { return _pinDotSprite; }
             Texture2D texture = new Texture2D(PinDotTextureSize, PinDotTextureSize, TextureFormat.RGBA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = FilterMode.Bilinear;

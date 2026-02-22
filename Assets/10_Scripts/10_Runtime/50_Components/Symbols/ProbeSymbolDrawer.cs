@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback probe symbol.
+    /// </summary>
     internal sealed class ProbeSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the probe symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawCircleThick(texture, 32, 32, 16, SymbolDrawingUtilities.FallbackLineThickness, color);

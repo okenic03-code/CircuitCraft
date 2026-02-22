@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback BJT symbol.
+    /// </summary>
     internal sealed class BjtSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the BJT symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawCircleThick(texture, 32, 32, 16, SymbolDrawingUtilities.FallbackLineThickness, color);

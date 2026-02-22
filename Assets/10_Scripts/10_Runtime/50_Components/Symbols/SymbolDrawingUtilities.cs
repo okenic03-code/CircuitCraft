@@ -2,22 +2,34 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Provides low-level texture drawing helpers for fallback symbols.
+    /// </summary>
     internal static class SymbolDrawingUtilities
     {
         internal const int FallbackLineThickness = 2;
 
+        /// <summary>
+        /// Draws horizontal lead lines from texture edges to inner points.
+        /// </summary>
         internal static void DrawHorizontalLeads(Texture2D texture, int y, int leftInner, int rightInner, Color color)
         {
             DrawLineThick(texture, 4, y, leftInner, y, FallbackLineThickness, color);
             DrawLineThick(texture, rightInner, y, 60, y, FallbackLineThickness, color);
         }
 
+        /// <summary>
+        /// Draws vertical lead lines from texture edges to inner points.
+        /// </summary>
         internal static void DrawVerticalLeads(Texture2D texture, int x, int bottomInner, int topInner, Color color)
         {
             DrawLineThick(texture, x, 4, x, bottomInner, FallbackLineThickness, color);
             DrawLineThick(texture, x, topInner, x, 60, FallbackLineThickness, color);
         }
 
+        /// <summary>
+        /// Draws a line with an arrow head.
+        /// </summary>
         internal static void DrawArrow(Texture2D texture, int startX, int startY, int endX, int endY, Color color)
         {
             DrawLineThick(texture, startX, startY, endX, endY, FallbackLineThickness, color);
@@ -40,6 +52,9 @@ namespace CircuitCraft.Components
             DrawLineThick(texture, endX, endY, Mathf.RoundToInt(right.x), Mathf.RoundToInt(right.y), FallbackLineThickness, color);
         }
 
+        /// <summary>
+        /// Draws an arc segment using line interpolation.
+        /// </summary>
         internal static void DrawArc(Texture2D texture, int centerX, int centerY, int radius, float startDegrees, float endDegrees, int thickness, Color color)
         {
             int segments = Mathf.Max(8, Mathf.CeilToInt(Mathf.Abs(endDegrees - startDegrees) / 6f));
@@ -61,6 +76,9 @@ namespace CircuitCraft.Components
             }
         }
 
+        /// <summary>
+        /// Draws a thick line by offsetting and layering line draws.
+        /// </summary>
         internal static void DrawLineThick(Texture2D texture, int x0, int y0, int x1, int y1, int thickness, Color color)
         {
             if (thickness <= 1)
@@ -81,6 +99,9 @@ namespace CircuitCraft.Components
             }
         }
 
+        /// <summary>
+        /// Draws a thick circle outline by layering circle draws.
+        /// </summary>
         internal static void DrawCircleThick(Texture2D texture, int centerX, int centerY, int radius, int thickness, Color color)
         {
             if (thickness <= 1)
@@ -102,6 +123,9 @@ namespace CircuitCraft.Components
             }
         }
 
+        /// <summary>
+        /// Draws a one-pixel-wide line using Bresenham's algorithm.
+        /// </summary>
         internal static void DrawLine(Texture2D texture, int x0, int y0, int x1, int y1, Color color)
         {
             int dx = Mathf.Abs(x1 - x0);
@@ -134,6 +158,9 @@ namespace CircuitCraft.Components
             }
         }
 
+        /// <summary>
+        /// Draws a one-pixel-wide circle outline.
+        /// </summary>
         internal static void DrawCircle(Texture2D texture, int centerX, int centerY, int radius, Color color)
         {
             int x = radius;
@@ -164,6 +191,9 @@ namespace CircuitCraft.Components
             }
         }
 
+        /// <summary>
+        /// Sets a pixel only when coordinates are inside texture bounds.
+        /// </summary>
         internal static void SetPixelSafe(Texture2D texture, int x, int y, Color color)
         {
             if (x >= 0 && x < texture.width && y >= 0 && y < texture.height)

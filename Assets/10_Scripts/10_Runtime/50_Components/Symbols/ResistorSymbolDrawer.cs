@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback resistor symbol.
+    /// </summary>
     internal sealed class ResistorSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the resistor symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawHorizontalLeads(texture, 32, 16, 48, color);

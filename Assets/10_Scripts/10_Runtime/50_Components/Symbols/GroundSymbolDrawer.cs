@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback ground symbol.
+    /// </summary>
     internal sealed class GroundSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the ground symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawLineThick(texture, 32, 60, 32, 38, SymbolDrawingUtilities.FallbackLineThickness, color);

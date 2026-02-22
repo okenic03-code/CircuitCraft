@@ -6,6 +6,9 @@ using TMPro;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Manages creation and visibility of per-component simulation text overlays.
+    /// </summary>
     internal sealed class ComponentOverlay
     {
         private readonly Transform _parent;
@@ -22,6 +25,14 @@ namespace CircuitCraft.Components
         private TextMesh _simulationOverlayText;
 #endif
 
+        /// <summary>
+        /// Creates a simulation overlay helper.
+        /// </summary>
+        /// <param name="parent">Transform used as overlay parent.</param>
+        /// <param name="parentSprite">Parent sprite renderer for sorting context.</param>
+        /// <param name="simulationOverlayOffset">Local overlay position offset.</param>
+        /// <param name="simulationOverlayScale">Local overlay scale multiplier.</param>
+        /// <param name="simulationOverlayColor">Text color for the overlay.</param>
         public ComponentOverlay(
             Transform parent,
             SpriteRenderer parentSprite,
@@ -36,6 +47,10 @@ namespace CircuitCraft.Components
             _simulationOverlayColor = simulationOverlayColor;
         }
 
+        /// <summary>
+        /// Shows simulation overlay text.
+        /// </summary>
+        /// <param name="text">Overlay text to display.</param>
         public void ShowSimulationOverlay(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
@@ -45,7 +60,7 @@ namespace CircuitCraft.Components
             }
 
             EnsureSimulationOverlayText();
-            if (_simulationOverlayText == null)
+            if (_simulationOverlayText is null)
             {
                 return;
             }
@@ -55,14 +70,20 @@ namespace CircuitCraft.Components
             _simulationOverlayObject.SetActive(true);
         }
 
+        /// <summary>
+        /// Hides the simulation overlay text object.
+        /// </summary>
         public void HideSimulationOverlay()
         {
-            if (_simulationOverlayObject != null)
+            if (_simulationOverlayObject is not null)
             {
                 _simulationOverlayObject.SetActive(false);
             }
         }
 
+        /// <summary>
+        /// Clears overlay resources.
+        /// </summary>
         public void Cleanup()
         {
             ClearSimulationOverlay();
@@ -70,7 +91,7 @@ namespace CircuitCraft.Components
 
         private void EnsureSimulationOverlayText()
         {
-            if (_simulationOverlayObject != null)
+            if (_simulationOverlayObject is not null)
             {
                 return;
             }
@@ -84,8 +105,8 @@ namespace CircuitCraft.Components
             var overlayText = _simulationOverlayObject.AddComponent<TextMeshPro>();
             overlayText.alignment = TMPro.TextAlignmentOptions.Center;
             overlayText.fontSize = 4f;
-            overlayText.sortingLayerID = _parentSprite != null ? _parentSprite.sortingLayerID : 0;
-            overlayText.sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder + 2 : 0;
+            overlayText.sortingLayerID = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
+            overlayText.sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder + 2 : 0;
             overlayText.autoSizeTextContainer = false;
             _simulationOverlayText = overlayText;
 #else
@@ -95,8 +116,8 @@ namespace CircuitCraft.Components
             overlayText.characterSize = 0.08f;
             overlayText.fontSize = 28;
             overlayText.GetComponent<MeshRenderer>().sortingLayerID =
-                _parentSprite != null ? _parentSprite.sortingLayerID : 0;
-            overlayText.GetComponent<MeshRenderer>().sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder + 2 : 0;
+                _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
+            overlayText.GetComponent<MeshRenderer>().sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder + 2 : 0;
             _simulationOverlayText = overlayText;
 #endif
 
@@ -105,7 +126,7 @@ namespace CircuitCraft.Components
 
         private void ClearSimulationOverlay()
         {
-            if (_simulationOverlayObject != null)
+            if (_simulationOverlayObject is not null)
             {
                 Object.Destroy(_simulationOverlayObject);
                 _simulationOverlayObject = null;

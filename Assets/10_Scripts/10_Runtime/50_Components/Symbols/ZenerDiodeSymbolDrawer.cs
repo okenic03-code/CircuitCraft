@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback Zener diode symbol.
+    /// </summary>
     internal sealed class ZenerDiodeSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the Zener diode symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawHorizontalLeads(texture, 32, 16, 42, color);

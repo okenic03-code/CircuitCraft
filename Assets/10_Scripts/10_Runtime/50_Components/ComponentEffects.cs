@@ -2,6 +2,9 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Manages LED and resistor heat glow effects for component visuals.
+    /// </summary>
     internal sealed class ComponentEffects
     {
         private readonly Transform _parent;
@@ -18,6 +21,17 @@ namespace CircuitCraft.Components
         private GameObject _heatGlowObject;
         private SpriteRenderer _heatGlowRenderer;
 
+        /// <summary>
+        /// Creates a visual effects helper for a component.
+        /// </summary>
+        /// <param name="parent">Transform used as effect parent.</param>
+        /// <param name="parentSprite">Parent sprite renderer for sorting and material context.</param>
+        /// <param name="ledGlowScale">LED glow local scale multiplier.</param>
+        /// <param name="ledGlowAlpha">LED glow alpha value.</param>
+        /// <param name="ledGlowDefaultColor">Default LED glow color.</param>
+        /// <param name="heatGlowScale">Heat glow local scale multiplier.</param>
+        /// <param name="heatGlowMaxAlpha">Maximum alpha for heat glow.</param>
+        /// <param name="heatGlowColor">Base heat glow color.</param>
         public ComponentEffects(
             Transform parent,
             SpriteRenderer parentSprite,
@@ -38,6 +52,11 @@ namespace CircuitCraft.Components
             _heatGlowColor = heatGlowColor;
         }
 
+        /// <summary>
+        /// Shows or hides the LED glow effect.
+        /// </summary>
+        /// <param name="glow">Whether glow should be visible.</param>
+        /// <param name="glowColor">Glow color override.</param>
         public void ShowLEDGlow(bool glow, Color glowColor)
         {
             if (!glow)
@@ -47,7 +66,7 @@ namespace CircuitCraft.Components
             }
 
             EnsureLEDGlowObject();
-            if (_ledGlowRenderer == null)
+            if (_ledGlowRenderer is null)
             {
                 return;
             }
@@ -57,14 +76,22 @@ namespace CircuitCraft.Components
             _ledGlowObject.SetActive(true);
         }
 
+        /// <summary>
+        /// Hides the LED glow effect.
+        /// </summary>
         public void HideLEDGlow()
         {
-            if (_ledGlowObject != null)
+            if (_ledGlowObject is not null)
             {
                 _ledGlowObject.SetActive(false);
             }
         }
 
+        /// <summary>
+        /// Shows or hides resistor heat glow based on normalized power.
+        /// </summary>
+        /// <param name="glow">Whether glow should be visible.</param>
+        /// <param name="normalizedPower">Normalized power value in range 0..1.</param>
         public void ShowResistorHeatGlow(bool glow, float normalizedPower)
         {
             if (!glow)
@@ -74,7 +101,7 @@ namespace CircuitCraft.Components
             }
 
             EnsureHeatGlowObject();
-            if (_heatGlowRenderer == null)
+            if (_heatGlowRenderer is null)
             {
                 return;
             }
@@ -86,14 +113,20 @@ namespace CircuitCraft.Components
             _heatGlowObject.SetActive(true);
         }
 
+        /// <summary>
+        /// Hides the resistor heat glow effect.
+        /// </summary>
         public void HideResistorHeatGlow()
         {
-            if (_heatGlowObject != null)
+            if (_heatGlowObject is not null)
             {
                 _heatGlowObject.SetActive(false);
             }
         }
 
+        /// <summary>
+        /// Clears all instantiated effect objects.
+        /// </summary>
         public void Cleanup()
         {
             ClearLEDGlow();
@@ -102,7 +135,7 @@ namespace CircuitCraft.Components
 
         private void EnsureLEDGlowObject()
         {
-            if (_ledGlowObject != null)
+            if (_ledGlowObject is not null)
             {
                 _ledGlowObject.SetActive(true);
                 return;
@@ -115,14 +148,14 @@ namespace CircuitCraft.Components
 
             _ledGlowRenderer = _ledGlowObject.AddComponent<SpriteRenderer>();
             _ledGlowRenderer.sprite = ComponentSymbolGenerator.GetLedGlowSprite();
-            _ledGlowRenderer.sortingLayerID = _parentSprite != null ? _parentSprite.sortingLayerID : 0;
-            _ledGlowRenderer.sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder - 1 : 0;
-            _ledGlowRenderer.material = _parentSprite != null ? _parentSprite.sharedMaterial : null;
+            _ledGlowRenderer.sortingLayerID = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
+            _ledGlowRenderer.sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder - 1 : 0;
+            _ledGlowRenderer.material = _parentSprite is not null ? _parentSprite.sharedMaterial : null;
         }
 
         private void ClearLEDGlow()
         {
-            if (_ledGlowObject != null)
+            if (_ledGlowObject is not null)
             {
                 Object.Destroy(_ledGlowObject);
                 _ledGlowObject = null;
@@ -132,7 +165,7 @@ namespace CircuitCraft.Components
 
         private void EnsureHeatGlowObject()
         {
-            if (_heatGlowObject != null)
+            if (_heatGlowObject is not null)
             {
                 _heatGlowObject.SetActive(true);
                 return;
@@ -145,14 +178,14 @@ namespace CircuitCraft.Components
 
             _heatGlowRenderer = _heatGlowObject.AddComponent<SpriteRenderer>();
             _heatGlowRenderer.sprite = ComponentSymbolGenerator.GetHeatGlowSprite();
-            _heatGlowRenderer.sortingLayerID = _parentSprite != null ? _parentSprite.sortingLayerID : 0;
-            _heatGlowRenderer.sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder - 2 : 0;
-            _heatGlowRenderer.material = _parentSprite != null ? _parentSprite.sharedMaterial : null;
+            _heatGlowRenderer.sortingLayerID = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
+            _heatGlowRenderer.sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder - 2 : 0;
+            _heatGlowRenderer.material = _parentSprite is not null ? _parentSprite.sharedMaterial : null;
         }
 
         private void ClearHeatGlow()
         {
-            if (_heatGlowObject != null)
+            if (_heatGlowObject is not null)
             {
                 Object.Destroy(_heatGlowObject);
                 _heatGlowObject = null;

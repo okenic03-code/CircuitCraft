@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback voltage source symbol.
+    /// </summary>
     internal sealed class VoltageSourceSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the voltage source symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawVerticalLeads(texture, 32, 16, 48, color);

@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback inductor symbol.
+    /// </summary>
     internal sealed class InductorSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the inductor symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawHorizontalLeads(texture, 32, 16, 48, color);

@@ -7,6 +7,9 @@ using TMPro;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Renders and updates the visual state of a placed component.
+    /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public class ComponentView : MonoBehaviour
     {
@@ -112,7 +115,7 @@ namespace CircuitCraft.Components
 
         private void InitializeSpriteRenderer()
         {
-            if (_spriteRenderer == null)
+            if (_spriteRenderer is null)
             {
                 _spriteRenderer = GetComponent<SpriteRenderer>();
             }
@@ -120,7 +123,7 @@ namespace CircuitCraft.Components
 
         private void InitializeLabelText()
         {
-            if (_labelText == null)
+            if (_labelText is null)
             {
 #if UNITY_TEXTMESHPRO
                 _labelText = GetComponentInChildren<TextMeshPro>();
@@ -132,33 +135,37 @@ namespace CircuitCraft.Components
 
         private void ApplySpriteMaterial()
         {
-            if (_spriteMaterial != null && _spriteRenderer != null)
+            if (_spriteMaterial is not null && _spriteRenderer is not null)
             {
                 _spriteRenderer.sharedMaterial = _spriteMaterial;
             }
         }
 
+        /// <summary>
+        /// Initializes visual data from a component definition.
+        /// </summary>
+        /// <param name="definition">Component data used for icon, label, and pin rendering.</param>
         public void Initialize(ComponentDefinition definition)
         {
             _pinDots?.ClearPinDots();
             _definition = definition;
-            if (_definition == null)
+            if (_definition is null)
             {
                 Debug.LogWarning("ComponentView.Initialize: Null ComponentDefinition provided.", this);
                 return;
             }
 
-            if (_spriteRenderer != null)
+            if (_spriteRenderer is not null)
             {
-                _spriteRenderer.sprite = _definition.Icon != null
+                _spriteRenderer.sprite = _definition.Icon is not null
                     ? _definition.Icon
                     : ComponentSymbolGenerator.GetOrCreateFallbackSprite(_definition.Kind);
 #if UNITY_EDITOR
-                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + (_definition.Icon == null ? " - Using fallback sprite" : ""));
+                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + (_definition.Icon is null ? " - Using fallback sprite" : ""));
 #endif
             }
 
-            if (_labelText != null)
+            if (_labelText is not null)
             {
                 _labelText.text = ComponentLabelFormatter.FormatLabel(_definition);
             }
@@ -167,12 +174,20 @@ namespace CircuitCraft.Components
             UpdateVisualState();
         }
 
+        /// <summary>
+        /// Updates hover highlighting state.
+        /// </summary>
+        /// <param name="isHovered">Whether the component is currently hovered.</param>
         public void SetHovered(bool isHovered)
         {
             _isHovered = isHovered;
             UpdateVisualState();
         }
 
+        /// <summary>
+        /// Updates selection highlighting state.
+        /// </summary>
+        /// <param name="isSelected">Whether the component is currently selected.</param>
         public void SetSelected(bool isSelected)
         {
             _isSelected = isSelected;
@@ -184,31 +199,54 @@ namespace CircuitCraft.Components
             _highlight?.UpdateState(_isHovered, _isSelected, _hoverColor, _selectedColor);
         }
 
+        /// <summary>
+        /// Shows simulation text above the component.
+        /// </summary>
+        /// <param name="text">Overlay text to display.</param>
         public void ShowSimulationOverlay(string text)
         {
             _overlay?.ShowSimulationOverlay(text);
         }
 
+        /// <summary>
+        /// Hides simulation text overlay.
+        /// </summary>
         public void HideSimulationOverlay()
         {
             _overlay?.HideSimulationOverlay();
         }
 
+        /// <summary>
+        /// Shows or hides LED glow effect.
+        /// </summary>
+        /// <param name="glow">Whether glow should be visible.</param>
+        /// <param name="glowColor">Glow color override.</param>
         public void ShowLEDGlow(bool glow, Color glowColor)
         {
             _effects?.ShowLEDGlow(glow, glowColor);
         }
 
+        /// <summary>
+        /// Hides LED glow effect.
+        /// </summary>
         public void HideLEDGlow()
         {
             _effects?.HideLEDGlow();
         }
 
+        /// <summary>
+        /// Shows or hides resistor heat glow effect.
+        /// </summary>
+        /// <param name="glow">Whether glow should be visible.</param>
+        /// <param name="normalizedPower">Normalized power value in range 0..1.</param>
         public void ShowResistorHeatGlow(bool glow, float normalizedPower)
         {
             _effects?.ShowResistorHeatGlow(glow, normalizedPower);
         }
 
+        /// <summary>
+        /// Hides resistor heat glow effect.
+        /// </summary>
         public void HideResistorHeatGlow()
         {
             _effects?.HideResistorHeatGlow();

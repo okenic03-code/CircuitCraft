@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback diode symbol.
+    /// </summary>
     internal sealed class DiodeSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the diode symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawHorizontalLeads(texture, 32, 16, 44, color);

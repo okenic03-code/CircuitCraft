@@ -2,8 +2,14 @@ using UnityEngine;
 
 namespace CircuitCraft.Components
 {
+    /// <summary>
+    /// Draws the fallback MOSFET symbol.
+    /// </summary>
     internal sealed class MosfetSymbolDrawer : ISymbolDrawer
     {
+        /// <summary>
+        /// Draws the MOSFET symbol into the texture.
+        /// </summary>
         public void Draw(Texture2D texture, Color color)
         {
             SymbolDrawingUtilities.DrawCircleThick(texture, 32, 32, 16, SymbolDrawingUtilities.FallbackLineThickness, color);
