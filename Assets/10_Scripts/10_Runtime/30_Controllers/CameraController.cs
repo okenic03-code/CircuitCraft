@@ -84,7 +84,7 @@ namespace CircuitCraft.Controllers
                 float worldDeltaX = -mouseDelta.x * (_camera.orthographicSize * 2f / Screen.height);
                 float worldDeltaY = -mouseDelta.y * (_camera.orthographicSize * 2f / Screen.height);
                 
-                panDelta += new(worldDeltaX, 0f, worldDeltaY);
+                panDelta += new Vector3(worldDeltaX, 0f, worldDeltaY);
             }
             
             // Apply panning
@@ -145,7 +145,7 @@ namespace CircuitCraft.Controllers
         public void FrameSuggestedArea(int suggestedWidth, int suggestedHeight, float cellSize, Vector3 gridOrigin)
         {
             Vector3 worldMin = gridOrigin;
-            Vector3 worldMax = gridOrigin + new(suggestedWidth * cellSize, 0f, suggestedHeight * cellSize);
+            Vector3 worldMax = gridOrigin + new Vector3(suggestedWidth * cellSize, 0f, suggestedHeight * cellSize);
             FrameBounds(worldMin, worldMax);
         }
     }
