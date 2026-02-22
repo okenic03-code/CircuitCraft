@@ -1,7 +1,5 @@
-using System.Collections.Generic;
-using CircuitCraft.Utils;
-using UnityEngine;
 using CircuitCraft.Data;
+using UnityEngine;
 
 #if UNITY_TEXTMESHPRO
 using TMPro;
@@ -9,10 +7,6 @@ using TMPro;
 
 namespace CircuitCraft.Components
 {
-    /// <summary>
-    /// Visual representation of a placed component on the grid.
-    /// Displays component sprite, label, and hover/selection highlighting.
-    /// </summary>
     [RequireComponent(typeof(SpriteRenderer))]
     public class ComponentView : MonoBehaviour
     {
@@ -20,7 +14,7 @@ namespace CircuitCraft.Components
         [SerializeField]
         [Tooltip("SpriteRenderer for displaying the component's visual appearance.")]
         private SpriteRenderer _spriteRenderer;
-        
+
         [SerializeField]
         [Tooltip("Text label for displaying component ID/value (TextMeshPro or Unity UI Text).")]
 #if UNITY_TEXTMESHPRO
@@ -28,20 +22,20 @@ namespace CircuitCraft.Components
 #else
         private TextMesh _labelText;
 #endif
-        
+
         [Header("Highlight Settings")]
         [SerializeField]
         [Tooltip("Normal color when not hovered or selected.")]
         private Color _normalColor = Color.white;
-        
+
         [SerializeField]
         [Tooltip("Highlight color when hovered (subtle).")]
-        private Color _hoverColor = new Color(1f, 1f, 0.5f, 1f); // Light yellow
-        
+        private Color _hoverColor = new Color(1f, 1f, 0.5f, 1f);
+
         [SerializeField]
         [Tooltip("Highlight color when selected (stronger).")]
-        private Color _selectedColor = new Color(0.5f, 1f, 0.5f, 1f); // Light green
-        
+        private Color _selectedColor = new Color(0.5f, 1f, 0.5f, 1f);
+
         [Header("Advanced")]
         [SerializeField]
         [Tooltip("Optional material override for sprite rendering.")]
@@ -84,35 +78,22 @@ namespace CircuitCraft.Components
         [Tooltip("Default resistor heat glow color.")]
         private Color _heatGlowColor = new Color(1f, 0.35f, 0.05f, 1f);
 
-        private static readonly int _ColorProperty = Shader.PropertyToID("_Color");
-        private static readonly Color _pinDotColor = new Color(0f, 0.83f, 1f, 0.6f);
-        // Shared cache to avoid expensive scene-wide GridSettings lookups per ComponentView instance.
-        private static GridSettings _cachedGridSettings;
-        private MaterialPropertyBlock _materialPropertyBlock;
-        private readonly List<GameObject> _pinDots = new List<GameObject>();
+        private ComponentHighlight _highlight;
+        private ComponentPinDots _pinDots;
         private ComponentOverlay _overlay;
         private ComponentEffects _effects;
-
-        // State
         private ComponentDefinition _definition;
         private bool _isHovered;
         private bool _isSelected;
-        
-        /// <summary>
-        /// Component definition associated with this view.
-        /// </summary>
+
         public ComponentDefinition Definition => _definition;
-        
-        /// <summary>
-        /// Grid position of this component (set during placement).
-        /// </summary>
         public Vector2Int GridPosition { get; set; }
-        
+
         private void Awake() => Init();
 
         private void OnDestroy()
         {
-            ClearPinDots();
+            _pinDots?.Cleanup();
             _overlay?.Cleanup();
             _effects?.Cleanup();
         }
@@ -122,27 +103,15 @@ namespace CircuitCraft.Components
             InitializeSpriteRenderer();
             InitializeLabelText();
             ApplySpriteMaterial();
-            _materialPropertyBlock = new MaterialPropertyBlock();
-            _overlay = new ComponentOverlay(
-                transform,
-                _spriteRenderer,
-                _simulationOverlayOffset,
-                _simulationOverlayScale,
-                _simulationOverlayColor);
-            _effects = new ComponentEffects(
-                transform,
-                _spriteRenderer,
-                _ledGlowScale,
-                _ledGlowAlpha,
-                _ledGlowDefaultColor,
-                _heatGlowScale,
-                _heatGlowMaxAlpha,
-                _heatGlowColor);
+
+            _highlight = new ComponentHighlight(_spriteRenderer, _normalColor);
+            _pinDots = new ComponentPinDots(transform, _spriteRenderer);
+            _overlay = new ComponentOverlay(transform, _spriteRenderer, _simulationOverlayOffset, _simulationOverlayScale, _simulationOverlayColor);
+            _effects = new ComponentEffects(transform, _spriteRenderer, _ledGlowScale, _ledGlowAlpha, _ledGlowDefaultColor, _heatGlowScale, _heatGlowMaxAlpha, _heatGlowColor);
         }
 
         private void InitializeSpriteRenderer()
         {
-            // Auto-assign SpriteRenderer if not set in Inspector
             if (_spriteRenderer == null)
             {
                 _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -151,7 +120,6 @@ namespace CircuitCraft.Components
 
         private void InitializeLabelText()
         {
-            // Auto-assign label text component if not set in Inspector
             if (_labelText == null)
             {
 #if UNITY_TEXTMESHPRO
@@ -164,275 +132,86 @@ namespace CircuitCraft.Components
 
         private void ApplySpriteMaterial()
         {
-            // Apply custom material if provided
             if (_spriteMaterial != null && _spriteRenderer != null)
             {
                 _spriteRenderer.sharedMaterial = _spriteMaterial;
             }
         }
-        
-        /// <summary>
-        /// Initialize the component view with a ComponentDefinition.
-        /// Sets sprite and label based on definition properties.
-        /// </summary>
-        /// <param name="definition">ComponentDefinition to visualize.</param>
+
         public void Initialize(ComponentDefinition definition)
         {
-            ClearPinDots();
+            _pinDots?.ClearPinDots();
             _definition = definition;
-            
             if (_definition == null)
             {
                 Debug.LogWarning("ComponentView.Initialize: Null ComponentDefinition provided.", this);
                 return;
             }
-            
-            // Set sprite from definition
+
             if (_spriteRenderer != null)
             {
-                if (_definition.Icon != null)
-                {
-                    _spriteRenderer.sprite = _definition.Icon;
-                }
-                else
-                {
-                    _spriteRenderer.sprite = ComponentSymbolGenerator.GetOrCreateFallbackSprite(_definition.Kind);
-                }
+                _spriteRenderer.sprite = _definition.Icon != null
+                    ? _definition.Icon
+                    : ComponentSymbolGenerator.GetOrCreateFallbackSprite(_definition.Kind);
 #if UNITY_EDITOR
-                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + 
-                    (_definition.Icon == null ? " - Using fallback sprite" : ""));
+                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + (_definition.Icon == null ? " - Using fallback sprite" : ""));
 #endif
             }
-            
-            // Set label text
+
             if (_labelText != null)
             {
-                // Display component value based on kind
-                string label = FormatComponentLabel(_definition);
-                _labelText.text = label;
+                _labelText.text = ComponentLabelFormatter.FormatLabel(_definition);
             }
 
-            CreatePinDots();
-            
-            // Apply normal color initially
+            _pinDots?.CreatePinDots(_definition, 0f);
             UpdateVisualState();
         }
-        
-        /// <summary>
-        /// Set hover state for visual feedback.
-        /// </summary>
-        /// <param name="isHovered">True if hovered, false otherwise.</param>
+
         public void SetHovered(bool isHovered)
         {
             _isHovered = isHovered;
             UpdateVisualState();
         }
-        
-        /// <summary>
-        /// Set selection state for visual feedback.
-        /// </summary>
-        /// <param name="isSelected">True if selected, false otherwise.</param>
+
         public void SetSelected(bool isSelected)
         {
             _isSelected = isSelected;
             UpdateVisualState();
         }
-        
-        /// <summary>
-        /// Update visual state based on hover/selection flags.
-        /// Priority: Selected > Hovered > Normal
-        /// </summary>
+
         private void UpdateVisualState()
         {
-            if (_spriteRenderer == null) return;
-            
-            if (_isSelected)
-            {
-                ApplyHighlight(_selectedColor);
-            }
-            else if (_isHovered)
-            {
-                ApplyHighlight(_hoverColor);
-            }
-            else
-            {
-                RemoveHighlight();
-            }
-        }
-        
-        /// <summary>
-        /// Apply highlight color to sprite renderer.
-        /// </summary>
-        /// <param name="highlightColor">Color to apply.</param>
-        private void ApplyHighlight(Color highlightColor)
-        {
-            if (_materialPropertyBlock == null) return;
-
-            _spriteRenderer.GetPropertyBlock(_materialPropertyBlock);
-            _materialPropertyBlock.SetColor(_ColorProperty, highlightColor);
-            _spriteRenderer.SetPropertyBlock(_materialPropertyBlock);
-        }
-        
-        /// <summary>
-        /// Remove highlight and restore normal color.
-        /// </summary>
-        private void RemoveHighlight()
-        {
-            if (_materialPropertyBlock == null) return;
-
-            _spriteRenderer.GetPropertyBlock(_materialPropertyBlock);
-            _materialPropertyBlock.SetColor(_ColorProperty, _normalColor);
-            _spriteRenderer.SetPropertyBlock(_materialPropertyBlock);
+            _highlight?.UpdateState(_isHovered, _isSelected, _hoverColor, _selectedColor);
         }
 
-        /// <summary>
-        /// Shows a simulation overlay label with voltage/current values.
-        /// </summary>
         public void ShowSimulationOverlay(string text)
         {
             _overlay?.ShowSimulationOverlay(text);
         }
 
-        /// <summary>
-        /// Hides any existing simulation overlay label.
-        /// </summary>
         public void HideSimulationOverlay()
         {
             _overlay?.HideSimulationOverlay();
         }
 
-        /// <summary>
-        /// Shows or hides an LED glow effect.
-        /// </summary>
         public void ShowLEDGlow(bool glow, Color glowColor)
         {
             _effects?.ShowLEDGlow(glow, glowColor);
         }
 
-        /// <summary>
-        /// Hides active LED glow effect.
-        /// </summary>
         public void HideLEDGlow()
         {
             _effects?.HideLEDGlow();
         }
 
-        /// <summary>
-        /// Shows or hides a resistor heat glow effect.
-        /// </summary>
         public void ShowResistorHeatGlow(bool glow, float normalizedPower)
         {
             _effects?.ShowResistorHeatGlow(glow, normalizedPower);
         }
 
-        /// <summary>
-        /// Hides active resistor heat glow effect.
-        /// </summary>
         public void HideResistorHeatGlow()
         {
             _effects?.HideResistorHeatGlow();
         }
-        private void CreatePinDots()
-        {
-            if (_definition?.Pins == null || _definition.Pins.Length == 0)
-                return;
-
-            float cellSize = ResolveGridCellSize();
-            Sprite pinDotSprite = ComponentSymbolGenerator.GetPinDotSprite();
-            int dotSortingOrder = _spriteRenderer != null ? _spriteRenderer.sortingOrder + 1 : 1;
-            int sortingLayerId = _spriteRenderer != null ? _spriteRenderer.sortingLayerID : 0;
-
-            for (int i = 0; i < _definition.Pins.Length; i++)
-            {
-                PinDefinition pinDef = _definition.Pins[i];
-                if (pinDef == null)
-                    continue;
-
-                GameObject pinDot = new GameObject($"PinDot_{pinDef.PinName}");
-                pinDot.transform.SetParent(transform, false);
-
-                Vector2 localGridOffset = pinDef.LocalPosition;
-                pinDot.transform.localPosition = new Vector3(
-                    localGridOffset.x * cellSize,
-                    localGridOffset.y * cellSize,
-                    0f
-                );
-                pinDot.transform.localScale = Vector3.one * (ComponentSymbolGenerator.PinDotRadius * 2f);
-
-                SpriteRenderer dotRenderer = pinDot.AddComponent<SpriteRenderer>();
-                dotRenderer.sprite = pinDotSprite;
-                dotRenderer.color = _pinDotColor;
-                dotRenderer.sortingLayerID = sortingLayerId;
-                dotRenderer.sortingOrder = dotSortingOrder;
-
-                _pinDots.Add(pinDot);
-            }
-        }
-
-        private void ClearPinDots()
-        {
-            for (int i = 0; i < _pinDots.Count; i++)
-            {
-                if (_pinDots[i] != null)
-                {
-                    Destroy(_pinDots[i]);
-                }
-            }
-
-            _pinDots.Clear();
-        }
-
-        private float ResolveGridCellSize()
-        {
-            if (_cachedGridSettings != null && _cachedGridSettings.CellSize > Mathf.Epsilon)
-            {
-                return _cachedGridSettings.CellSize;
-            }
-
-            if (_cachedGridSettings == null)
-            {
-                _cachedGridSettings = FindFirstObjectByType<GridSettings>();
-            }
-
-            if (_cachedGridSettings != null && _cachedGridSettings.CellSize > Mathf.Epsilon)
-            {
-                return _cachedGridSettings.CellSize;
-            }
-
-            return 1f;
-        }
-
-        /// <summary>
-        /// Format component label based on component kind and values.
-        /// </summary>
-        /// <param name="definition">ComponentDefinition to format.</param>
-        /// <returns>Formatted label string.</returns>
-        private string FormatComponentLabel(ComponentDefinition definition)
-        {
-            switch (definition.Kind)
-            {
-                case ComponentKind.Resistor:
-                    return CircuitUnitFormatter.FormatResistance(definition.ResistanceOhms);
-                
-                case ComponentKind.Capacitor:
-                    return CircuitUnitFormatter.FormatCapacitance(definition.CapacitanceFarads);
-                
-                case ComponentKind.Inductor:
-                    return CircuitUnitFormatter.FormatInductance(definition.InductanceHenrys);
-                
-                case ComponentKind.VoltageSource:
-                    return $"{definition.VoltageVolts}V";
-                
-                case ComponentKind.CurrentSource:
-                    return $"{definition.CurrentAmps}A";
-                
-                case ComponentKind.Ground:
-                    return "GND";
-                
-                default:
-                    return definition.DisplayName;
-            }
-        }
-        
     }
 }
