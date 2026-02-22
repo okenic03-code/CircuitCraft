@@ -51,6 +51,7 @@ namespace CircuitCraft.Controllers
 
         private RoutingState _state = RoutingState.Idle;
         private BoardState _boardState;
+        private System.Action<string> _onBoardLoadedHandler;
         private PinReference _startPin;
         private int _selectedTraceSegmentId = -1;
 
@@ -98,6 +99,12 @@ namespace CircuitCraft.Controllers
         {
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
+
+            if (_gameManager != null)
+            {
+                _onBoardLoadedHandler = _ => HandleBoardReset();
+                _gameManager.OnBoardLoaded += _onBoardLoadedHandler;
+            }
         }
 
         private void Update()
@@ -421,6 +428,9 @@ namespace CircuitCraft.Controllers
         {
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= HandleBoardReset;
+
+            if (_gameManager != null)
+                _gameManager.OnBoardLoaded -= _onBoardLoadedHandler;
         }
 
     }

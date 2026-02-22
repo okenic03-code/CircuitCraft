@@ -35,6 +35,7 @@ namespace CircuitCraft.Controllers
         private ComponentView _selectedComponent;
         private BoardState _boardState;
         private CommandHistory _commandHistory;
+        private System.Action<string> _onBoardLoadedHandler;
         
         private void Awake() => Init();
         
@@ -70,12 +71,21 @@ namespace CircuitCraft.Controllers
 
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
+
+            if (_gameManager != null)
+            {
+                _onBoardLoadedHandler = _ => HandleBoardReset();
+                _gameManager.OnBoardLoaded += _onBoardLoadedHandler;
+            }
         }
 
         private void OnDestroy()
         {
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= HandleBoardReset;
+
+            if (_gameManager != null)
+                _gameManager.OnBoardLoaded -= _onBoardLoadedHandler;
         }
         
         private void Update()

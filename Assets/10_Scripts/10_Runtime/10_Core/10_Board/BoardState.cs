@@ -311,6 +311,31 @@ namespace CircuitCraft.Core
         }
 
         /// <summary>
+        /// Creates a net with a specific ID, used for undo operations that need to restore
+        /// the original net identity. Updates _nextNetId if needed to avoid future collisions.
+        /// </summary>
+        /// <param name="netId">The specific net ID to restore.</param>
+        /// <param name="netName">Name for the net.</param>
+        /// <returns>The created net.</returns>
+        /// <exception cref="InvalidOperationException">If a net with this ID already exists.</exception>
+        public Net CreateNetWithId(int netId, string netName)
+        {
+            if (_netsById.ContainsKey(netId))
+                throw new InvalidOperationException($"Net {netId} already exists.");
+
+            var net = new Net(netId, netName);
+            _nets.Add(net);
+            _netsById.Add(netId, net);
+
+            // Ensure future auto-generated IDs don't collide
+            if (netId >= _nextNetId)
+                _nextNetId = netId + 1;
+
+            OnNetCreated?.Invoke(net);
+            return net;
+        }
+
+        /// <summary>
         /// Connects a pin to a net.
         /// </summary>
         /// <param name="netId">Net ID.</param>

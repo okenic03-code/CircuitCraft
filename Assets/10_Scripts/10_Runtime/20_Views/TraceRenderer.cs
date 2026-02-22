@@ -39,6 +39,7 @@ namespace CircuitCraft.Views
         [SerializeField] private Color _flowColor = new Color(1f, 1f, 1f, 0.85f);
 
         private BoardState _boardState;
+        private System.Action<string> _onBoardLoadedHandler;
         private Material _lineMaterial;
         private Material _flowLineMaterial;
         private Texture2D _flowTexture;
@@ -85,6 +86,9 @@ namespace CircuitCraft.Views
 
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
+
+            _onBoardLoadedHandler = _ => HandleBoardReset();
+            _gameManager.OnBoardLoaded += _onBoardLoadedHandler;
         }
 
         private void OnDestroy()
@@ -94,6 +98,9 @@ namespace CircuitCraft.Views
 
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= HandleBoardReset;
+
+            if (_gameManager != null)
+                _gameManager.OnBoardLoaded -= _onBoardLoadedHandler;
 
             foreach (var pair in _traceLines)
             {

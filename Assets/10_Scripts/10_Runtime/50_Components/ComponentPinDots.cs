@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Utils;
 using UnityEngine;
@@ -37,7 +38,17 @@ namespace CircuitCraft.Components
         /// <param name="cellSize">Grid cell size for coordinate conversion.</param>
         public void CreatePinDots(ComponentDefinition definition, float cellSize)
         {
-            if (definition?.Pins is null || definition.Pins.Length == 0)
+            if (definition is null)
+            {
+                return;
+            }
+
+            var pins = definition.Pins;
+            if (pins is null || pins.Length == 0)
+            {
+                pins = GetStandardPins(definition.Kind);
+            }
+            if (pins is null || pins.Length == 0)
             {
                 return;
             }
@@ -47,9 +58,9 @@ namespace CircuitCraft.Components
             int dotSortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder + 1 : 1;
             int sortingLayerId = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
 
-            for (int i = 0; i < definition.Pins.Length; i++)
+            for (int i = 0; i < pins.Length; i++)
             {
-                PinDefinition pinDef = definition.Pins[i];
+                PinDefinition pinDef = pins[i];
                 if (pinDef is null)
                 {
                     continue;
@@ -74,6 +85,18 @@ namespace CircuitCraft.Components
 
                 _pinDots.Add(pinDot);
             }
+        }
+
+        private static PinDefinition[] GetStandardPins(ComponentKind kind)
+        {
+            return kind switch
+            {
+                ComponentKind.BJT => StandardPinDefinitions.BJT,
+                ComponentKind.MOSFET => StandardPinDefinitions.MOSFET,
+                ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode => StandardPinDefinitions.Diode,
+                ComponentKind.VoltageSource or ComponentKind.CurrentSource => StandardPinDefinitions.VerticalTwoPin,
+                _ => StandardPinDefinitions.TwoPin
+            };
         }
 
         /// <summary>

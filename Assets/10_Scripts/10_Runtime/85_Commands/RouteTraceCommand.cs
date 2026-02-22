@@ -244,17 +244,16 @@ namespace CircuitCraft.Commands
             }
             _mergedTargetTraceIds.Clear();
 
-            var sourceNet = _boardState.CreateNet(_mergedSourceNetName);
-            int newSourceNetId = sourceNet.NetId;
+            _boardState.CreateNetWithId(_mergedSourceNetId, _mergedSourceNetName);
 
             foreach (var (start, end) in _mergedSourceTraces)
             {
-                _boardState.AddTrace(newSourceNetId, start, end);
+                _boardState.AddTrace(_mergedSourceNetId, start, end);
             }
 
             foreach (var pin in _mergedSourcePins)
             {
-                _boardState.ConnectPinToNet(newSourceNetId, pin);
+                _boardState.ConnectPinToNet(_mergedSourceNetId, pin);
             }
         }
 

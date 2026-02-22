@@ -33,6 +33,7 @@ namespace CircuitCraft.Views
         [SerializeField] private GridSettings _gridSettings;
 
         private BoardState _boardState;
+        private System.Action<string> _onBoardLoadedHandler;
 
         /// <summary>
         /// Maps component InstanceId to its visual <see cref="ComponentView"/> representation.
@@ -73,6 +74,12 @@ namespace CircuitCraft.Views
             }
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
+
+            if (_gameManager != null)
+            {
+                _onBoardLoadedHandler = _ => HandleBoardReset();
+                _gameManager.OnBoardLoaded += _onBoardLoadedHandler;
+            }
             
             if (_gridSettings == null)
             {
@@ -86,6 +93,9 @@ namespace CircuitCraft.Views
             
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= HandleBoardReset;
+
+            if (_gameManager != null)
+                _gameManager.OnBoardLoaded -= _onBoardLoadedHandler;
         }
 
         /// <summary>

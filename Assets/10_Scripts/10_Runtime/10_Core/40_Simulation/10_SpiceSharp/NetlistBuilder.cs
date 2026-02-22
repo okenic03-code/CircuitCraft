@@ -25,6 +25,7 @@ namespace CircuitCraft.Simulation.SpiceSharp
                 throw new ArgumentNullException(nameof(netlist));
 
             var circuit = new Circuit();
+            var addedModelNames = new HashSet<string>();
 
             foreach (var element in netlist.Elements)
             {
@@ -33,12 +34,22 @@ namespace CircuitCraft.Simulation.SpiceSharp
                 {
                     if (entity is not null)
                     {
+                        if (IsSemiconductorModelEntity(entity) && !addedModelNames.Add(entity.Name))
+                            continue;
+
                         circuit.Add(entity);
                     }
                 }
             }
 
             return circuit;
+        }
+
+        private static bool IsSemiconductorModelEntity(IEntity entity)
+        {
+            return entity is DiodeModel
+                or BipolarJunctionTransistorModel
+                or Mosfet1Model;
         }
 
         /// <summary>
