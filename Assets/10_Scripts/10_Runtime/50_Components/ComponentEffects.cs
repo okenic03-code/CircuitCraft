@@ -66,7 +66,7 @@ namespace CircuitCraft.Components
             }
 
             EnsureLEDGlowObject();
-            if (_ledGlowRenderer is null)
+            if (_ledGlowRenderer == null)
             {
                 return;
             }
@@ -81,7 +81,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void HideLEDGlow()
         {
-            if (_ledGlowObject is not null)
+            if (_ledGlowObject != null)
             {
                 _ledGlowObject.SetActive(false);
             }
@@ -101,7 +101,7 @@ namespace CircuitCraft.Components
             }
 
             EnsureHeatGlowObject();
-            if (_heatGlowRenderer is null)
+            if (_heatGlowRenderer == null)
             {
                 return;
             }
@@ -118,7 +118,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void HideResistorHeatGlow()
         {
-            if (_heatGlowObject is not null)
+            if (_heatGlowObject != null)
             {
                 _heatGlowObject.SetActive(false);
             }
@@ -135,7 +135,7 @@ namespace CircuitCraft.Components
 
         private void EnsureLEDGlowObject()
         {
-            if (_ledGlowObject is not null)
+            if (_ledGlowObject != null)
             {
                 _ledGlowObject.SetActive(true);
                 return;
@@ -148,14 +148,14 @@ namespace CircuitCraft.Components
 
             _ledGlowRenderer = _ledGlowObject.AddComponent<SpriteRenderer>();
             _ledGlowRenderer.sprite = ComponentSymbolGenerator.GetLedGlowSprite();
-            _ledGlowRenderer.sortingLayerID = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
-            _ledGlowRenderer.sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder - 1 : 0;
-            _ledGlowRenderer.material = _parentSprite is not null ? _parentSprite.sharedMaterial : null;
+            _ledGlowRenderer.sortingLayerID = _parentSprite != null ? _parentSprite.sortingLayerID : 0;
+            _ledGlowRenderer.sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder - 1 : 0;
+            _ledGlowRenderer.material = _parentSprite != null ? _parentSprite.sharedMaterial : null;
         }
 
         private void ClearLEDGlow()
         {
-            if (_ledGlowObject is not null)
+            if (_ledGlowObject != null)
             {
                 Object.Destroy(_ledGlowObject);
                 _ledGlowObject = null;
@@ -165,7 +165,7 @@ namespace CircuitCraft.Components
 
         private void EnsureHeatGlowObject()
         {
-            if (_heatGlowObject is not null)
+            if (_heatGlowObject != null)
             {
                 _heatGlowObject.SetActive(true);
                 return;
@@ -178,14 +178,14 @@ namespace CircuitCraft.Components
 
             _heatGlowRenderer = _heatGlowObject.AddComponent<SpriteRenderer>();
             _heatGlowRenderer.sprite = ComponentSymbolGenerator.GetHeatGlowSprite();
-            _heatGlowRenderer.sortingLayerID = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
-            _heatGlowRenderer.sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder - 2 : 0;
-            _heatGlowRenderer.material = _parentSprite is not null ? _parentSprite.sharedMaterial : null;
+            _heatGlowRenderer.sortingLayerID = _parentSprite != null ? _parentSprite.sortingLayerID : 0;
+            _heatGlowRenderer.sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder - 2 : 0;
+            _heatGlowRenderer.material = _parentSprite != null ? _parentSprite.sharedMaterial : null;
         }
 
         private void ClearHeatGlow()
         {
-            if (_heatGlowObject is not null)
+            if (_heatGlowObject != null)
             {
                 Object.Destroy(_heatGlowObject);
                 _heatGlowObject = null;

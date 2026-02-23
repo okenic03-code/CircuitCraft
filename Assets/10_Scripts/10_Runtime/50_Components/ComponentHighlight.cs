@@ -31,7 +31,7 @@ namespace CircuitCraft.Components
         /// <param name="highlightColor">Highlight color to apply.</param>
         public void ApplyHighlight(Color highlightColor)
         {
-            if (_spriteRenderer is null || _materialPropertyBlock is null)
+            if (_spriteRenderer == null || _materialPropertyBlock is null)
             {
                 return;
             }
@@ -46,7 +46,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void RemoveHighlight()
         {
-            if (_spriteRenderer is null || _materialPropertyBlock is null)
+            if (_spriteRenderer == null || _materialPropertyBlock is null)
             {
                 return;
             }
@@ -65,7 +65,7 @@ namespace CircuitCraft.Components
         /// <param name="selectedColor">Color used for selected state.</param>
         public void UpdateState(bool isHovered, bool isSelected, Color hoverColor, Color selectedColor)
         {
-            if (_spriteRenderer is null)
+            if (_spriteRenderer == null)
             {
                 return;
             }

@@ -126,7 +126,7 @@ namespace CircuitCraft.Components
 
         private void InitializeSpriteRenderer()
         {
-            if (_spriteRenderer is null)
+            if (_spriteRenderer == null)
             {
                 _spriteRenderer = GetComponent<SpriteRenderer>();
             }
@@ -134,7 +134,7 @@ namespace CircuitCraft.Components
 
         private void InitializeLabelText()
         {
-            if (_labelText is null)
+            if (_labelText == null)
             {
 #if UNITY_TEXTMESHPRO
                 _labelText = GetComponentInChildren<TextMeshPro>();
@@ -146,7 +146,7 @@ namespace CircuitCraft.Components
 
         private void ApplySpriteMaterial()
         {
-            if (_spriteMaterial is not null && _spriteRenderer is not null)
+            if (_spriteMaterial != null && _spriteRenderer != null)
             {
                 _spriteRenderer.sharedMaterial = _spriteMaterial;
             }
@@ -160,23 +160,23 @@ namespace CircuitCraft.Components
         {
             _pinDots?.ClearPinDots();
             _definition = definition;
-            if (_definition is null)
+            if (_definition == null)
             {
                 Debug.LogWarning("ComponentView.Initialize: Null ComponentDefinition provided.", this);
                 return;
             }
 
-            if (_spriteRenderer is not null)
+            if (_spriteRenderer != null)
             {
-                _spriteRenderer.sprite = _definition.Icon is not null
+                _spriteRenderer.sprite = _definition.Icon != null
                     ? _definition.Icon
                     : ComponentSymbolGenerator.GetOrCreateFallbackSprite(_definition.Kind);
 #if UNITY_EDITOR
-                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + (_definition.Icon is null ? " - Using fallback sprite" : ""));
+                Debug.Log($"ComponentView.Initialize: {_definition.DisplayName} ({_definition.Id})" + (_definition.Icon == null ? " - Using fallback sprite" : ""));
 #endif
             }
 
-            if (_labelText is not null)
+            if (_labelText != null)
             {
                 _labelText.text = ComponentLabelFormatter.FormatLabel(_definition);
             }

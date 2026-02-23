@@ -38,7 +38,7 @@ namespace CircuitCraft.Components
         /// <param name="cellSize">Grid cell size for coordinate conversion.</param>
         public void CreatePinDots(ComponentDefinition definition, float cellSize)
         {
-            if (definition is null)
+            if (definition == null)
             {
                 return;
             }
@@ -55,8 +55,8 @@ namespace CircuitCraft.Components
 
             float resolvedCellSize = cellSize > Mathf.Epsilon ? cellSize : ResolveGridCellSize();
             Sprite pinDotSprite = ComponentSymbolGenerator.GetPinDotSprite();
-            int dotSortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder + 1 : 1;
-            int sortingLayerId = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
+            int dotSortingOrder = _parentSprite != null ? _parentSprite.sortingOrder + 1 : 1;
+            int sortingLayerId = _parentSprite != null ? _parentSprite.sortingLayerID : 0;
 
             for (int i = 0; i < pins.Length; i++)
             {
@@ -111,7 +111,7 @@ namespace CircuitCraft.Components
         {
             for (int i = 0; i < _pinDots.Count; i++)
             {
-                if (_pinDots[i] is not null)
+                if (_pinDots[i] != null)
                 {
                     Object.Destroy(_pinDots[i]);
                 }
@@ -130,7 +130,7 @@ namespace CircuitCraft.Components
 
         private float ResolveGridCellSize()
         {
-            if (_gridSettings is not null && _gridSettings.CellSize > Mathf.Epsilon)
+            if (_gridSettings != null && _gridSettings.CellSize > Mathf.Epsilon)
             {
                 return _gridSettings.CellSize;
             }

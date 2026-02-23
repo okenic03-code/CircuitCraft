@@ -60,7 +60,7 @@ namespace CircuitCraft.Components
             }
 
             EnsureSimulationOverlayText();
-            if (_simulationOverlayText is null)
+            if (_simulationOverlayText == null)
             {
                 return;
             }
@@ -75,7 +75,7 @@ namespace CircuitCraft.Components
         /// </summary>
         public void HideSimulationOverlay()
         {
-            if (_simulationOverlayObject is not null)
+            if (_simulationOverlayObject != null)
             {
                 _simulationOverlayObject.SetActive(false);
             }
@@ -91,7 +91,7 @@ namespace CircuitCraft.Components
 
         private void EnsureSimulationOverlayText()
         {
-            if (_simulationOverlayObject is not null)
+            if (_simulationOverlayObject != null)
             {
                 return;
             }
@@ -105,8 +105,8 @@ namespace CircuitCraft.Components
             var overlayText = _simulationOverlayObject.AddComponent<TextMeshPro>();
             overlayText.alignment = TMPro.TextAlignmentOptions.Center;
             overlayText.fontSize = 4f;
-            overlayText.sortingLayerID = _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
-            overlayText.sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder + 2 : 0;
+            overlayText.sortingLayerID = _parentSprite != null ? _parentSprite.sortingLayerID : 0;
+            overlayText.sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder + 2 : 0;
             overlayText.autoSizeTextContainer = false;
             _simulationOverlayText = overlayText;
 #else
@@ -116,8 +116,8 @@ namespace CircuitCraft.Components
             overlayText.characterSize = 0.08f;
             overlayText.fontSize = 28;
             overlayText.GetComponent<MeshRenderer>().sortingLayerID =
-                _parentSprite is not null ? _parentSprite.sortingLayerID : 0;
-            overlayText.GetComponent<MeshRenderer>().sortingOrder = _parentSprite is not null ? _parentSprite.sortingOrder + 2 : 0;
+                _parentSprite != null ? _parentSprite.sortingLayerID : 0;
+            overlayText.GetComponent<MeshRenderer>().sortingOrder = _parentSprite != null ? _parentSprite.sortingOrder + 2 : 0;
             _simulationOverlayText = overlayText;
 #endif
 
@@ -126,7 +126,7 @@ namespace CircuitCraft.Components
 
         private void ClearSimulationOverlay()
         {
-            if (_simulationOverlayObject is not null)
+            if (_simulationOverlayObject != null)
             {
                 Object.Destroy(_simulationOverlayObject);
                 _simulationOverlayObject = null;
