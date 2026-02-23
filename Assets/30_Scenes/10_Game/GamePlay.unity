@@ -299,7 +299,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77dceb7f653af30458e6448d49fa491f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiDocument: {fileID: 0}
+  _uiDocument: {fileID: 244080130}
 --- !u!114 &244080130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -675,7 +675,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dccd3fa4f45f70141aba06da47700cee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiDocument: {fileID: 0}
+  _uiDocument: {fileID: 440354469}
   _cameraController: {fileID: 0}
   _wireRoutingController: {fileID: 0}
 --- !u!1 &652220587
@@ -933,7 +933,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d3573bf32ac20432efbab7f78e0f531a, type: 2}
   - {fileID: 11400000, guid: 2f483553321f77f7a65d55f05bc2134c, type: 2}
   - {fileID: 11400000, guid: 5813ac06f115eef1fec9532b1bfdf4b2, type: 2}
-  _uiDocument: {fileID: 0}
+  _uiDocument: {fileID: 963589278}
 --- !u!114 &963589278
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1096,7 +1096,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 891d848f485be4249b30b329272b5309, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _uiDocument: {fileID: 0}
+  _uiDocument: {fileID: 1073842453}
 --- !u!114 &1073842453
 MonoBehaviour:
   m_ObjectHideFlags: 0
