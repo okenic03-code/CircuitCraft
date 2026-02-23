@@ -1,8 +1,10 @@
 using UnityEngine;
 using CircuitCraft.Core;
 using CircuitCraft.Components;
+using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using CircuitCraft.Commands;
+using CircuitCraft.Utils;
 
 namespace CircuitCraft.Controllers
 {
@@ -25,6 +27,10 @@ namespace CircuitCraft.Controllers
         [SerializeField]
         [Tooltip("Camera used for raycasting (defaults to Camera.main if not set).")]
         private Camera _camera;
+
+        [SerializeField]
+        [Tooltip("Grid settings for position snapping during drag.")]
+        private GridSettings _gridSettings;
         
         [Header("Raycast Settings")]
         [SerializeField]
@@ -36,6 +42,11 @@ namespace CircuitCraft.Controllers
         private BoardState _boardState;
         private CommandHistory _commandHistory;
         private System.Action<string> _onBoardLoadedHandler;
+        private ComponentView _pressedComponent;
+        private bool _isDragging;
+        private Vector2Int _dragStartGridPos;
+        private Vector3 _mouseDownPos;
+        private const float DragThreshold = 5f;
         
         private void Awake() => Init();
         
@@ -100,32 +111,148 @@ namespace CircuitCraft.Controllers
         /// </summary>
         private void HandleSelection()
         {
+            if (_camera == null)
+                return;
+
             if (Input.GetMouseButtonDown(0))
             {
-                if (_camera == null) return;
-                
-                Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hit;
-                
-                if (Physics.Raycast(ray, out hit, _raycastDistance))
+                _mouseDownPos = Input.mousePosition;
+                _isDragging = false;
+
+                if (TryRaycastComponent(out ComponentView view))
                 {
-                    // Try to get ComponentView from hit collider or parent
-                    ComponentView view = hit.collider.GetComponent<ComponentView>();
-                    if (view == null)
-                    {
-                        view = hit.collider.GetComponentInParent<ComponentView>();
-                    }
-                    
-                    if (view != null)
-                    {
-                        SelectComponent(view);
-                        return;
-                    }
+                    _pressedComponent = view;
+                    _dragStartGridPos = view.GridPosition;
+                    return;
                 }
-                
+
+                _pressedComponent = null;
+
                 // Clicked empty space - deselect
                 DeselectAll();
             }
+
+            if (Input.GetMouseButton(0) && _pressedComponent != null)
+            {
+                float dragDistance = Vector2.Distance(Input.mousePosition, _mouseDownPos);
+                if (!_isDragging && dragDistance >= DragThreshold)
+                {
+                    _isDragging = true;
+                    SelectComponent(_pressedComponent);
+                }
+
+                if (_isDragging)
+                    UpdateDragPosition();
+            }
+
+            if (Input.GetMouseButtonUp(0))
+            {
+                if (_pressedComponent == null)
+                    return;
+
+                if (_isDragging)
+                    FinalizeDragMove();
+                else
+                    SelectComponent(_pressedComponent);
+
+                _pressedComponent = null;
+                _isDragging = false;
+            }
+        }
+
+        private bool TryRaycastComponent(out ComponentView view)
+        {
+            view = null;
+
+            Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+            if (!Physics.Raycast(ray, out RaycastHit hit, _raycastDistance))
+                return false;
+
+            view = hit.collider.GetComponent<ComponentView>();
+            if (view == null)
+                view = hit.collider.GetComponentInParent<ComponentView>();
+
+            return view != null;
+        }
+
+        private void UpdateDragPosition()
+        {
+            if (_selectedComponent == null || _gridSettings == null)
+                return;
+
+            Vector2Int dragGridPos = GridUtility.ScreenToGridPosition(
+                Input.mousePosition,
+                _camera,
+                _gridSettings.CellSize,
+                _gridSettings.GridOrigin);
+
+            Vector3 dragWorldPos = GridUtility.GridToWorldPosition(
+                dragGridPos,
+                _gridSettings.CellSize,
+                _gridSettings.GridOrigin);
+
+            _selectedComponent.transform.position = dragWorldPos;
+        }
+
+        private void FinalizeDragMove()
+        {
+            if (_selectedComponent == null || _gridSettings == null || _boardState is null || _commandHistory == null)
+                return;
+
+            Vector2Int targetGridPos = GridUtility.ScreenToGridPosition(
+                Input.mousePosition,
+                _camera,
+                _gridSettings.CellSize,
+                _gridSettings.GridOrigin);
+
+            GridPosition startPosition = new(_dragStartGridPos.x, _dragStartGridPos.y);
+            PlacedComponent placedComponent = _boardState.GetComponentAt(startPosition);
+            if (placedComponent is null)
+                return;
+
+            bool isSameCell = targetGridPos == _dragStartGridPos;
+            if (isSameCell)
+            {
+                SnapSelectedToGrid(_dragStartGridPos);
+                return;
+            }
+
+            GridPosition targetPosition = new(targetGridPos.x, targetGridPos.y);
+            if (!PlacementValidator.IsValidPlacement(_boardState, targetPosition))
+            {
+                SnapSelectedToGrid(_dragStartGridPos);
+                return;
+            }
+
+            if (placedComponent.IsFixed)
+            {
+                SnapSelectedToGrid(_dragStartGridPos);
+                return;
+            }
+
+            DeselectAll();
+
+            _commandHistory.ExecuteCommand(new RemoveComponentCommand(_boardState, placedComponent.InstanceId));
+            _commandHistory.ExecuteCommand(new PlaceComponentCommand(
+                _boardState,
+                placedComponent.ComponentDefinitionId,
+                targetPosition,
+                placedComponent.Rotation,
+                placedComponent.Pins,
+                placedComponent.CustomValue));
+        }
+
+        private void SnapSelectedToGrid(Vector2Int gridPos)
+        {
+            if (_selectedComponent == null || _gridSettings == null)
+                return;
+
+            Vector3 snappedPosition = GridUtility.GridToWorldPosition(
+                gridPos,
+                _gridSettings.CellSize,
+                _gridSettings.GridOrigin);
+
+            _selectedComponent.transform.position = snappedPosition;
         }
         
         /// <summary>

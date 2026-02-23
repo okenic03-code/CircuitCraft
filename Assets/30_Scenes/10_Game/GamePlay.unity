@@ -154,6 +154,7 @@ MonoBehaviour:
   _gameManager: {fileID: 1268765404}
   _stageManager: {fileID: 1342791942}
   _camera: {fileID: 866817686}
+  _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
   _raycastDistance: 100
 --- !u!4 &66569308
 Transform:

@@ -1,4 +1,5 @@
 using CircuitCraft.Commands;
+using CircuitCraft.Components;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
@@ -143,6 +144,21 @@ namespace CircuitCraft.Controllers
 
             if (!Input.GetMouseButtonDown(0))
                 return;
+
+            // Before placing, check if clicking on existing component.
+            if (_camera != null)
+            {
+                Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+                {
+                    ComponentView existingView = hit.collider.GetComponent<ComponentView>();
+                    if (existingView == null)
+                        existingView = hit.collider.GetComponentInParent<ComponentView>();
+
+                    if (existingView != null)
+                        return; // Let ComponentInteraction handle this click.
+                }
+            }
 
             Vector2Int gridPos = GridUtility.ScreenToGridPosition(
                 Input.mousePosition,

@@ -53,6 +53,25 @@ namespace CircuitCraft.Components
                 return;
             }
 
+            // Compute centroid to center pin dots around component origin
+            Vector2 centroid = Vector2.zero;
+            int validCount = 0;
+            for (int i = 0; i < pins.Length; i++)
+            {
+                if (pins[i] is null)
+                {
+                    continue;
+                }
+
+                centroid += (Vector2)pins[i].LocalPosition;
+                validCount++;
+            }
+
+            if (validCount > 0)
+            {
+                centroid /= validCount;
+            }
+
             float resolvedCellSize = cellSize > Mathf.Epsilon ? cellSize : ResolveGridCellSize();
             Sprite pinDotSprite = ComponentSymbolGenerator.GetPinDotSprite();
             int dotSortingOrder = _parentSprite != null ? _parentSprite.sortingOrder + 1 : 1;
@@ -69,7 +88,7 @@ namespace CircuitCraft.Components
                 GameObject pinDot = new GameObject($"PinDot_{pinDef.PinName}");
                 pinDot.transform.SetParent(_parent, false);
 
-                Vector2 localGridOffset = pinDef.LocalPosition;
+                Vector2 localGridOffset = (Vector2)pinDef.LocalPosition - centroid;
                 pinDot.transform.localPosition = new Vector3(
                     localGridOffset.x * resolvedCellSize,
                     localGridOffset.y * resolvedCellSize,
