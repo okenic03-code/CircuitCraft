@@ -253,7 +253,11 @@ MonoBehaviour:
   _camera: {fileID: 866817686}
   _componentPreviewManager: {fileID: 0}
   _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
-  _uiDocuments: []
+  _uiDocuments:
+  - {fileID: 440354469}
+  - {fileID: 1073842453}
+  - {fileID: 963589278}
+  - {fileID: 244080130}
 --- !u!4 &236485886
 Transform:
   m_ObjectHideFlags: 0
