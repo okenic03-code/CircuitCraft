@@ -9,6 +9,7 @@
                 <ui:Button name="RedoButton" class="toolbar-button" text="Redo" />
                 <ui:VisualElement style="width: 16px;" /> <!-- Spacer -->
                 <ui:Button name="ClearBoardButton" class="toolbar-button" text="Clear Board" />
+                <ui:Button name="WireModeButton" class="toolbar-button" text="🔌 Wire" />
                 <ui:Button name="CircuitDiagramButton" class="toolbar-button" text="📋 Circuit" />
             </ui:VisualElement>
             

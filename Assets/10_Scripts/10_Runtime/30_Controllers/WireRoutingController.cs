@@ -191,6 +191,21 @@ namespace CircuitCraft.Controllers
             if (UIInputHelper.IsPointerOverUI(_uiDocuments))
                 return;
 
+            // Grid-based detection first (more reliable than raycast)
+            if (TryGetClickedPinByGrid(out var clickedPinByGridFallback))
+            {
+                if (_state == RoutingState.Idle)
+                {
+                    StartRouting(clickedPinByGridFallback);
+                }
+                else if (_state == RoutingState.Drawing || _state == RoutingState.PinSelected)
+                {
+                    CommitRouting(clickedPinByGridFallback);
+                }
+                return;
+            }
+
+            // Raycast fallback (for clicking on component bodies near pins)
             if (TryGetClickedPin(out var clickedPin))
             {
                 if (_state == RoutingState.Idle)
@@ -431,6 +446,19 @@ namespace CircuitCraft.Controllers
 
             if (_gameManager != null)
                 _gameManager.OnBoardLoaded -= _onBoardLoadedHandler;
+        }
+
+        /// <summary>
+        /// Gets whether wiring mode is currently active.
+        /// </summary>
+        public bool IsWiringModeActive => _wiringModeActive;
+
+        /// <summary>
+        /// Toggles wiring mode on/off. Called by UI button.
+        /// </summary>
+        public void ToggleWiringModePublic()
+        {
+            ToggleWiringMode();
         }
 
     }

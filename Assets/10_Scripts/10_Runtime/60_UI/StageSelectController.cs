@@ -49,8 +49,8 @@ namespace CircuitCraft.UI
         private void Awake()
         {
             // Initialize default state if not set externally
-            // Default: 5 stages supported by UI
-            int capacity = (_stages != null && _stages.Length > 0) ? _stages.Length : 5;
+            // Default: 10 stages supported by UI
+            int capacity = (_stages != null && _stages.Length > 0) ? _stages.Length : 10;
             _unlockedStages = new bool[capacity];
             _stageStars = new int[capacity];
 
@@ -87,8 +87,8 @@ namespace CircuitCraft.UI
                 _btnBack.clicked += HandleBackClicked;
             }
 
-            // Setup Stage Cards (assuming max 5 for now as per UXML)
-            for (int i = 0; i < 5; i++)
+            int cardCount = (_stages != null && _stages.Length > 0) ? _stages.Length : 10;
+            for (int i = 0; i < cardCount; i++)
             {
                 int stageIndex = i; // Capture for lambda
                 string cardName = $"stage-{stageIndex + 1}";

@@ -83,6 +83,11 @@ namespace CircuitCraft.Components
                 dotRenderer.sortingLayerID = sortingLayerId;
                 dotRenderer.sortingOrder = dotSortingOrder;
 
+                // Add collider for raycast detection during wiring
+                SphereCollider pinCollider = pinDot.AddComponent<SphereCollider>();
+                pinCollider.radius = 0.5f;
+                pinCollider.isTrigger = false;
+
                 _pinDots.Add(pinDot);
             }
         }

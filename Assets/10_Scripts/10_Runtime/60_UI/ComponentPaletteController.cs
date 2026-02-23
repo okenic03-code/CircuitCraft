@@ -225,6 +225,7 @@ namespace CircuitCraft.UI
         /// </summary>
         private void UnregisterCallbacks()
         {
+            if (_registeredCallbacks == null) return;
             foreach (var (btn, action) in _registeredCallbacks)
             {
                 if (btn != null)

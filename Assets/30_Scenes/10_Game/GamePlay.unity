@@ -251,9 +251,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _gameManager: {fileID: 1268765404}
   _camera: {fileID: 866817686}
-  _componentViewPrefab: {fileID: 5961584455894186576, guid: bc3e36097dd62624ba4a13bdf7304046,
-    type: 3}
+  _componentPreviewManager: {fileID: 0}
   _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
+  _uiDocuments: []
 --- !u!4 &236485886
 Transform:
   m_ObjectHideFlags: 0
@@ -299,6 +299,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 77dceb7f653af30458e6448d49fa491f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _uiDocument: {fileID: 0}
 --- !u!114 &244080130
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -360,22 +361,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab7aadc5be7722f41b594196bc68df34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stageSelectScreen: {fileID: 0}
-  _gamePlayScreen: {fileID: 0}
+  _stageSelectScreen: {fileID: 963589276}
+  _gamePlayScreen: {fileID: 440354464}
   _endingScreen: {fileID: 1073842451}
-  _stageSelectController: {fileID: 0}
+  _stageSelectController: {fileID: 963589277}
   _endingController: {fileID: 1073842452}
-  _stageManager: {fileID: 0}
-  _progressionManager: {fileID: 0}
-  _paletteController: {fileID: 0}
-  _resultsPanelController: {fileID: 0}
-  _pauseMenuController: {fileID: 0}
+  _stageManager: {fileID: 1342791942}
+  _progressionManager: {fileID: 652220588}
+  _paletteController: {fileID: 440354467}
+  _resultsPanelController: {fileID: 440354465}
+  _pauseMenuController: {fileID: 244080129}
   _stages:
   - {fileID: 11400000, guid: 259c78f0c35ef4349bbc7717f6fb8002, type: 2}
   - {fileID: 11400000, guid: a1b2c3d4e5f60718293a4b5c6d7e8f90, type: 2}
   - {fileID: 11400000, guid: b2c3d4e5f6071829304a5b6c7d8e9f01, type: 2}
   - {fileID: 11400000, guid: c3d4e5f607182930415a6b7c8d9e0f12, type: 2}
   - {fileID: 11400000, guid: d4e5f6071829304152a6b7c8d9e0f123, type: 2}
+  - {fileID: 11400000, guid: 587fd76699620e0b8d05b35c984e8de2, type: 2}
+  - {fileID: 11400000, guid: b26b0378eb71277e0cbc8efd3a5c1bb5, type: 2}
+  - {fileID: 11400000, guid: d3573bf32ac20432efbab7f78e0f531a, type: 2}
+  - {fileID: 11400000, guid: 2f483553321f77f7a65d55f05bc2134c, type: 2}
+  - {fileID: 11400000, guid: 5813ac06f115eef1fec9532b1bfdf4b2, type: 2}
 --- !u!4 &322458026
 Transform:
   m_ObjectHideFlags: 0
@@ -544,6 +550,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85f5d42cfd882164cab349b7bee86db1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _uiDocument: {fileID: 440354469}
   _gameManager: {fileID: 1268765404}
   _stageManager: {fileID: 1342791942}
 --- !u!114 &440354466
@@ -602,7 +609,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cffbaf52adad504ca9f4326f40dd5c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  uiDocument: {fileID: 0}
+  _uiDocument: {fileID: 440354469}
   _mainCamera: {fileID: 866817686}
   _gridCursor: {fileID: 1529819357}
   _placementController: {fileID: 236485885}
@@ -668,6 +675,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dccd3fa4f45f70141aba06da47700cee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _uiDocument: {fileID: 0}
+  _cameraController: {fileID: 0}
+  _wireRoutingController: {fileID: 0}
 --- !u!1 &652220587
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,6 +928,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: b2c3d4e5f6071829304a5b6c7d8e9f01, type: 2}
   - {fileID: 11400000, guid: c3d4e5f607182930415a6b7c8d9e0f12, type: 2}
   - {fileID: 11400000, guid: d4e5f6071829304152a6b7c8d9e0f123, type: 2}
+  - {fileID: 11400000, guid: 587fd76699620e0b8d05b35c984e8de2, type: 2}
+  - {fileID: 11400000, guid: b26b0378eb71277e0cbc8efd3a5c1bb5, type: 2}
+  - {fileID: 11400000, guid: d3573bf32ac20432efbab7f78e0f531a, type: 2}
+  - {fileID: 11400000, guid: 2f483553321f77f7a65d55f05bc2134c, type: 2}
+  - {fileID: 11400000, guid: 5813ac06f115eef1fec9532b1bfdf4b2, type: 2}
   _uiDocument: {fileID: 0}
 --- !u!114 &963589278
 MonoBehaviour:
@@ -1435,6 +1450,76 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1881518812
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1881518815}
+  - component: {fileID: 1881518814}
+  - component: {fileID: 1881518813}
+  m_Layer: 0
+  m_Name: WireRoutingController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1881518813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1881518812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93c307d692ba30b4c9d0bb8c81a8e92e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _previewColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _previewWidth: 0.08
+  _previewY: 0.06
+  _previewShader: {fileID: 0}
+--- !u!114 &1881518814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1881518812}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89941ec19c90f854e850ab5a3bcecba7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _gameManager: {fileID: 1268765404}
+  _stageManager: {fileID: 1342791942}
+  _gridSettings: {fileID: 11400000, guid: eb663ec4d2d762e4c833caf12a4ace35, type: 2}
+  _mainCamera: {fileID: 866817686}
+  _wirePreviewManager: {fileID: 0}
+  _uiDocuments:
+  - {fileID: 440354469}
+  _placementController: {fileID: 236485885}
+  _raycastDistance: 100
+--- !u!4 &1881518815
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1881518812}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1457,3 +1542,4 @@ SceneRoots:
   - {fileID: 244080131}
   - {fileID: 827465219}
   - {fileID: 1019091867}
+  - {fileID: 1881518815}

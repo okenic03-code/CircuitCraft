@@ -58,6 +58,56 @@
                     <ui:Label name="stage-stars-5" class="stage-stars" text="☆☆☆" />
                 </ui:VisualElement>
             </ui:VisualElement>
+
+            <!-- Stage 6 -->
+            <ui:VisualElement name="stage-6" class="stage-card">
+                <ui:VisualElement class="card-status-bar status-blue" />
+                <ui:VisualElement class="card-content">
+                    <ui:Label name="stage-number-6" class="stage-number" text="1-6" />
+                    <ui:Label name="stage-name-6" class="stage-name" text="LED Current" />
+                    <ui:Label name="stage-stars-6" class="stage-stars" text="☆☆☆" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Stage 7 -->
+            <ui:VisualElement name="stage-7" class="stage-card">
+                <ui:VisualElement class="card-status-bar status-blue" />
+                <ui:VisualElement class="card-content">
+                    <ui:Label name="stage-number-7" class="stage-number" text="1-7" />
+                    <ui:Label name="stage-name-7" class="stage-name" text="Series LED" />
+                    <ui:Label name="stage-stars-7" class="stage-stars" text="☆☆☆" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Stage 8 -->
+            <ui:VisualElement name="stage-8" class="stage-card">
+                <ui:VisualElement class="card-status-bar status-blue" />
+                <ui:VisualElement class="card-content">
+                    <ui:Label name="stage-number-8" class="stage-number" text="1-8" />
+                    <ui:Label name="stage-name-8" class="stage-name" text="Two Sources" />
+                    <ui:Label name="stage-stars-8" class="stage-stars" text="☆☆☆" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Stage 9 -->
+            <ui:VisualElement name="stage-9" class="stage-card">
+                <ui:VisualElement class="card-status-bar status-blue" />
+                <ui:VisualElement class="card-content">
+                    <ui:Label name="stage-number-9" class="stage-number" text="1-9" />
+                    <ui:Label name="stage-name-9" class="stage-name" text="Ground Ref" />
+                    <ui:Label name="stage-stars-9" class="stage-stars" text="☆☆☆" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- Stage 10 -->
+            <ui:VisualElement name="stage-10" class="stage-card">
+                <ui:VisualElement class="card-status-bar status-blue" />
+                <ui:VisualElement class="card-content">
+                    <ui:Label name="stage-number-10" class="stage-number" text="1-10" />
+                    <ui:Label name="stage-name-10" class="stage-name" text="Triple Divider" />
+                    <ui:Label name="stage-stars-10" class="stage-stars" text="☆☆☆" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
         
         <!-- Back Button -->

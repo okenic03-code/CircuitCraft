@@ -40,6 +40,8 @@ namespace CircuitCraft.UI
         private Button _clearBoardButton;
         private Button _undoButton;
         private Button _redoButton;
+        private Button _wireModeButton;
+        private WireRoutingController _wireRoutingController;
         private StatusBarUpdater _statusBarUpdater;
         private BudgetTracker _budgetTracker;
 
@@ -94,6 +96,8 @@ namespace CircuitCraft.UI
                 _undoButton.clicked -= OnUndo;
             if (_redoButton != null)
                 _redoButton.clicked -= OnRedo;
+            if (_wireModeButton != null)
+                _wireModeButton.clicked -= OnToggleWireMode;
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= HandleStageLoaded;
             UnregisterStatusBarSubscriptions();
@@ -121,6 +125,7 @@ namespace CircuitCraft.UI
             _clearBoardButton = _root.Q<Button>("ClearBoardButton");
             _undoButton = _root.Q<Button>("UndoButton");
             _redoButton = _root.Q<Button>("RedoButton");
+            _wireModeButton = _root.Q<Button>("WireModeButton");
             if (_statusText == null) Debug.LogWarning("UIController: StatusText not found.");
             if (_toolbar == null) Debug.LogWarning("UIController: Toolbar not found.");
             if (_gameView == null) Debug.LogWarning("UIController: GameView not found.");
@@ -144,6 +149,8 @@ namespace CircuitCraft.UI
                 _undoButton.clicked += OnUndo;
             if (_redoButton != null)
                 _redoButton.clicked += OnRedo;
+            if (_wireModeButton != null)
+                _wireModeButton.clicked += OnToggleWireMode;
         }
         private void RegisterStatusBarSubscriptions()
         {
@@ -205,6 +212,22 @@ namespace CircuitCraft.UI
         {
             if (_commandHistory != null && _commandHistory.CanRedo)
             { _commandHistory.Redo(); SetStatusText("Redo"); }
+        }
+
+        private void OnToggleWireMode()
+        {
+            if (_wireRoutingController == null)
+                _wireRoutingController = FindFirstObjectByType<WireRoutingController>();
+
+            if (_wireRoutingController == null) return;
+
+            _wireRoutingController.ToggleWiringModePublic();
+
+            if (_wireModeButton != null)
+            {
+                _wireModeButton.text = _wireRoutingController.IsWiringModeActive
+                    ? "🔌 Wire ✓" : "🔌 Wire";
+            }
         }
     }
 }
