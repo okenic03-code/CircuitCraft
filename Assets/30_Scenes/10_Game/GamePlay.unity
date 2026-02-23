@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gameManager: {fileID: 1268765404}
-  _stageManager: {fileID: 0}
+  _stageManager: {fileID: 1342791942}
   _camera: {fileID: 866817686}
   _raycastDistance: 100
 --- !u!4 &66569308
@@ -676,8 +676,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiDocument: {fileID: 440354469}
-  _cameraController: {fileID: 0}
-  _wireRoutingController: {fileID: 0}
+  _cameraController: {fileID: 866817688}
+  _wireRoutingController: {fileID: 1881518814}
 --- !u!1 &652220587
 GameObject:
   m_ObjectHideFlags: 0
