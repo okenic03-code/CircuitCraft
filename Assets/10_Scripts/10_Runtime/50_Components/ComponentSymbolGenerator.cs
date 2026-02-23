@@ -26,7 +26,7 @@ namespace CircuitCraft.Components
         /// <returns>Generated or cached fallback sprite.</returns>
         internal static Sprite GetOrCreateFallbackSprite(ComponentKind kind)
         {
-            if (_fallbackSprites.TryGetValue(kind, out Sprite cachedSprite) && cachedSprite is not null) { return cachedSprite; }
+            if (_fallbackSprites.TryGetValue(kind, out Sprite cachedSprite) && cachedSprite != null) { return cachedSprite; }
             var texture = new Texture2D(FallbackSymbolTextureSize, FallbackSymbolTextureSize, TextureFormat.RGBA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = FilterMode.Point;
@@ -43,7 +43,7 @@ namespace CircuitCraft.Components
         /// </summary>
         internal static Sprite GetHeatGlowSprite()
         {
-            if (_heatGlowSprite is not null) { return _heatGlowSprite; }
+            if (_heatGlowSprite != null) { return _heatGlowSprite; }
             _heatGlowSprite = CreateGlowSprite();
             return _heatGlowSprite;
         }
@@ -53,7 +53,7 @@ namespace CircuitCraft.Components
         /// </summary>
         internal static Sprite GetLedGlowSprite()
         {
-            if (_ledGlowSprite is not null) { return _ledGlowSprite; }
+            if (_ledGlowSprite != null) { return _ledGlowSprite; }
             _ledGlowSprite = CreateGlowSprite();
             return _ledGlowSprite;
         }
@@ -63,7 +63,7 @@ namespace CircuitCraft.Components
         /// </summary>
         internal static Sprite GetPinDotSprite()
         {
-            if (_pinDotSprite is not null) { return _pinDotSprite; }
+            if (_pinDotSprite != null) { return _pinDotSprite; }
             Texture2D texture = new Texture2D(PinDotTextureSize, PinDotTextureSize, TextureFormat.RGBA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = FilterMode.Bilinear;
