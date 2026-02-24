@@ -191,39 +191,39 @@ namespace CircuitCraft.Controllers
             if (UIInputHelper.IsPointerOverUI(_uiDocuments))
                 return;
 
-            // Grid-based detection first (more reliable than raycast)
-            if (TryGetClickedPinByGrid(out var clickedPinByGridFallback))
+            // If routing is already active, handle commit
+            if (_state == RoutingState.Drawing || _state == RoutingState.PinSelected)
             {
-                if (_state == RoutingState.Idle)
-                {
-                    StartRouting(clickedPinByGridFallback);
-                }
-                else if (_state == RoutingState.Drawing || _state == RoutingState.PinSelected)
-                {
-                    CommitRouting(clickedPinByGridFallback);
-                }
+                if (TryGetClickedPinByGrid(out var commitPin))
+                    CommitRouting(commitPin);
+                else if (TryGetClickedPin(out var commitPinFallback))
+                    CommitRouting(commitPinFallback);
                 return;
             }
 
-            // Raycast fallback (for clicking on component bodies near pins)
-            if (TryGetClickedPin(out var clickedPin))
+            // IDLE state — only start routing if user clicks directly on a pin dot collider
+            Ray ray = _mainCamera.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out var hit, _raycastDistance))
             {
-                if (_state == RoutingState.Idle)
+                bool isPinDot = hit.collider is SphereCollider
+                                && hit.collider.gameObject.name.StartsWith("PinDot_");
+                if (isPinDot)
                 {
-                    StartRouting(clickedPin);
+                    if (TryGetClickedPinByGrid(out var startPin))
+                    {
+                        StartRouting(startPin);
+                        return;
+                    }
+                    if (TryGetClickedPin(out var startPinFallback))
+                    {
+                        StartRouting(startPinFallback);
+                        return;
+                    }
                 }
-                else if (_state == RoutingState.Drawing || _state == RoutingState.PinSelected)
-                {
-                    CommitRouting(clickedPin);
-                }
-
-                return;
             }
 
             if (_state == RoutingState.Idle)
-            {
                 TrySelectTraceAtMouse();
-            }
         }
 
         private void HandleCancelInput()
@@ -452,6 +452,12 @@ namespace CircuitCraft.Controllers
         /// Gets whether wiring mode is currently active.
         /// </summary>
         public bool IsWiringModeActive => _wiringModeActive;
+
+        /// <summary>
+        /// Whether this controller will consume the next ESC key press.
+        /// True when wiring mode is active or routing is in progress.
+        /// </summary>
+        public bool ShouldConsumeEscape => _state != RoutingState.Idle || _wiringModeActive;
 
         /// <summary>
         /// Toggles wiring mode on/off. Called by UI button.

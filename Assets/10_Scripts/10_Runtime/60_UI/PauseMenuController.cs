@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEngine.SceneManagement;
+using CircuitCraft.Controllers;
 
 namespace CircuitCraft.UI
 {
@@ -23,6 +24,9 @@ namespace CircuitCraft.UI
         [SerializeField]
         [Tooltip("Wire in Inspector: UIDocument hosting pause menu elements.")]
         private UIDocument _uiDocument;
+        [SerializeField]
+        [Tooltip("Wire routing controller — ESC is suppressed while wiring is active.")]
+        private WireRoutingController _wireRoutingController;
         private VisualElement _root;
         private VisualElement _pauseOverlay;
         
@@ -75,6 +79,10 @@ namespace CircuitCraft.UI
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                // Let wire routing consume ESC first (cancel routing or exit wiring mode)
+                if (_wireRoutingController != null && _wireRoutingController.ShouldConsumeEscape)
+                    return;
+
                 TogglePause();
             }
         }

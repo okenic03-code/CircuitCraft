@@ -104,7 +104,7 @@ namespace CircuitCraft.Components
 
                 // Add collider for raycast detection during wiring
                 SphereCollider pinCollider = pinDot.AddComponent<SphereCollider>();
-                pinCollider.radius = 0.5f;
+                pinCollider.radius = 0.35f;
                 pinCollider.isTrigger = false;
 
                 _pinDots.Add(pinDot);

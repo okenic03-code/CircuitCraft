@@ -305,6 +305,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _uiDocument: {fileID: 244080130}
+  _wireRoutingController: {fileID: 1881518814}
 --- !u!114 &244080130
 MonoBehaviour:
   m_ObjectHideFlags: 0
