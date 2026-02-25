@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage1-3_VoltageDivider
+  m_EditorClassIdentifier: 
+  _stageId: 1-3
+  _displayName: "\uC804\uC555 \uBD84\uBC30\uAE30"
+  _worldId: world1
+  _stageNumber: 3
+  _gridSize: {x: 10, y: 10}
+  _targetArea: 100
+  _allowedComponents:
+  - {fileID: 11400000, guid: e8da7b3c2a7ca494eaa819665e3eea83, type: 2}
+  - {fileID: 11400000, guid: 7ca4f65367656f449afdd499f69190d9, type: 2}
+  _testCases:
+  - _testName: Voltage Divider Output
+    _expectedVoltage: 3.84
+    _probeNode: NET2
+    _tolerance: 0.1
+  _budgetLimit: 10
+  _fixedPlacements:
+  - component: {fileID: 11400000, guid: b03b4a56d58e03b4087fc1f1ea898d17, type: 2}
+    position: {x: 1, y: 8}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  - component: {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+    position: {x: 1, y: 0}
+    rotation: 0
+    overrideCustomValue: 0
+    customValue: 0
+  _circuitDiagramDescription: "V+(12V)\uc640 GND \uc0ac\uc774\uc5d0 10k\u03a9\uacfc 4.7k\u03a9 \uc800\ud56d\uc73c\ub85c \uc804\uc555 \ubd84\ubc30\uae30\ub97c \uad6c\uc131\ud558\uc138\uc694.\n\nV_out = V_in \u00d7 R2 / (R1 + R2)\nV_out = 12V \u00d7 4.7k\u03a9 / (10k\u03a9 + 4.7k\u03a9) = 3.84V\n\uce21\uc815\uc810(NET2)\uc5d0\uc11c 3.84V\uac00 \uce21\uc815\ub418\uc5b4\uc57c \ud569\ub2c8\ub2e4."

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg width="392" height="672" version="1.1" viewBox="0 0 392 672" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+ <metadata>
+  <rdf:RDF>
+   <cc:Work rdf:about="">
+    <dc:format>image/svg+xml</dc:format>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:title/>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-width="3.5">
+  <path d="m77 133v-49h168v49"/>
+  <path d="m245 294v-98"/>
+  <path d="m77 336h112"/>
+  <path d="m245 539v77"/>
+  <path d="m77 196v280"/>
+  <path d="m77 539v49h168"/>
+  <path d="m245 476v-98"/>
+ </g>
+ <g fill="none" stroke="#000">
+  <circle cx="231" cy="336" r="28" stroke-linecap="square" stroke-linejoin="round" stroke-width="3.5"/>
+  <g>
+   <path d="m189 336h35" stroke-linecap="round" stroke-width="3.5"/>
+   <path d="m224 318v35" stroke-linecap="square" stroke-width="7"/>
+   <path d="m224 327 21-15.8v-17.5" stroke-linecap="round" stroke-width="3.5"/>
+   <path d="m245 378v-17.5l-21-15.8" stroke-linecap="round" stroke-width="3.5"/>
+  </g>
+ </g>
+ <path d="m233 357 5.25-7 4.38 8.75z"/>
+ <g fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" word-spacing="0px">
+  <text id="label_q1_c" x="252" y="301.00003" style="line-height:0%" xml:space="preserve"><tspan x="252" y="301.00003" font-size="30px" style="line-height:1.25">C</tspan></text>
+  <text id="label_q1_e" x="252" y="392.00003" style="line-height:0%" xml:space="preserve"><tspan x="252" y="392.00003" font-size="30px" style="line-height:1.25">E</tspan></text>
+  <text id="label_q1_b" x="196" y="364.00003" text-align="end" text-anchor="end" style="line-height:0%" xml:space="preserve"><tspan x="196" y="364.00003" font-size="30px" style="line-height:1.25">B</tspan></text>
+ </g>
+ <text id="vcc_label" x="161" y="42.000023" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" text-align="center" text-anchor="middle" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="161" y="42.000023" font-size="30px" style="line-height:1.25">+V<tspan baseline-shift="sub" font-size="65%">cc</tspan></tspan></text>
+ <path id="vcc_symbol_line" d="m161 84v-28" fill="none" stroke="#000" stroke-linecap="round" stroke-width="3.5"/>
+ <path id="vcc_symbol_arrow" d="m161 47.2-5.25 10.5h10.5z"/>
+ <g fill="none" stroke="#000" stroke-width="3.5">
+  <path d="m266 630h-42" stroke-linecap="square"/>
+  <path d="m245 616v14" stroke-linecap="round"/>
+  <path d="m259 637h-28" stroke-linecap="square"/>
+  <path d="m252 644h-14" stroke-linecap="square"/>
+ </g>
+ <g>
+  <path d="m77 196v-10.5l7-3.5-14-7 14-7-14-7 14-7-14-7 7-3.5v-10.5" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="3.5"/>
+  <text x="91" y="175.00002" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="91" y="175.00002" font-size="30px" style="line-height:1.25">R<tspan baseline-shift="sub" font-size="65%">1</tspan></tspan></text>
+ </g>
+ <g>
+  <path d="m77 539v-10.5l7-3.5-14-7 14-7-14-7 14-7-14-7 7-3.5v-10.5" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="3.5"/>
+  <text x="91" y="518" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="91" y="518" font-size="30px" style="line-height:1.25">R<tspan baseline-shift="sub" font-size="65%">2</tspan></tspan></text>
+ </g>
+ <g id="rc">
+  <path d="m245 196v-10.5l7-3.5-14-7 14-7-14-7 14-7-14-7 7-3.5v-10.5" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="3.5"/>
+  <text x="231" y="175.00002" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" text-align="end" text-anchor="end" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="231" y="175.00002" font-size="30px" style="line-height:1.25">R<tspan baseline-shift="sub" font-size="65%">c</tspan></tspan></text>
+ </g>
+ <g id="re">
+  <path d="m245 539v-10.5l7-3.5-14-7 14-7-14-7 14-7-14-7 7-3.5v-10.5" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="bevel" stroke-width="3.5"/>
+  <text x="231" y="518" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" text-align="end" text-anchor="end" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="231" y="518" font-size="30px" style="line-height:1.25">R<tspan baseline-shift="sub" font-size="65%">e</tspan></tspan></text>
+ </g>
+ <text x="49" y="175.00002" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" text-align="end" text-anchor="end" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="49" y="175.00002" font-size="30px" style="line-height:1.25">I<tspan baseline-shift="sub" font-size="65%">1</tspan></tspan></text>
+ <path d="m56 187v-63" fill="none" stroke="#000" stroke-width="2"/>
+ <path d="m56 196-5.25-10.5h10.5z"/>
+ <text x="49" y="518" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" text-align="end" text-anchor="end" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="49" y="518" font-size="30px" style="line-height:1.25">I<tspan baseline-shift="sub" font-size="65%">2</tspan></tspan></text>
+ <path d="m56 530v-63" fill="none" stroke="#000" stroke-width="2"/>
+ <path d="m56 539-5.25-10.5h10.5z"/>
+ <g id="label_ib">
+  <text x="133" y="308" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" text-align="center" text-anchor="middle" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="133" y="308" font-size="30px" text-align="center" text-anchor="middle" style="line-height:1.25">I<tspan baseline-shift="sub" font-size="65%" text-align="center" text-anchor="middle">b</tspan></tspan></text>
+  <path d="m162 322h-63" fill="none" stroke="#000" stroke-width="2"/>
+  <path d="m170 322-10.5 5.25v-10.5z"/>
+ </g>
+ <g id="label_ic">
+  <text x="273" y="175.00002" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="273" y="175.00002" font-size="30px" style="line-height:1.25">I<tspan baseline-shift="sub" font-size="65%">c</tspan></tspan></text>
+  <path d="m266 187v-63" fill="none" stroke="#000" stroke-width="2"/>
+  <path d="m266 196-5.25-10.5h10.5z"/>
+ </g>
+ <g id="label_ie">
+  <text x="273" y="518" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="273" y="518" font-size="30px" style="line-height:1.25">I<tspan baseline-shift="sub" font-size="65%">e</tspan></tspan></text>
+  <path d="m266 530v-63" fill="none" stroke="#000" stroke-width="2"/>
+  <path d="m266 539-5.25-10.5h10.5z"/>
+ </g>
+ <g id="label_vce">
+  <text x="322" y="336.00003" fill="#000000" font-family="'Liberation Sans'" letter-spacing="0px" stroke-width="1px" word-spacing="0px" style="line-height:0%" xml:space="preserve"><tspan x="322" y="336.00003" font-size="30px" style="line-height:1.25">V<tspan baseline-shift="sub" font-size="65%">ce</tspan></tspan></text>
+  <path d="m263 261 11.5-2.35-2.72 10.1z"/>
+  <path d="m273 263a84 84 0 0 1 42 72.7 84 84 0 0 1-42 72.7" fill="none" stroke="#000" stroke-linecap="round" stroke-width="2"/>
+  <path d="m263 411 8.78-7.79 2.72 10.1z"/>
+ </g>
+</svg>

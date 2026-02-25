@@ -1,0 +1,14 @@
+{
+    "name": "CircuitCraft.UI",
+    "rootNamespace": "CircuitCraft.UI",
+    "references": ["CircuitCraft.Core", "CircuitCraft.Data", "CircuitCraft.Managers", "CircuitCraft.Controllers"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

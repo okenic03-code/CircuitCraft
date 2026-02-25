@@ -98,6 +98,9 @@ InitTestScene*.unity*
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
 
+# Screenshots captured by Unity MCP
+Assets/Screenshots/
+
 # OpenCode AI assistant files
 .sisyphus/
 .sisyphus-*

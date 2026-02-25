@@ -1,0 +1,33 @@
+{
+    "name": "CircuitCraft.Tests",
+    "rootNamespace": "CircuitCraft.Tests",
+    "references": [
+        "CircuitCraft.Core",
+        "CircuitCraft.Data",
+        "CircuitCraft.Systems",
+        "CircuitCraft.Commands",
+        "CircuitCraft.Components",
+        "CircuitCraft.Managers",
+        "CircuitCraft.Views",
+        "CircuitCraft.Controllers",
+        "CircuitCraft.UI",
+        "CircuitCraft.Utils",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "SpiceSharp.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

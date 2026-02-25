@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed85e5a7b3856be449b831e8bdb2abfe, type: 3}
+  m_Name: Stage2-2_LadderNetwork
+  m_EditorClassIdentifier: 
+  _stageId: 2-2
+  _displayName: "R-2R \uB798\uB354 \uB124\uD2B8\uC6CC\uD06C"
+  _worldId: world2
+  _stageNumber: 2
+  _gridSize: {x: 12, y: 10}
+  _targetArea: 120
+  _allowedComponents:
+  - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
+  - {fileID: 11400000, guid: ebc16846293594d4db0feea5af68ab84, type: 2}
+  - {fileID: 11400000, guid: 66e631d4439b5d34d9b358060a2fd734, type: 2}
+  - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
+  _testCases:
+  - _testName: Vout
+    _expectedVoltage: 1.25
+    _tolerance: 0.2
+  _budgetLimit: 15
