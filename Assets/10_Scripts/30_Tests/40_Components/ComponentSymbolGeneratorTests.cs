@@ -10,7 +10,7 @@ namespace CircuitCraft.Tests.Components
     public class ComponentSymbolGeneratorTests
     {
         // Track all created Unity objects for cleanup
-        private readonly List<Object> _createdObjects = new List<Object>();
+        private readonly List<UnityEngine.Object> _createdObjects = new List<UnityEngine.Object>();
 
         [TearDown]
         public void TearDown()
@@ -19,7 +19,7 @@ namespace CircuitCraft.Tests.Components
             {
                 if (obj != null)
                 {
-                    Object.DestroyImmediate(obj);
+                    UnityEngine.Object.DestroyImmediate(obj);
                 }
             }
 
@@ -277,8 +277,8 @@ namespace CircuitCraft.Tests.Components
         [Test]
         public void PinDotRadius_IsExpectedValue()
         {
-            Assert.AreEqual(0.18f, ComponentSymbolGenerator.PinDotRadius, 0.0001f,
-                "PinDotRadius should be 0.18f");
+            Assert.AreEqual(0.12f, ComponentSymbolGenerator.PinDotRadius, 0.0001f,
+                "PinDotRadius should be 0.12f");
         }
 
         // ------------------------------------------------------------------
@@ -311,6 +311,42 @@ namespace CircuitCraft.Tests.Components
             Assert.AreEqual(0f, sprite.rect.y, 0.01f, $"Sprite rect.y should be 0 for {kind}");
             Assert.AreEqual(64f, sprite.rect.width, 0.01f, $"Sprite rect.width should be 64 for {kind}");
             Assert.AreEqual(64f, sprite.rect.height, 0.01f, $"Sprite rect.height should be 64 for {kind}");
+        }
+
+        [Test]
+        public void GetOrCreateFallbackSprite_Probe_PivotMatchesLeadTip()
+        {
+            var sprite = ComponentSymbolGenerator.GetOrCreateFallbackSprite(ComponentKind.Probe);
+
+            Assert.AreEqual(64f, sprite.pixelsPerUnit, 0.001f, "Probe fallback sprite must stay at 64 PPU.");
+            float pivotNormalizedY = sprite.pivot.y / sprite.rect.height;
+            Assert.AreEqual(0.0625f, pivotNormalizedY, 0.001f, "Probe pivot should be aligned to lead tip for pin-dot overlap.");
+        }
+
+        [TestCase(ComponentKind.VoltageSource)]
+        [TestCase(ComponentKind.CurrentSource)]
+        public void GetOrCreateFallbackSprite_VerticalSource_UsesOuterTerminalLayout(ComponentKind kind)
+        {
+            var sprite = ComponentSymbolGenerator.GetOrCreateFallbackSprite(kind);
+
+            Assert.AreEqual(56f, sprite.pixelsPerUnit, 0.001f, $"{kind} fallback sprite must keep 56 PPU terminal spacing.");
+            float pivotNormalizedY = sprite.pivot.y / sprite.rect.height;
+            Assert.AreEqual(0.0625f, pivotNormalizedY, 0.001f, $"{kind} pivot should be aligned to lower outer terminal.");
+        }
+
+        [TestCase(ComponentKind.Resistor)]
+        [TestCase(ComponentKind.Capacitor)]
+        [TestCase(ComponentKind.Inductor)]
+        [TestCase(ComponentKind.Diode)]
+        [TestCase(ComponentKind.LED)]
+        [TestCase(ComponentKind.ZenerDiode)]
+        public void GetOrCreateFallbackSprite_HorizontalTwoPin_UsesOuterTerminalLayout(ComponentKind kind)
+        {
+            var sprite = ComponentSymbolGenerator.GetOrCreateFallbackSprite(kind);
+
+            Assert.AreEqual(56f, sprite.pixelsPerUnit, 0.001f, $"{kind} fallback sprite must keep 56 PPU terminal spacing.");
+            float pivotNormalizedX = sprite.pivot.x / sprite.rect.width;
+            Assert.AreEqual(0.0625f, pivotNormalizedX, 0.001f, $"{kind} pivot should be aligned to left outer terminal.");
         }
     }
 }
