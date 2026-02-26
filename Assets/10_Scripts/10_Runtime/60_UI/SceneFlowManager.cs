@@ -1,3 +1,4 @@
+﻿using System;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
@@ -7,75 +8,94 @@ using UnityEngine.SceneManagement;
 namespace CircuitCraft.UI
 {
     /// <summary>
-    /// Manages screen transitions in the gameplay scene.
-    /// Navigates between StageSelect → GamePlay → Ending by
-    /// enabling/disabling screen root GameObjects.
+    /// Manages runtime flow between StageSelect and GamePlay scenes.
+    /// StageSelect scene: shows stage list and loads GamePlay on selection.
+    /// GamePlay scene: loads selected stage and manages gameplay/ending flow.
     /// </summary>
     public class SceneFlowManager : MonoBehaviour
     {
         [Header("Screen References")]
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Stage Select screen root GameObject.")]
+        [SerializeField, Tooltip("Wire in Inspector: Stage Select screen root GameObject.")]
         private GameObject _stageSelectScreen;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Gameplay screen root GameObject.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Gameplay screen root GameObject.")]
         private GameObject _gamePlayScreen;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Ending screen root GameObject.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Ending screen root GameObject.")]
         private GameObject _endingScreen;
 
         [Header("Controllers")]
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Stage Select UI controller.")]
+        [SerializeField, Tooltip("Wire in Inspector: Stage Select UI controller.")]
         private StageSelectController _stageSelectController;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Ending screen controller.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Ending screen controller.")]
         private EndingController _endingController;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Stage manager instance in gameplay scene.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Stage manager instance in gameplay scene.")]
         private StageManager _stageManager;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Progression manager for unlock and star data.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Progression manager for unlock and star data.")]
         private ProgressionManager _progressionManager;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Component palette controller on gameplay HUD.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Component palette controller on gameplay HUD.")]
         private ComponentPaletteController _paletteController;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Results panel controller for retry and next flow.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Results panel controller for retry and next flow.")]
         private ResultsPanelController _resultsPanelController;
-        [SerializeField]
-        [Tooltip("Wire in Inspector: Pause menu controller.")]
+
+        [SerializeField, Tooltip("Wire in Inspector: Pause menu controller.")]
         private PauseMenuController _pauseMenuController;
 
         [Header("Stage Data")]
-        [SerializeField]
-        [Tooltip("Ordered stage definitions matching StageSelectController's stage list.")]
+        [SerializeField, Tooltip("Ordered stage definitions matching StageSelectController's stage list.")]
         private StageDefinition[] _stages;
 
-        private enum GameScreen { StageSelect, GamePlay, Ending }
+        private enum GameScreen
+        {
+            StageSelect,
+            GamePlay,
+            Ending
+        }
+
+        private bool _isStageSelectScene;
 
         private void Start()
         {
-            WireStageSelectEvents();
+            _isStageSelectScene = string.Equals(
+                SceneManager.GetActiveScene().name,
+                SceneNames.StageSelect,
+                StringComparison.Ordinal);
+
+            if (_isStageSelectScene)
+            {
+                WireStageSelectEvents();
+                SyncProgressionToStageSelect();
+                ShowScreen(GameScreen.StageSelect);
+                return;
+            }
+
             WireEndingEvents();
             WireStageManagerEvents();
             WireResultsPanelEvents();
             WirePauseMenuEvents();
 
-            SyncProgressionToStageSelect();
-            ShowScreen(GameScreen.StageSelect);
+            LoadInitialGameplayStage();
+            ShowScreen(GameScreen.GamePlay);
         }
 
         private void OnDestroy()
         {
-            UnwireStageSelectEvents();
+            if (_isStageSelectScene)
+            {
+                UnwireStageSelectEvents();
+                return;
+            }
+
             UnwireEndingEvents();
             UnwireStageManagerEvents();
             UnwireResultsPanelEvents();
             UnwirePauseMenuEvents();
         }
-
-        // ─── Wiring ───────────────────────────────────────────────────────
 
         private void WireStageSelectEvents()
         {
@@ -145,24 +165,30 @@ namespace CircuitCraft.UI
             _pauseMenuController.OnStageSelectRequested -= HandlePauseStageSelect;
         }
 
-        // ─── Event Handlers ───────────────────────────────────────────────
+        private void HandleBackToMenu()
+        {
+            StageSelectionContext.Clear();
+            SceneManager.LoadScene(SceneNames.MainMenu);
+        }
 
-        private void HandleBackToMenu() => SceneManager.LoadScene(0);
-
-        private void HandleEndingBackToMenu() => SceneManager.LoadScene(0);
+        private void HandleEndingBackToMenu()
+        {
+            StageSelectionContext.Clear();
+            SceneManager.LoadScene(SceneNames.MainMenu);
+        }
 
         private void HandleStageSelected(StageDefinition stage)
         {
-            if (_stageManager == null || stage == null)
+            if (stage == null)
                 return;
 
-            _stageManager.LoadStage(stage);
-            ShowScreen(GameScreen.GamePlay);
+            StageSelectionContext.SetSelectedStage(stage);
+            SceneManager.LoadScene(SceneNames.GamePlay);
         }
 
         private void HandleStageCompleted(ScoreBreakdown breakdown)
         {
-            if (_progressionManager == null || _stageManager.CurrentStage == null || breakdown == null)
+            if (_progressionManager == null || _stageManager?.CurrentStage == null || breakdown == null)
                 return;
 
             if (breakdown.Stars <= 0)
@@ -177,7 +203,7 @@ namespace CircuitCraft.UI
 
         private void HandleStageLoaded()
         {
-            if (_paletteController != null && _stageManager.CurrentStage != null)
+            if (_paletteController != null && _stageManager?.CurrentStage != null)
             {
                 _paletteController.SetAvailableComponents(_stageManager.CurrentStage.AllowedComponents);
             }
@@ -185,29 +211,30 @@ namespace CircuitCraft.UI
 
         private void HandleRetry()
         {
-            if (_stageManager.CurrentStage != null)
+            if (_stageManager?.CurrentStage != null)
+            {
                 _stageManager.LoadStage(_stageManager.CurrentStage);
+            }
         }
 
         private void HandlePauseStageSelect()
         {
-            SyncProgressionToStageSelect();
-            ShowScreen(GameScreen.StageSelect);
+            SceneManager.LoadScene(SceneNames.StageSelect);
         }
 
         private void HandleNextStage()
         {
-            if (_stages != null && _stageManager.CurrentStage != null)
+            if (_stages != null && _stageManager?.CurrentStage != null)
             {
-                int currentIndex = System.Array.IndexOf(_stages, _stageManager.CurrentStage);
+                int currentIndex = Array.IndexOf(_stages, _stageManager.CurrentStage);
                 if (currentIndex >= 0 && currentIndex < _stages.Length - 1)
                 {
-                    // Not the last stage: advance to next stage
-                    _stageManager.LoadStage(_stages[currentIndex + 1]);
+                    StageDefinition nextStage = _stages[currentIndex + 1];
+                    _stageManager.LoadStage(nextStage);
+                    StageSelectionContext.SetSelectedStage(nextStage);
                     return;
                 }
 
-                // Last stage completed → show Ending screen
                 if (currentIndex == _stages.Length - 1)
                 {
                     ShowEndingScreen();
@@ -215,8 +242,7 @@ namespace CircuitCraft.UI
                 }
             }
 
-            SyncProgressionToStageSelect();
-            ShowScreen(GameScreen.StageSelect);
+            SceneManager.LoadScene(SceneNames.StageSelect);
         }
 
         private void ShowEndingScreen()
@@ -225,35 +251,64 @@ namespace CircuitCraft.UI
             {
                 int totalEarned = 0;
                 int totalMax = _stages.Length * 3;
+
                 foreach (var stage in _stages)
                 {
                     if (stage != null)
+                    {
                         totalEarned += _progressionManager.GetBestStars(stage.StageId);
+                    }
                 }
+
                 _endingController.SetTotalStars(totalEarned, totalMax);
             }
+
             ShowScreen(GameScreen.Ending);
         }
-
-        // ─── Screen Management ────────────────────────────────────────────
 
         private void ShowScreen(GameScreen screen)
         {
             if (_stageSelectScreen != null)
+            {
                 _stageSelectScreen.SetActive(screen == GameScreen.StageSelect);
+            }
 
             if (_gamePlayScreen != null)
+            {
                 _gamePlayScreen.SetActive(screen == GameScreen.GamePlay);
+            }
 
             if (_endingScreen != null)
+            {
                 _endingScreen.SetActive(screen == GameScreen.Ending);
+            }
 
 #if UNITY_EDITOR
             Debug.Log($"SceneFlowManager: Showing {screen}");
 #endif
         }
 
-        // ─── Progression Sync ─────────────────────────────────────────────
+        private void LoadInitialGameplayStage()
+        {
+            if (_stageManager == null)
+                return;
+
+            StageDefinition stageToLoad = StageSelectionContext.SelectedStage;
+
+            if (stageToLoad == null && _stages != null && _stages.Length > 0)
+            {
+                stageToLoad = _stages[0];
+            }
+
+            if (stageToLoad == null)
+            {
+                Debug.LogWarning("SceneFlowManager: No stage available to load in GamePlay scene.");
+                return;
+            }
+
+            _stageManager.LoadStage(stageToLoad);
+            StageSelectionContext.SetSelectedStage(stageToLoad);
+        }
 
         /// <summary>
         /// Pushes unlock/star state from ProgressionManager into StageSelectController.
@@ -267,15 +322,19 @@ namespace CircuitCraft.UI
 
             for (int i = 0; i < _stages.Length; i++)
             {
-                var stage = _stages[i];
+                StageDefinition stage = _stages[i];
                 if (stage == null) continue;
 
                 if (_progressionManager.IsStageUnlocked(stage.StageId))
+                {
                     _stageSelectController.UnlockStage(i);
+                }
 
                 int bestStars = _progressionManager.GetBestStars(stage.StageId);
                 if (bestStars > 0)
+                {
                     _stageSelectController.SetStageStars(i, bestStars);
+                }
             }
         }
     }

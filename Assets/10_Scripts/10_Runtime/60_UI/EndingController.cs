@@ -50,9 +50,8 @@ namespace CircuitCraft.UI
         private void HandleBackClicked()
         {
             OnBackToMenu?.Invoke();
-            // Fallback: if SceneFlowManager handles this, great.
-            // But also ensure we go back to MainMenu scene
-            SceneManager.LoadScene(0);
+            StageSelectionContext.Clear();
+            SceneManager.LoadScene(SceneNames.MainMenu);
         }
 
         /// <summary>

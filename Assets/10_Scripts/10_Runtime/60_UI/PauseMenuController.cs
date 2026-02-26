@@ -27,6 +27,12 @@ namespace CircuitCraft.UI
         [SerializeField]
         [Tooltip("Wire routing controller — ESC is suppressed while wiring is active.")]
         private WireRoutingController _wireRoutingController;
+        [SerializeField]
+        [Tooltip("Component interaction controller - ESC deselects component before opening pause menu.")]
+        private ComponentInteraction _componentInteraction;
+        [SerializeField]
+        [Tooltip("Placement controller - ESC cancels placement before opening pause menu.")]
+        private PlacementController _placementController;
         private VisualElement _root;
         private VisualElement _pauseOverlay;
         
@@ -43,6 +49,8 @@ namespace CircuitCraft.UI
 
         private void OnEnable()
         {
+            ResolveDependencies();
+
             if (_uiDocument == null) return;
             
             _root = _uiDocument.rootVisualElement;
@@ -77,14 +85,19 @@ namespace CircuitCraft.UI
 
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Escape))
-            {
-                // Let wire routing consume ESC first (cancel routing or exit wiring mode)
-                if (_wireRoutingController != null && _wireRoutingController.ShouldConsumeEscape)
-                    return;
+            if (!Input.GetKeyDown(KeyCode.Escape))
+                return;
 
+            if (_isPaused)
+            {
                 TogglePause();
+                return;
             }
+
+            if (TryConsumeGameplayEscape())
+                return;
+
+            TogglePause();
         }
 
         /// <summary>
@@ -147,9 +160,53 @@ namespace CircuitCraft.UI
         {
             Resume(); // Unpause first
             OnMainMenuRequested?.Invoke();
-            
-            // Load Main Menu scene (Build Index 0)
-            SceneManager.LoadScene(0);
+
+            StageSelectionContext.Clear();
+            SceneManager.LoadScene(SceneNames.MainMenu);
+        }
+
+        private void ResolveDependencies()
+        {
+            if (_wireRoutingController == null)
+                _wireRoutingController = FindObjectOfType<WireRoutingController>();
+
+            if (_componentInteraction == null)
+                _componentInteraction = FindObjectOfType<ComponentInteraction>();
+
+            if (_placementController == null)
+                _placementController = FindObjectOfType<PlacementController>();
+        }
+
+        private bool TryConsumeGameplayEscape()
+        {
+            if (_wireRoutingController != null)
+            {
+                if (_wireRoutingController.ConsumedEscapeThisFrame)
+                    return true;
+
+                if (_wireRoutingController.TryConsumeEscape())
+                    return true;
+            }
+
+            if (_componentInteraction != null)
+            {
+                if (_componentInteraction.ConsumedEscapeThisFrame)
+                    return true;
+
+                if (_componentInteraction.TryConsumeEscape())
+                    return true;
+            }
+
+            if (_placementController != null)
+            {
+                if (_placementController.ConsumedEscapeThisFrame)
+                    return true;
+
+                if (_placementController.TryConsumeEscape())
+                    return true;
+            }
+
+            return false;
         }
     }
 }
