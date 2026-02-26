@@ -40,6 +40,7 @@ namespace CircuitCraft.Controllers
         private int _currentRotation;
         private Vector3 _lastMousePosition = Vector3.negativeInfinity;
         private float? _customValue;
+        private int _escapeConsumedFrame = -1;
 
         private void Awake() => Init();
 
@@ -90,7 +91,13 @@ namespace CircuitCraft.Controllers
         private void HandleCancellation()
         {
             if (Input.GetMouseButtonDown(1) && _selectedComponent != null)
+            {
                 SetSelectedComponent(null);
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape))
+                TryConsumeEscape();
         }
 
         private void HandleRotation()
@@ -236,6 +243,25 @@ namespace CircuitCraft.Controllers
         /// <returns>Selected component definition, or null when no component is selected.</returns>
         public ComponentDefinition GetSelectedComponent()
             => _selectedComponent;
+
+        /// <summary>
+        /// Gets whether this controller consumed ESC on the current frame.
+        /// </summary>
+        public bool ConsumedEscapeThisFrame => _escapeConsumedFrame == Time.frameCount;
+
+        /// <summary>
+        /// Tries to consume ESC by canceling component placement selection.
+        /// Returns true when ESC was consumed.
+        /// </summary>
+        public bool TryConsumeEscape()
+        {
+            if (_selectedComponent == null)
+                return false;
+
+            SetSelectedComponent(null);
+            _escapeConsumedFrame = Time.frameCount;
+            return true;
+        }
 
         /// <summary>
         /// Sets an optional custom value used when placing the selected component.

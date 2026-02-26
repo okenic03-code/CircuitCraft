@@ -15,6 +15,7 @@ namespace CircuitCraft.Commands
         private readonly int _rotation;
         private readonly List<PinInstance> _pins;
         private readonly float? _customValue;
+        private readonly bool _isFixed;
         private int _placedInstanceId;
 
         /// <summary>
@@ -31,13 +32,15 @@ namespace CircuitCraft.Commands
         /// <param name="rotation">The rotation in degrees.</param>
         /// <param name="pins">The component pin instances used for placement.</param>
         /// <param name="customValue">User-specified custom electrical value (null to use definition default).</param>
+        /// <param name="isFixed">Whether the placed component should remain fixed.</param>
         public PlaceComponentCommand(
             BoardState boardState,
             string componentDefId,
             GridPosition position,
             int rotation,
             IEnumerable<PinInstance> pins,
-            float? customValue = null)
+            float? customValue = null,
+            bool isFixed = false)
         {
             _boardState = boardState;
             _componentDefId = componentDefId;
@@ -45,6 +48,7 @@ namespace CircuitCraft.Commands
             _rotation = rotation;
             _pins = pins?.ToList() ?? new();
             _customValue = customValue;
+            _isFixed = isFixed;
         }
 
         /// <summary>
@@ -52,7 +56,7 @@ namespace CircuitCraft.Commands
         /// </summary>
         public void Execute()
         {
-            var placed = _boardState.PlaceComponent(_componentDefId, _position, _rotation, _pins, _customValue);
+            var placed = _boardState.PlaceComponent(_componentDefId, _position, _rotation, _pins, _customValue, _isFixed);
             _placedInstanceId = placed.InstanceId;
         }
 

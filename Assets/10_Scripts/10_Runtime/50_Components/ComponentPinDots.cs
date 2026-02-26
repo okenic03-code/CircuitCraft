@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using CircuitCraft.Core;
 using CircuitCraft.Data;
-using CircuitCraft.Utils;
 using UnityEngine;
 
 namespace CircuitCraft.Components
@@ -46,30 +44,11 @@ namespace CircuitCraft.Components
             var pins = definition.Pins;
             if (pins is null || pins.Length == 0)
             {
-                pins = GetStandardPins(definition.Kind);
+                pins = StandardPinDefinitions.GetForKind(definition.Kind);
             }
             if (pins is null || pins.Length == 0)
             {
                 return;
-            }
-
-            // Compute centroid to center pin dots around component origin
-            Vector2 centroid = Vector2.zero;
-            int validCount = 0;
-            for (int i = 0; i < pins.Length; i++)
-            {
-                if (pins[i] is null)
-                {
-                    continue;
-                }
-
-                centroid += (Vector2)pins[i].LocalPosition;
-                validCount++;
-            }
-
-            if (validCount > 0)
-            {
-                centroid /= validCount;
             }
 
             float resolvedCellSize = cellSize > Mathf.Epsilon ? cellSize : ResolveGridCellSize();
@@ -88,7 +67,8 @@ namespace CircuitCraft.Components
                 GameObject pinDot = new GameObject($"PinDot_{pinDef.PinName}");
                 pinDot.transform.SetParent(_parent, false);
 
-                Vector2 localGridOffset = (Vector2)pinDef.LocalPosition - centroid;
+                // Keep visual pin dots on the exact logical pin coordinates used by board/wiring systems.
+                Vector2 localGridOffset = pinDef.LocalPosition;
                 pinDot.transform.localPosition = new Vector3(
                     localGridOffset.x * resolvedCellSize,
                     localGridOffset.y * resolvedCellSize,
@@ -104,23 +84,18 @@ namespace CircuitCraft.Components
 
                 // Add collider for raycast detection during wiring
                 SphereCollider pinCollider = pinDot.AddComponent<SphereCollider>();
+                // Keep pin clicks precise so body clicks can still select/move components.
                 pinCollider.radius = 0.35f;
                 pinCollider.isTrigger = false;
 
+#if UNITY_EDITOR
+                Debug.Log(
+                    $"[ComponentPinDots] def={definition.Id}, kind={definition.Kind}, pin={pinDef.PinName}, " +
+                    $"localGrid={pinDef.LocalPosition}, localPos={pinDot.transform.localPosition}, worldPos={pinDot.transform.position}, cellSize={resolvedCellSize}");
+#endif
+
                 _pinDots.Add(pinDot);
             }
-        }
-
-        private static PinDefinition[] GetStandardPins(ComponentKind kind)
-        {
-            return kind switch
-            {
-                ComponentKind.BJT => StandardPinDefinitions.BJT,
-                ComponentKind.MOSFET => StandardPinDefinitions.MOSFET,
-                ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode => StandardPinDefinitions.Diode,
-                ComponentKind.VoltageSource or ComponentKind.CurrentSource => StandardPinDefinitions.VerticalTwoPin,
-                _ => StandardPinDefinitions.TwoPin
-            };
         }
 
         /// <summary>
