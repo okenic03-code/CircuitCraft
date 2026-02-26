@@ -267,6 +267,21 @@ namespace CircuitCraft.Managers
         public ComponentDefinition GetDefinition(string componentDefId)
             => GetComponentDefinition(componentDefId);
 
+        /// <summary>
+        /// Registers a runtime-created component definition into the active lookup table.
+        /// Useful for stage-scoped helper components that are not serialized assets.
+        /// </summary>
+        /// <param name="definition">Runtime component definition to register.</param>
+        public void RegisterRuntimeComponentDefinition(ComponentDefinition definition)
+        {
+            if (definition == null || string.IsNullOrEmpty(definition.Id))
+            {
+                return;
+            }
+
+            _componentDefinitionLookup[definition.Id] = definition;
+        }
+
         private IEnumerable<ProbeDefinition> AddVisualizationProbes(
             BoardState boardState,
             IEnumerable<ProbeDefinition> additionalProbes,

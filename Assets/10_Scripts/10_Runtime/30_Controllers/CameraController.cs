@@ -4,8 +4,8 @@ namespace CircuitCraft.Controllers
 {
     /// <summary>
     /// Controls camera pan and zoom for grid navigation.
-    /// Supports keyboard (arrow keys) and mouse (middle button) panning,
-    /// plus mouse wheel zooming with configurable bounds.
+    /// Supports middle mouse button drag panning and mouse wheel zooming
+    /// with configurable bounds.
     /// </summary>
     [RequireComponent(typeof(Camera))]
     public class CameraController : MonoBehaviour
@@ -47,22 +47,12 @@ namespace CircuitCraft.Controllers
         }
         
         /// <summary>
-        /// Handles camera panning via arrow keys or middle mouse button drag.
+        /// Handles camera panning via middle mouse button drag.
         /// </summary>
         private void HandlePan()
         {
             Vector3 panDelta = Vector3.zero;
-            
-            // Arrow key panning
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
-            
-            if (Mathf.Abs(horizontal) > 0.01f || Mathf.Abs(vertical) > 0.01f)
-            {
-                panDelta = new(horizontal, 0f, vertical);
-                panDelta *= _panSpeed * Time.deltaTime;
-            }
-            
+
             // Middle mouse button panning
             if (Input.GetMouseButtonDown(2))
             {

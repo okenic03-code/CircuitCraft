@@ -59,5 +59,40 @@ namespace CircuitCraft.Data
             new("Anode", new(0, 0)),
             new("Cathode", new(1, 0))
         };
+
+        /// <summary>
+        /// Ground pin definition.
+        /// Pin 0: Ground reference.
+        /// </summary>
+        public static PinDefinition[] Ground => new PinDefinition[]
+        {
+            new("GND", new(0, 0))
+        };
+
+        /// <summary>
+        /// Probe pin definition.
+        /// Pin 0: Probe node.
+        /// </summary>
+        public static PinDefinition[] Probe => new PinDefinition[]
+        {
+            new("P", new(0, 0))
+        };
+
+        /// <summary>
+        /// Returns the default fallback pin definitions for a component kind.
+        /// </summary>
+        public static PinDefinition[] GetForKind(ComponentKind kind)
+        {
+            return kind switch
+            {
+                ComponentKind.BJT => BJT,
+                ComponentKind.MOSFET => MOSFET,
+                ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode => Diode,
+                ComponentKind.VoltageSource or ComponentKind.CurrentSource => VerticalTwoPin,
+                ComponentKind.Ground => Ground,
+                ComponentKind.Probe => Probe,
+                _ => TwoPin
+            };
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace CircuitCraft.Components
     /// </summary>
     internal static class ComponentSymbolGenerator
     {
-        internal const float PinDotRadius = 0.18f;
+        internal const float PinDotRadius = 0.12f;
         private const int PinDotTextureSize = 32;
         private const int GlowTextureSize = 64;
         private const int FallbackSymbolTextureSize = 64;
@@ -26,14 +26,27 @@ namespace CircuitCraft.Components
         /// <returns>Generated or cached fallback sprite.</returns>
         internal static Sprite GetOrCreateFallbackSprite(ComponentKind kind)
         {
-            if (_fallbackSprites.TryGetValue(kind, out Sprite cachedSprite) && cachedSprite != null) { return cachedSprite; }
+            ResolveFallbackSpriteLayout(kind, out Vector2 pivot, out float pixelsPerUnit);
+            if (_fallbackSprites.TryGetValue(kind, out Sprite cachedSprite)
+                && cachedSprite != null
+                && DoesSpriteMatchLayout(cachedSprite, pivot, pixelsPerUnit)
+                && DoesSpriteMatchStyle(cachedSprite, kind))
+            {
+                return cachedSprite;
+            }
+
             var texture = new Texture2D(FallbackSymbolTextureSize, FallbackSymbolTextureSize, TextureFormat.RGBA32, false);
             texture.wrapMode = TextureWrapMode.Clamp;
             texture.filterMode = FilterMode.Point;
             ClearTexture(texture);
             DrawComponentSymbol(texture, kind, Color.white);
             texture.Apply();
-            Sprite sprite = Sprite.Create(texture, new Rect(0f, 0f, FallbackSymbolTextureSize, FallbackSymbolTextureSize), new Vector2(0.5f, 0.5f), FallbackSymbolTextureSize);
+            Sprite sprite = Sprite.Create(
+                texture,
+                new Rect(0f, 0f, FallbackSymbolTextureSize, FallbackSymbolTextureSize),
+                pivot,
+                pixelsPerUnit
+            );
             sprite.name = $"{kind}_FallbackSprite";
             _fallbackSprites[kind] = sprite;
             return sprite;
@@ -130,6 +143,100 @@ namespace CircuitCraft.Components
                     texture.SetPixel(x, y, clear);
                 }
             }
+        }
+
+        private static void ResolveFallbackSpriteLayout(ComponentKind kind, out Vector2 pivot, out float pixelsPerUnit)
+        {
+            switch (kind)
+            {
+                case ComponentKind.Resistor:
+                case ComponentKind.Capacitor:
+                case ComponentKind.Inductor:
+                case ComponentKind.Diode:
+                case ComponentKind.LED:
+                case ComponentKind.ZenerDiode:
+                    // Horizontal two-pin symbols use local pins (0,0) and (1,0).
+                    // Align pins to OUTER lead endpoints (x=4 and x=60 in a 64px texture):
+                    //  pin(0,0) -> x=4, pin(1,0) -> x=60
+                    // so terminal-to-terminal spacing is exactly 1 grid cell.
+                    pivot = new Vector2(0.0625f, 0.5f); // 4 / 64
+                    pixelsPerUnit = 56f;                // (60 - 4)
+                    return;
+                case ComponentKind.VoltageSource:
+                case ComponentKind.CurrentSource:
+                    // Two-pin vertical sources use local pins (0,0) and (0,1).
+                    // Align pins to the OUTER lead endpoints (y=4 and y=60 in a 64px texture):
+                    //  pin(0,0) -> y=4, pin(0,1) -> y=60
+                    // so terminal-to-terminal spacing is exactly 1 grid cell.
+                    pivot = new Vector2(0.5f, 0.0625f); // 4 / 64
+                    pixelsPerUnit = 56f;                // (60 - 4)
+                    return;
+                case ComponentKind.Ground:
+                    // Ground has a single pin at local (0,0):
+                    // place pivot on the top lead so pin and symbol connection coincide.
+                    pivot = new Vector2(0.5f, 0.9375f);
+                    pixelsPerUnit = FallbackSymbolTextureSize;
+                    return;
+                case ComponentKind.Probe:
+                    // Probe has a single pin at local (0,0):
+                    // place pivot on the probe lead tip so the wiring pin aligns to the terminal connection point.
+                    pivot = new Vector2(0.5f, 0.0625f);
+                    pixelsPerUnit = FallbackSymbolTextureSize;
+                    return;
+                default:
+                    pivot = new Vector2(0.5f, 0.5f);
+                    pixelsPerUnit = FallbackSymbolTextureSize;
+                    return;
+            }
+        }
+
+        private static bool DoesSpriteMatchLayout(Sprite sprite, Vector2 expectedPivotNormalized, float expectedPixelsPerUnit)
+        {
+            if (sprite == null)
+            {
+                return false;
+            }
+
+            if (sprite.texture == null)
+            {
+                return false;
+            }
+
+            if (Mathf.Abs(sprite.pixelsPerUnit - expectedPixelsPerUnit) > 0.001f)
+            {
+                return false;
+            }
+
+            Rect rect = sprite.rect;
+            if (rect.width <= Mathf.Epsilon || rect.height <= Mathf.Epsilon)
+            {
+                return false;
+            }
+
+            Vector2 actualPivotNormalized = new Vector2(sprite.pivot.x / rect.width, sprite.pivot.y / rect.height);
+            return Vector2.Distance(actualPivotNormalized, expectedPivotNormalized) <= 0.001f;
+        }
+
+        private static bool DoesSpriteMatchStyle(Sprite sprite, ComponentKind kind)
+        {
+            if (sprite == null || sprite.texture == null)
+            {
+                return false;
+            }
+
+            // Voltage/Current source terminals should align with logical pin rows (y=16, y=48),
+            // therefore top outer lead pixels near y=56 on center x should be present.
+            if (kind == ComponentKind.VoltageSource || kind == ComponentKind.CurrentSource)
+            {
+                if (sprite.texture.width <= 32 || sprite.texture.height <= 56)
+                {
+                    return false;
+                }
+
+                return sprite.texture.GetPixel(32, 56).a > 0.01f;
+            }
+
+            return true;
         }
     }
 }
