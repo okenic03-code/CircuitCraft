@@ -36,7 +36,6 @@
     padding-left: 16px;
     padding-right: 16px;
     color: var(--text-secondary);
-    text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.4px;
     transition-property: background-color, border-color, color;
@@ -112,7 +111,6 @@
     font-size: 11px;
     color: var(--text-muted);
     -unity-font-style: bold;
-    text-transform: uppercase;
     letter-spacing: 1.2px;
     margin-top: 16px;
     margin-bottom: 8px;
@@ -170,7 +168,6 @@
     -unity-font-style: bold;
     color: var(--accent-ice);
     margin-bottom: 8px;
-    text-transform: uppercase;
     letter-spacing: 0.8px;
 }
 
@@ -249,7 +246,7 @@
 .prop-specs-text {
     font-size: 12px;
     color: var(--text-secondary);
-    white-space: pre-wrap;
+    white-space: normal;
     padding: 8px;
     background-color: rgba(16, 22, 30, 0.7);
     border-radius: var(--radius-sm);
@@ -277,7 +274,6 @@
     color: var(--accent-blue);
     font-size: 14px;
     -unity-font-style: bold;
-    text-transform: uppercase;
     display: none;
 }
 
@@ -298,14 +294,13 @@
     -unity-font-style: bold;
     color: var(--accent-ice);
     margin-bottom: 6px;
-    text-transform: uppercase;
     letter-spacing: 0.8px;
 }
 
 .stage-targets {
     font-size: 12px;
     color: var(--text-secondary);
-    white-space: pre-wrap;
+    white-space: normal;
 }
 
 /* Status Bar */
@@ -404,7 +399,7 @@
 
 .score-breakdown {
     font-size: 13px;
-    white-space: pre-wrap;
+    white-space: normal;
     margin-bottom: 16px;
     color: var(--text-secondary);
     width: 100%;
@@ -437,7 +432,7 @@
 .results-text {
     font-size: 12px;
     color: var(--text-secondary);
-    white-space: pre-wrap;
+    white-space: normal;
     -unity-font-definition: initial;
 }
 
@@ -472,7 +467,6 @@
     margin-left: 4px;
     margin-right: 4px;
     -unity-font-style: bold;
-    text-transform: uppercase;
     transition-property: background-color, border-color, color;
     transition-duration: var(--transition-normal);
 }
@@ -503,7 +497,6 @@
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     -unity-font-style: bold;
-    text-transform: uppercase;
     transition-property: background-color;
     transition-duration: 0.1s;
 }
@@ -541,7 +534,6 @@
     -unity-font-style: bold;
     color: var(--accent-ice);
     margin-bottom: 16px;
-    text-transform: uppercase;
     letter-spacing: 1px;
     -unity-text-align: middle-center;
 }
@@ -556,7 +548,7 @@
 .modal-body-text {
     font-size: 13px;
     color: var(--text-secondary);
-    white-space: pre-wrap;
+    white-space: normal;
     padding: 12px;
     background-color: rgba(14, 19, 26, 0.75);
     border-radius: var(--radius-md);

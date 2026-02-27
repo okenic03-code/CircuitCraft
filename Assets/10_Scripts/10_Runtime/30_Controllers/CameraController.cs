@@ -10,10 +10,6 @@ namespace CircuitCraft.Controllers
     [RequireComponent(typeof(Camera))]
     public class CameraController : MonoBehaviour
     {
-        [Header("Pan Settings")]
-        [Tooltip("Camera pan speed in world units per second.")]
-        [SerializeField] private float _panSpeed = 10f;
-        
         [Header("Zoom Settings")]
         [Tooltip("Mouse-wheel zoom speed multiplier.")]
         [SerializeField] private float _zoomSpeed = 2f;

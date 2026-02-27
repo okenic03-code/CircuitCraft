@@ -158,7 +158,7 @@ namespace CircuitCraft.Managers
                 return;
             }
 
-            boardState.PlaceComponent(
+            var placed = boardState.PlaceComponent(
                 probeDefinition.Id,
                 position,
                 rotation: 0,
@@ -166,7 +166,10 @@ namespace CircuitCraft.Managers
                 customValue: null,
                 isFixed: true
             );
-            Debug.Log($"StageManager: Auto output terminal placed at {position}.");
+            var outNet = boardState.CreateNet("OUT");
+            var pinRef = new PinReference(placed.InstanceId, 0, placed.GetPinWorldPosition(0));
+            boardState.ConnectPinToNet(outNet.NetId, pinRef);
+            Debug.Log($"StageManager: Auto output terminal placed at {position}, created net 'OUT' and connected pin 0.");
         }
 
         private ComponentDefinition GetOrCreateRuntimeOutputProbeDefinition()
@@ -376,7 +379,7 @@ namespace CircuitCraft.Managers
                 }
 
                 string dynamicProbeNode = ResolveDynamicProbeNode(boardState);
-                if (!string.IsNullOrEmpty(dynamicProbeNode))
+                if (!string.IsNullOrEmpty(dynamicProbeNode) && _currentStage.TestCases is not null)
                 {
                     Debug.Log($"StageManager: Overriding stage probe nodes with dynamic probe net '{dynamicProbeNode}'.");
                     probes.Clear();
@@ -390,9 +393,10 @@ namespace CircuitCraft.Managers
                         if (string.IsNullOrWhiteSpace(testName))
                             continue;
 
-                        probes.Add(ProbeDefinition.Voltage($"V_{testName}", dynamicProbeNode));
+                        string effectiveProbeNode = tc.HasProbeNode ? tc.ProbeNode : dynamicProbeNode;
+                        probes.Add(ProbeDefinition.Voltage($"V_{testName}", effectiveProbeNode));
                         testCaseInputs.Add(new TestCaseInput(
-                            dynamicProbeNode,
+                            effectiveProbeNode,
                             tc.ExpectedVoltage,
                             tc.Tolerance
                         ));

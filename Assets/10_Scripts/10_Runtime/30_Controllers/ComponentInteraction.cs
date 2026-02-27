@@ -261,6 +261,12 @@ namespace CircuitCraft.Controllers
             if (placedComponent is null)
                 return;
 
+            if (placedComponent.IsFixed)
+            {
+                SnapSelectedToGrid(_dragStartGridPos);
+                return;
+            }
+
             bool isSameCell = targetGridPos == _dragStartGridPos;
             if (isSameCell)
             {
@@ -296,6 +302,9 @@ namespace CircuitCraft.Controllers
             GridPosition boardPosition = new(view.GridPosition.x, view.GridPosition.y);
             PlacedComponent placedComponent = _boardState.GetComponentAt(boardPosition);
             if (placedComponent is null)
+                return;
+
+            if (placedComponent.IsFixed)
                 return;
 
             int rotated = (placedComponent.Rotation + RotationConstants.Quarter) % RotationConstants.Full;

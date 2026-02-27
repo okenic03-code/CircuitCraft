@@ -65,7 +65,7 @@ namespace CircuitCraft.Commands
         /// </summary>
         public void Undo()
         {
-            _boardState.RemoveComponent(_placedInstanceId);
+            _boardState.RemoveComponent(_placedInstanceId, _isFixed);
         }
     }
 }
