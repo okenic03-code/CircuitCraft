@@ -16,6 +16,6 @@
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "autoReferenced": false,
+    "autoReferenced": true,
     "noEngineReferences": false
 }
