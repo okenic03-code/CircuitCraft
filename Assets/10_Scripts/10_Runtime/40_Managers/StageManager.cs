@@ -227,6 +227,55 @@ namespace CircuitCraft.Managers
             return center;
         }
 
+        private string ResolveDynamicProbeNode(BoardState boardState)
+        {
+            if (boardState == null)
+                return null;
+
+            foreach (var component in boardState.Components)
+            {
+                if (component.ComponentDefinitionId != AutoOutputProbeComponentId)
+                    continue;
+
+                if (TryResolveProbeNetName(boardState, component, out var autoProbeNode))
+                    return autoProbeNode;
+            }
+
+            foreach (var component in boardState.Components)
+            {
+                var definition = _simulationManager?.GetComponentDefinition(component.ComponentDefinitionId);
+                if (definition == null || definition.Kind != ComponentKind.Probe)
+                    continue;
+
+                if (TryResolveProbeNetName(boardState, component, out var probeNode))
+                    return probeNode;
+            }
+
+            return null;
+        }
+
+        private static bool TryResolveProbeNetName(BoardState boardState, PlacedComponent component, out string netName)
+        {
+            netName = null;
+
+            if (component == null || component.Pins.Count == 0)
+                return false;
+
+            var pin = component.Pins[0];
+            if (!pin.ConnectedNetId.HasValue)
+                return false;
+
+            var net = boardState.GetNet(pin.ConnectedNetId.Value);
+            if (net == null || string.IsNullOrWhiteSpace(net.NetName))
+                return false;
+
+            if (string.Equals(net.NetName, "0", StringComparison.Ordinal))
+                return false;
+
+            netName = net.NetName;
+            return true;
+        }
+
         /// <summary>
         /// Runs simulation on the current board, evaluates against stage test cases,
         /// calculates the score, and fires OnStageCompleted with the breakdown.
@@ -320,6 +369,30 @@ namespace CircuitCraft.Managers
                         probes.Add(ProbeDefinition.Voltage($"V_{tc.TestName}", probeNode));
                         testCaseInputs.Add(new TestCaseInput(
                             probeNode,
+                            tc.ExpectedVoltage,
+                            tc.Tolerance
+                        ));
+                    }
+                }
+
+                string dynamicProbeNode = ResolveDynamicProbeNode(boardState);
+                if (!string.IsNullOrEmpty(dynamicProbeNode))
+                {
+                    Debug.Log($"StageManager: Overriding stage probe nodes with dynamic probe net '{dynamicProbeNode}'.");
+                    probes.Clear();
+                    testCaseInputs.Clear();
+                    foreach (var tc in _currentStage.TestCases)
+                    {
+                        if (tc is null)
+                            continue;
+
+                        string testName = tc.TestName;
+                        if (string.IsNullOrWhiteSpace(testName))
+                            continue;
+
+                        probes.Add(ProbeDefinition.Voltage($"V_{testName}", dynamicProbeNode));
+                        testCaseInputs.Add(new TestCaseInput(
+                            dynamicProbeNode,
                             tc.ExpectedVoltage,
                             tc.Tolerance
                         ));
