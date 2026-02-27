@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
+using CircuitCraft.Core;
 
 namespace CircuitCraft.Controllers
 {
@@ -20,6 +22,11 @@ namespace CircuitCraft.Controllers
         [Tooltip("Grid settings used to convert stage area to world-space framing.")]
         [SerializeField] private GridSettings _gridSettings;
 
+        [Tooltip("Optional GameManager used to frame actual placed content after stage setup.")]
+        [SerializeField] private GameManager _gameManager;
+
+        private Coroutine _frameRoutine;
+
         private void OnEnable()
         {
             if (_stageManager != null)
@@ -30,15 +37,86 @@ namespace CircuitCraft.Controllers
         {
             if (_stageManager != null)
                 _stageManager.OnStageLoaded -= FrameCamera;
+
+            if (_frameRoutine != null)
+            {
+                StopCoroutine(_frameRoutine);
+                _frameRoutine = null;
+            }
         }
 
         private void FrameCamera()
         {
-            if (_cameraController == null || _gridSettings == null || _stageManager.CurrentStage == null)
+            if (_frameRoutine != null)
+            {
+                StopCoroutine(_frameRoutine);
+                _frameRoutine = null;
+            }
+
+            if (_cameraController == null || _gridSettings == null)
                 return;
+
+            // Try actual content bounds first (components are already placed before OnStageLoaded)
+            if (_gameManager == null)
+            {
+                _gameManager = FindObjectOfType<GameManager>();
+            }
+
+            if (_gameManager != null && _gameManager.BoardState != null)
+            {
+                BoardState boardState = _gameManager.BoardState;
+                if (boardState.Components.Count > 0 || boardState.Traces.Count > 0)
+                {
+                    BoardBounds bounds = boardState.ComputeContentBounds();
+                    float cellSize = _gridSettings.CellSize;
+                    Vector3 origin = _gridSettings.GridOrigin;
+                    Vector3 worldMin = origin + new Vector3(bounds.MinX * cellSize, 0f, bounds.MinY * cellSize);
+                    Vector3 worldMax = origin + new Vector3(bounds.MaxX * cellSize, 0f, bounds.MaxY * cellSize);
+                    _cameraController.FrameBounds(worldMin, worldMax, padding: 2.5f);
+                    return;
+                }
+            }
+
+            // Fallback: estimated area from stage definition
+            if (_stageManager != null && _stageManager.CurrentStage != null)
+            {
+                int side = (int)Math.Ceiling(Math.Sqrt(_stageManager.CurrentStage.TargetArea));
+                _cameraController.FrameSuggestedArea(side, side, _gridSettings.CellSize, _gridSettings.GridOrigin);
+            }
+        }
+
+        private IEnumerator FrameCameraDeferred()
+        {
+            if (_cameraController == null || _gridSettings == null || _stageManager.CurrentStage == null)
+                yield break;
+
+            // Wait one frame so fixed placements are already spawned before we compute framing bounds.
+            yield return null;
+
+            if (_gameManager == null)
+            {
+                _gameManager = FindObjectOfType<GameManager>();
+            }
+
+            if (_gameManager != null && _gameManager.BoardState != null)
+            {
+                BoardState boardState = _gameManager.BoardState;
+                if (boardState.Components.Count > 0 || boardState.Traces.Count > 0)
+                {
+                    BoardBounds bounds = boardState.ComputeContentBounds();
+                    float cellSize = _gridSettings.CellSize;
+                    Vector3 origin = _gridSettings.GridOrigin;
+                    Vector3 worldMin = origin + new Vector3(bounds.MinX * cellSize, 0f, bounds.MinY * cellSize);
+                    Vector3 worldMax = origin + new Vector3(bounds.MaxX * cellSize, 0f, bounds.MaxY * cellSize);
+                    _cameraController.FrameBounds(worldMin, worldMax, padding: 2.5f);
+                    _frameRoutine = null;
+                    yield break;
+                }
+            }
 
             int side = (int)Math.Ceiling(Math.Sqrt(_stageManager.CurrentStage.TargetArea));
             _cameraController.FrameSuggestedArea(side, side, _gridSettings.CellSize, _gridSettings.GridOrigin);
+            _frameRoutine = null;
         }
     }
 }

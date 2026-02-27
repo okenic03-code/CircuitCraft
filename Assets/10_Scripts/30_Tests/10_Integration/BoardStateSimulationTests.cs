@@ -1,7 +1,11 @@
 using NUnit.Framework;
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.TestTools;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Linq;
 using Cysharp.Threading.Tasks;
 using CircuitCraft.Core;
@@ -38,6 +42,9 @@ namespace CircuitCraft.Tests.Integration
             CreateVoltageSourceAsset(VSourceAssetName, 5f);
             CreateResistorAsset(Resistor1kAssetName, 1000f);
             CreateResistorAsset(Resistor2kAssetName, 2000f);
+            AssertAssetKind(VSourceAssetName, ComponentKind.VoltageSource);
+            AssertAssetKind(Resistor1kAssetName, ComponentKind.Resistor);
+            AssertAssetKind(Resistor2kAssetName, ComponentKind.Resistor);
             
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -49,7 +56,7 @@ namespace CircuitCraft.Tests.Integration
             // Clean up test assets
             foreach (var path in _createdAssetPaths)
             {
-                if (AssetDatabase.LoadAssetAtPath<Object>(path) != null)
+                if (AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(path) != null)
                 {
                     AssetDatabase.DeleteAsset(path);
                 }
@@ -68,8 +75,8 @@ namespace CircuitCraft.Tests.Integration
         /// Circuit: 5V source -> 1k resistor -> VOUT node -> 2k resistor -> GND
         /// Expected: Vout = 5V * 2k / (1k + 2k) = 3.333V
         /// </summary>
-        [Test]
-        public async UniTask VoltageDivider_EndToEnd_CalculatesCorrectOutputVoltage()
+        [UnityTest]
+        public IEnumerator VoltageDivider_EndToEnd_CalculatesCorrectOutputVoltage()
         {
             // Arrange: Create the board and circuit
             var board = new BoardState(10, 10);
@@ -119,7 +126,18 @@ namespace CircuitCraft.Tests.Integration
             request.IsSafetyChecksEnabled = true;
 
             // Act: Run simulation
-            var result = await _simulationService.RunAsync(request);
+            SimulationResult result = null;
+            Exception simulationException = null;
+            yield return _simulationService.RunAsync(request).ToCoroutine(
+                value => result = value,
+                ex => simulationException = ex);
+
+            if (simulationException != null)
+            {
+                Assert.Fail($"Simulation task faulted: {simulationException}");
+            }
+
+            Assert.IsNotNull(result, "Simulation returned null result.");
 
             // Assert
             Assert.IsTrue(result.IsSuccess, $"Simulation failed: {result.StatusMessage}");
@@ -229,55 +247,60 @@ namespace CircuitCraft.Tests.Integration
         private void CreateVoltageSourceAsset(string assetName, float voltage)
         {
             var path = $"{TestAssetBasePath}/{assetName}.asset";
-            
-            // Check if already exists
-            var existing = AssetDatabase.LoadAssetAtPath<ComponentDefinition>(path);
-            if (existing != null)
+            var asset = AssetDatabase.LoadAssetAtPath<ComponentDefinition>(path);
+            if (asset == null)
             {
-                _createdAssetPaths.Add(path);
-                return;
+                asset = ScriptableObject.CreateInstance<ComponentDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
             }
 
-            var asset = ScriptableObject.CreateInstance<ComponentDefinition>();
-            AssetDatabase.CreateAsset(asset, path);
-            
-            // Use SerializedObject to set private fields
-            var serializedObject = new SerializedObject(asset);
-            serializedObject.FindProperty("_id").stringValue = assetName;
-            serializedObject.FindProperty("_displayName").stringValue = $"Test Voltage Source {voltage}V";
-            serializedObject.FindProperty("_kind").enumValueIndex = (int)ComponentKind.VoltageSource;
-            serializedObject.FindProperty("_voltageVolts").floatValue = voltage;
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            SetPrivateField(asset, "_id", assetName);
+            SetPrivateField(asset, "_displayName", $"Test Voltage Source {voltage}V");
+            SetPrivateField(asset, "_kind", ComponentKind.VoltageSource);
+            SetPrivateField(asset, "_voltageVolts", voltage);
             
             EditorUtility.SetDirty(asset);
-            _createdAssetPaths.Add(path);
+            if (!_createdAssetPaths.Contains(path))
+            {
+                _createdAssetPaths.Add(path);
+            }
         }
 
         private void CreateResistorAsset(string assetName, float resistance)
         {
             var path = $"{TestAssetBasePath}/{assetName}.asset";
-            
-            // Check if already exists
-            var existing = AssetDatabase.LoadAssetAtPath<ComponentDefinition>(path);
-            if (existing != null)
+            var asset = AssetDatabase.LoadAssetAtPath<ComponentDefinition>(path);
+            if (asset == null)
             {
-                _createdAssetPaths.Add(path);
-                return;
+                asset = ScriptableObject.CreateInstance<ComponentDefinition>();
+                AssetDatabase.CreateAsset(asset, path);
             }
 
-            var asset = ScriptableObject.CreateInstance<ComponentDefinition>();
-            AssetDatabase.CreateAsset(asset, path);
-            
-            // Use SerializedObject to set private fields
-            var serializedObject = new SerializedObject(asset);
-            serializedObject.FindProperty("_id").stringValue = assetName;
-            serializedObject.FindProperty("_displayName").stringValue = $"Test Resistor {resistance}Ohm";
-            serializedObject.FindProperty("_kind").enumValueIndex = (int)ComponentKind.Resistor;
-            serializedObject.FindProperty("_resistanceOhms").floatValue = resistance;
-            serializedObject.ApplyModifiedPropertiesWithoutUndo();
+            SetPrivateField(asset, "_id", assetName);
+            SetPrivateField(asset, "_displayName", $"Test Resistor {resistance}Ohm");
+            SetPrivateField(asset, "_kind", ComponentKind.Resistor);
+            SetPrivateField(asset, "_resistanceOhms", resistance);
             
             EditorUtility.SetDirty(asset);
-            _createdAssetPaths.Add(path);
+            if (!_createdAssetPaths.Contains(path))
+            {
+                _createdAssetPaths.Add(path);
+            }
+        }
+
+        private void AssertAssetKind(string assetName, ComponentKind expectedKind)
+        {
+            var path = $"{TestAssetBasePath}/{assetName}.asset";
+            var asset = AssetDatabase.LoadAssetAtPath<ComponentDefinition>(path);
+            Assert.IsNotNull(asset, $"Test asset not found: {path}");
+            Assert.AreEqual(expectedKind, asset.Kind, $"Unexpected kind for {assetName}");
+        }
+
+        private static void SetPrivateField<TValue>(ComponentDefinition asset, string fieldName, TValue value)
+        {
+            var field = typeof(ComponentDefinition).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.IsNotNull(field, $"Field '{fieldName}' was not found on ComponentDefinition.");
+            field.SetValue(asset, value);
         }
 
         #endregion

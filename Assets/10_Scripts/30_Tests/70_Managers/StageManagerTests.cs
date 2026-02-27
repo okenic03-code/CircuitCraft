@@ -5,6 +5,7 @@ using NUnit.Framework;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
+using CircuitCraft.Simulation;
 using UnityEngine;
 
 namespace CircuitCraft.Tests.Managers
@@ -104,6 +105,34 @@ namespace CircuitCraft.Tests.Managers
             // Explicitly set empty pins array so PinInstanceFactory uses standard pins
             SetPrivateField(def, "_pins", new PinDefinition[0]);
             return def;
+        }
+
+        private StageTestCase CreateStageTestCase(string testName, float expectedVoltage, float tolerance, string probeNode)
+        {
+            var testCase = new StageTestCase();
+            SetPrivateField(testCase, "_testName", testName);
+            SetPrivateField(testCase, "_expectedVoltage", expectedVoltage);
+            SetPrivateField(testCase, "_tolerance", tolerance);
+            SetPrivateField(testCase, "_probeNode", probeNode);
+            return testCase;
+        }
+
+        private static T InvokeStageManagerStatic<T>(string methodName, params object[] args)
+        {
+            var method = typeof(StageManager).GetMethod(
+                methodName,
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.IsNotNull(method, $"Method '{methodName}' not found on StageManager.");
+            return (T)method.Invoke(null, args);
+        }
+
+        private static string GetAutoOutputProbeComponentId()
+        {
+            var field = typeof(StageManager).GetField(
+                "AutoOutputProbeComponentId",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.IsNotNull(field, "Field 'AutoOutputProbeComponentId' not found on StageManager.");
+            return (string)field.GetValue(null);
         }
 
         // ------------------------------------------------------------------
@@ -357,6 +386,68 @@ namespace CircuitCraft.Tests.Managers
                 "OUT net should have at least 1 connected pin (probe pin 0)");
         }
 
+        [Test]
+        public void LoadStage_WithTestCaseAndNoProbeFixedPlacement_PlacesAutoOutputTerminal()
+        {
+            var stage = CreateStageDefinition("s-auto-output", "AutoOutput", "world1", 1, 16);
+            SetPrivateField(stage, "_fixedPlacements", Array.Empty<FixedPlacement>());
+            SetPrivateField(stage, "_testCases", new[]
+            {
+                CreateStageTestCase("Vout", 3.3f, 0.1f, probeNode: null)
+            });
+
+            _stageManager.LoadStage(stage);
+
+            string autoProbeId = GetAutoOutputProbeComponentId();
+            bool hasAutoProbe = false;
+            foreach (var component in _gameManager.BoardState.Components)
+            {
+                if (component.ComponentDefinitionId == autoProbeId)
+                {
+                    hasAutoProbe = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(hasAutoProbe, "Stage should auto-place an output terminal probe when no probe fixed placement exists.");
+        }
+
+        [Test]
+        public void LoadStage_WithProbeFixedPlacement_DoesNotAddAutoOutputTerminal()
+        {
+            var stage = CreateStageDefinition("s-auto-output-skip", "AutoOutputSkip", "world1", 1, 16);
+            var probeDef = CreateComponentDefinition("existing_probe", ComponentKind.Probe);
+            SetPrivateField(stage, "_fixedPlacements", new[]
+            {
+                new FixedPlacement
+                {
+                    component = probeDef,
+                    position = new Vector2Int(0, 0),
+                    rotation = 0,
+                    overrideCustomValue = false,
+                    customValue = 0f
+                }
+            });
+            SetPrivateField(stage, "_testCases", new[]
+            {
+                CreateStageTestCase("Vout", 3.3f, 0.1f, probeNode: "VOUT")
+            });
+
+            _stageManager.LoadStage(stage);
+
+            int autoProbeCount = 0;
+            string autoProbeId = GetAutoOutputProbeComponentId();
+            foreach (var component in _gameManager.BoardState.Components)
+            {
+                if (component.ComponentDefinitionId == autoProbeId)
+                {
+                    autoProbeCount++;
+                }
+            }
+
+            Assert.AreEqual(0, autoProbeCount, "Stage should not auto-place an output terminal when a fixed probe is already configured.");
+        }
+
         // ------------------------------------------------------------------
         // RunSimulationAndEvaluate — guard checks
         // ------------------------------------------------------------------
@@ -367,6 +458,189 @@ namespace CircuitCraft.Tests.Managers
             // Should not throw; should log a warning. We verify it doesn't crash.
             Assert.DoesNotThrow(() => _stageManager.RunSimulationAndEvaluate(),
                 "RunSimulationAndEvaluate should log a warning (not throw) when no stage is loaded");
+        }
+
+        [Test]
+        public void CollectAdditionalObjectiveFailures_WithoutOutputTerminal_ReturnsFailure()
+        {
+            var stage = CreateStageDefinition("s-no-output", "NoOutput", "world1", 1, 16);
+            SetPrivateField(stage, "_fixedPlacements", Array.Empty<FixedPlacement>());
+            SetPrivateField(stage, "_testCases", new[]
+            {
+                CreateStageTestCase("Vout", 3.0f, 0.1f, probeNode: null)
+            });
+
+            var failures = InvokeStageManagerStatic<List<string>>(
+                "CollectAdditionalObjectiveFailures",
+                stage,
+                new List<TestCaseInput>(),
+                null);
+
+            Assert.IsNotNull(failures);
+            Assert.Greater(failures.Count, 0, "Missing output terminal must produce a stage-clear failure.");
+            Assert.That(failures[0], Does.Contain("Output terminal"));
+        }
+
+        [Test]
+        public void CollectAdditionalObjectiveFailures_DividerOutputNotLessThanInput_ReturnsFailure()
+        {
+            var stage = CreateStageDefinition("s-divider", "Divider", "world1", 1, 16);
+
+            var sourceDef = CreateComponentDefinition("vsource_5v", ComponentKind.VoltageSource);
+            SetPrivateField(sourceDef, "_voltageVolts", 5f);
+            SetPrivateField(stage, "_fixedPlacements", new[]
+            {
+                new FixedPlacement
+                {
+                    component = sourceDef,
+                    position = new Vector2Int(0, 0),
+                    rotation = 0,
+                    overrideCustomValue = false,
+                    customValue = 0f
+                }
+            });
+            SetPrivateField(stage, "_testCases", new[]
+            {
+                CreateStageTestCase("Vout", 2.5f, 0.1f, probeNode: "VOUT")
+            });
+
+            var testInputs = new List<TestCaseInput>
+            {
+                new("VOUT", 2.5, 0.1)
+            };
+            var simResult = SimulationResult.Success(SimulationType.DCOperatingPoint, 0);
+            simResult.ProbeResults.Add(new ProbeResult("V_VOUT", ProbeType.Voltage, "VOUT", 5.0));
+
+            var failures = InvokeStageManagerStatic<List<string>>(
+                "CollectAdditionalObjectiveFailures",
+                stage,
+                testInputs,
+                simResult);
+
+            Assert.IsNotNull(failures);
+            Assert.Greater(failures.Count, 0, "Vin <= Vout must fail divider objective.");
+            Assert.That(string.Join(" | ", failures), Does.Contain("Vin"));
+        }
+
+        [Test]
+        public void CollectAdditionalObjectiveFailures_DividerOutputLessThanInput_ReturnsNoFailure()
+        {
+            var stage = CreateStageDefinition("s-divider-pass", "DividerPass", "world1", 1, 16);
+
+            var sourceDef = CreateComponentDefinition("vsource_5v_pass", ComponentKind.VoltageSource);
+            SetPrivateField(sourceDef, "_voltageVolts", 5f);
+            SetPrivateField(stage, "_fixedPlacements", new[]
+            {
+                new FixedPlacement
+                {
+                    component = sourceDef,
+                    position = new Vector2Int(0, 0),
+                    rotation = 0,
+                    overrideCustomValue = false,
+                    customValue = 0f
+                }
+            });
+            SetPrivateField(stage, "_testCases", new[]
+            {
+                CreateStageTestCase("Vout", 2.5f, 0.1f, probeNode: "VOUT")
+            });
+
+            var testInputs = new List<TestCaseInput>
+            {
+                new("VOUT", 2.5, 0.1)
+            };
+            var simResult = SimulationResult.Success(SimulationType.DCOperatingPoint, 0);
+            simResult.ProbeResults.Add(new ProbeResult("V_VOUT", ProbeType.Voltage, "VOUT", 2.5));
+
+            var failures = InvokeStageManagerStatic<List<string>>(
+                "CollectAdditionalObjectiveFailures",
+                stage,
+                testInputs,
+                simResult);
+
+            Assert.IsNotNull(failures);
+            Assert.AreEqual(0, failures.Count, "Vin > Vout should pass divider constraint.");
+        }
+
+        [Test]
+        public void CollectAdditionalObjectiveFailures_DividerStage_TargetEqualsInputVoltage_ReturnsFailure()
+        {
+            var stage = CreateStageDefinition("s-divider-eq", "Voltage Divider", "world1", 1, 16);
+
+            var sourceDef = CreateComponentDefinition("vsource_5v_eq", ComponentKind.VoltageSource);
+            SetPrivateField(sourceDef, "_voltageVolts", 5f);
+            SetPrivateField(stage, "_fixedPlacements", new[]
+            {
+                new FixedPlacement
+                {
+                    component = sourceDef,
+                    position = new Vector2Int(0, 0),
+                    rotation = 0,
+                    overrideCustomValue = false,
+                    customValue = 0f
+                }
+            });
+            SetPrivateField(stage, "_testCases", new[]
+            {
+                CreateStageTestCase("Vout", 5.0f, 0.1f, probeNode: "VOUT")
+            });
+
+            var testInputs = new List<TestCaseInput>
+            {
+                new("VOUT", 5.0, 0.1)
+            };
+            var simResult = SimulationResult.Success(SimulationType.DCOperatingPoint, 0);
+            simResult.ProbeResults.Add(new ProbeResult("V_VOUT", ProbeType.Voltage, "VOUT", 5.0));
+
+            var failures = InvokeStageManagerStatic<List<string>>(
+                "CollectAdditionalObjectiveFailures",
+                stage,
+                testInputs,
+                simResult);
+
+            Assert.IsNotNull(failures);
+            Assert.Greater(failures.Count, 0, "Divider stage must fail when Vin == Vout.");
+            Assert.That(string.Join(" | ", failures), Does.Contain("Vin"));
+        }
+
+        [Test]
+        public void CollectAdditionalObjectiveFailures_NonDividerStage_TargetEqualsInputVoltage_ReturnsNoFailure()
+        {
+            var stage = CreateStageDefinition("s-ohm-eq", "Ohms Law", "world1", 1, 16);
+
+            var sourceDef = CreateComponentDefinition("vsource_5v_ohm", ComponentKind.VoltageSource);
+            SetPrivateField(sourceDef, "_voltageVolts", 5f);
+            SetPrivateField(stage, "_fixedPlacements", new[]
+            {
+                new FixedPlacement
+                {
+                    component = sourceDef,
+                    position = new Vector2Int(0, 0),
+                    rotation = 0,
+                    overrideCustomValue = false,
+                    customValue = 0f
+                }
+            });
+            SetPrivateField(stage, "_testCases", new[]
+            {
+                CreateStageTestCase("Vout", 5.0f, 0.1f, probeNode: "VOUT")
+            });
+
+            var testInputs = new List<TestCaseInput>
+            {
+                new("VOUT", 5.0, 0.1)
+            };
+            var simResult = SimulationResult.Success(SimulationType.DCOperatingPoint, 0);
+            simResult.ProbeResults.Add(new ProbeResult("V_VOUT", ProbeType.Voltage, "VOUT", 5.0));
+
+            var failures = InvokeStageManagerStatic<List<string>>(
+                "CollectAdditionalObjectiveFailures",
+                stage,
+                testInputs,
+                simResult);
+
+            Assert.IsNotNull(failures);
+            Assert.AreEqual(0, failures.Count, "Non-divider stage should allow Vin == Vout.");
         }
 
         // ------------------------------------------------------------------

@@ -6,10 +6,9 @@ using CircuitCraft.Core;
 namespace CircuitCraft.Commands
 {
     /// <summary>
-    /// Command that routes trace segments between two pins and manages net connections.
-    /// Supports undo/redo through the CommandHistory system.
+    /// Routes from a component pin to a point on an existing trace net (junction behavior).
     /// </summary>
-    public class RouteTraceCommand : ICommand
+    public class RouteTraceToNetPointCommand : ICommand
     {
         private const string GroundNetName = "0";
         private const string GroundNetAlias = "GND";
@@ -17,16 +16,13 @@ namespace CircuitCraft.Commands
 
         private readonly BoardState _boardState;
         private readonly PinReference _startPin;
-        private readonly PinReference _endPin;
+        private readonly int _targetNetId;
+        private readonly GridPosition _targetPoint;
         private readonly List<(GridPosition start, GridPosition end)> _segments;
 
-        // State captured during Execute for Undo
-        private int _netId;
-        private string _netName;
-        private int? _restoredRouteNetId;
         private readonly List<int> _addedSegmentIds = new();
         private int? _startPinPreviousNetId;
-        private int? _endPinPreviousNetId;
+        private int _resolvedNetId;
 
         private bool _didMerge;
         private int _mergedSourceNetId;
@@ -38,134 +34,85 @@ namespace CircuitCraft.Commands
         private string _resolvedNetOriginalName;
 
         /// <summary>
-        /// Gets a user-facing description of this routing command.
+        /// Gets a user-facing description of this junction routing command.
         /// </summary>
-        public string Description => $"Route trace from {_startPin} to {_endPin}";
+        public string Description => $"Route trace from {_startPin} to net {_targetNetId} at {_targetPoint}";
 
         /// <summary>
-        /// Creates a new route trace command.
+        /// Creates a command that routes from a pin to a point on an existing net.
         /// </summary>
-        /// <param name="boardState">The board state to operate on.</param>
-        /// <param name="startPin">The starting pin reference.</param>
-        /// <param name="endPin">The ending pin reference.</param>
-        /// <param name="segments">Manhattan trace segments to add.</param>
-        public RouteTraceCommand(
+        public RouteTraceToNetPointCommand(
             BoardState boardState,
             PinReference startPin,
-            PinReference endPin,
+            int targetNetId,
+            GridPosition targetPoint,
             List<(GridPosition start, GridPosition end)> segments)
         {
             _boardState = boardState;
             _startPin = startPin;
-            _endPin = endPin;
-            _segments = segments;
+            _targetNetId = targetNetId;
+            _targetPoint = targetPoint;
+            _segments = segments ?? new();
         }
 
         /// <summary>
-        /// Executes trace routing, net resolution, and optional net merge behavior.
+        /// Executes trace routing to the target net point.
         /// </summary>
         public void Execute()
         {
-            // Capture previous pin net connections for undo
             _startPinPreviousNetId = GetPinConnectedNetId(_startPin);
-            _endPinPreviousNetId = GetPinConnectedNetId(_endPin);
-
             _addedSegmentIds.Clear();
             _didMerge = false;
-            _restoredRouteNetId = null;
             _didRenameResolvedNet = false;
             _resolvedNetOriginalName = null;
 
-            // Resolve which net to use (may create a new one)
-            _netId = ResolveNetId();
-            _netName = _boardState.GetNet(_netId)?.NetName;
+            _resolvedNetId = ResolveNetId();
             EnsureResolvedNetGroundName();
+            _boardState.ConnectPinToNet(_resolvedNetId, _startPin);
 
-            // Connect pins to the net
-            _boardState.ConnectPinToNet(_netId, _startPin);
-            _boardState.ConnectPinToNet(_netId, _endPin);
-
-            // Add trace segments
             foreach (var segment in _segments)
             {
-                var trace = _boardState.AddTrace(_netId, segment.start, segment.end);
+                var trace = _boardState.AddTrace(_resolvedNetId, segment.start, segment.end);
                 _addedSegmentIds.Add(trace.SegmentId);
             }
         }
 
         /// <summary>
-        /// Undoes routed trace segments and restores previous pin and net state.
+        /// Undoes routed segments and restores prior net/pin topology.
         /// </summary>
         public void Undo()
         {
-            // Remove all trace segments added by this command (reverse order)
             for (int i = _addedSegmentIds.Count - 1; i >= 0; i--)
             {
                 _boardState.RemoveTrace(_addedSegmentIds[i]);
             }
             _addedSegmentIds.Clear();
 
-            // BoardState.RemoveTrace auto-cleans the net when no traces remain
-            // (disconnects all pins, removes net). Check if net still exists.
-            var net = _boardState.GetNet(_netId);
-
-            if (net is not null)
+            var resolvedNet = _boardState.GetNet(_resolvedNetId);
+            if (resolvedNet is not null
+                && (!_startPinPreviousNetId.HasValue || _startPinPreviousNetId.Value != _resolvedNetId))
             {
-                // Net still has other traces. Only disconnect pins that we newly
-                // connected (skip pins that were already on this net before Execute).
-                if (!_startPinPreviousNetId.HasValue || _startPinPreviousNetId.Value != _netId)
-                {
-                    DisconnectPinFromNet(_startPin, net);
-                }
-
-                if (!_endPinPreviousNetId.HasValue || _endPinPreviousNetId.Value != _netId)
-                {
-                    DisconnectPinFromNet(_endPin, net);
-                }
+                DisconnectPinFromNet(_startPin, resolvedNet, _resolvedNetId);
             }
-
-            // Restore previous pin connections if they were on different nets
-            RestorePreviousPinConnection(_startPin, _startPinPreviousNetId);
-            RestorePreviousPinConnection(_endPin, _endPinPreviousNetId);
 
             UnmergeNets();
             RestoreResolvedNetName();
+            RestorePreviousPinConnection();
         }
 
         private int ResolveNetId()
         {
-            int? startNetId = _startPinPreviousNetId;
-            int? endNetId = _endPinPreviousNetId;
-
-            if (startNetId.HasValue && endNetId.HasValue)
+            if (!_startPinPreviousNetId.HasValue || _startPinPreviousNetId.Value == _targetNetId)
             {
-                if (startNetId.Value != endNetId.Value)
-                {
-                    int targetNetId = GetPreferredMergeTargetNetId(startNetId.Value, endNetId.Value);
-                    int sourceNetId = targetNetId == startNetId.Value ? endNetId.Value : startNetId.Value;
-                    MergeNets(targetNetId, sourceNetId);
-
-                    return targetNetId;
-                }
-
-                return startNetId.Value;
+                return _targetNetId;
             }
 
-            if (startNetId.HasValue)
-            {
-                return startNetId.Value;
-            }
-
-            if (endNetId.HasValue)
-            {
-                return endNetId.Value;
-            }
-
-            // Neither pin connected — create a new net
-            string netName = IsGroundPin(_startPin) || IsGroundPin(_endPin)
-                ? GroundNetName
-                : $"NET{_boardState.Nets.Count + 1}";
-            return _boardState.CreateNet(netName).NetId;
+            int preferredTargetNetId = GetPreferredMergeTargetNetId(_startPinPreviousNetId.Value, _targetNetId);
+            int sourceNetId = preferredTargetNetId == _startPinPreviousNetId.Value
+                ? _targetNetId
+                : _startPinPreviousNetId.Value;
+            MergeNets(preferredTargetNetId, sourceNetId);
+            return preferredTargetNetId;
         }
 
         private int GetPreferredMergeTargetNetId(int firstNetId, int secondNetId)
@@ -182,8 +129,11 @@ namespace CircuitCraft.Commands
             if (!firstIsGround && secondIsGround)
                 return secondNetId;
 
-            return firstNetId;
+            return secondNetId;
         }
+
+        private static bool IsGroundNet(Net net)
+            => net is not null && IsGroundNetName(net.NetName);
 
         private bool IsGroundPin(PinReference pinRef)
         {
@@ -193,9 +143,6 @@ namespace CircuitCraft.Commands
 
             return string.Equals(component.ComponentDefinitionId, GroundComponentDefinitionId, StringComparison.OrdinalIgnoreCase);
         }
-
-        private static bool IsGroundNet(Net net)
-            => net is not null && IsGroundNetName(net.NetName);
 
         private static bool IsGroundNetName(string netName)
         {
@@ -241,10 +188,10 @@ namespace CircuitCraft.Commands
 
         private void EnsureResolvedNetGroundName()
         {
-            if (!IsGroundPin(_startPin) && !IsGroundPin(_endPin))
+            if (!IsGroundPin(_startPin))
                 return;
 
-            var net = _boardState.GetNet(_netId);
+            var net = _boardState.GetNet(_resolvedNetId);
             if (net is null || IsGroundNetName(net.NetName))
                 return;
 
@@ -258,7 +205,7 @@ namespace CircuitCraft.Commands
             if (!_didRenameResolvedNet || string.IsNullOrEmpty(_resolvedNetOriginalName))
                 return;
 
-            var net = _boardState.GetNet(_netId);
+            var net = _boardState.GetNet(_resolvedNetId);
             if (net is null)
                 return;
 
@@ -308,7 +255,7 @@ namespace CircuitCraft.Commands
             return pin?.ConnectedNetId;
         }
 
-        private void DisconnectPinFromNet(PinReference pinRef, Net net)
+        private void DisconnectPinFromNet(PinReference pinRef, Net net, int netId)
         {
             net.RemovePin(pinRef);
 
@@ -326,35 +273,21 @@ namespace CircuitCraft.Commands
                 }
             }
 
-            if (pinInstance is not null && pinInstance.ConnectedNetId == _netId)
+            if (pinInstance is not null && pinInstance.ConnectedNetId == netId)
             {
                 pinInstance.ConnectedNetId = null;
             }
         }
 
-        private void RestorePreviousPinConnection(PinReference pinRef, int? previousNetId)
+        private void RestorePreviousPinConnection()
         {
-            if (!previousNetId.HasValue)
+            if (!_startPinPreviousNetId.HasValue)
                 return;
 
-            int targetNetId = previousNetId.Value;
-            if (_restoredRouteNetId.HasValue && previousNetId.Value == _netId)
-            {
-                targetNetId = _restoredRouteNetId.Value;
-            }
+            if (_boardState.GetNet(_startPinPreviousNetId.Value) is null)
+                return;
 
-            var previousNet = _boardState.GetNet(targetNetId);
-            if (previousNet is null)
-            {
-                if (previousNetId.Value != _netId || string.IsNullOrEmpty(_netName))
-                    return;
-
-                previousNet = _boardState.CreateNet(_netName);
-                _restoredRouteNetId = previousNet.NetId;
-                targetNetId = previousNet.NetId;
-            }
-
-            _boardState.ConnectPinToNet(targetNetId, pinRef);
+            _boardState.ConnectPinToNet(_startPinPreviousNetId.Value, _startPin);
         }
     }
 }

@@ -25,6 +25,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a59f82134262bd6478d58c4667b5e989, type: 2}
   _testCases:
   - _testName: V_R
-    _expectedVoltage: 5.0
+    _expectedVoltage: 6.3
     _tolerance: 0.5
-  _budgetLimit: 12
+  _budgetLimit: 38

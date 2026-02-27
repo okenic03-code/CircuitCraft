@@ -97,8 +97,8 @@ namespace CircuitCraft.Systems
                 ComponentKind.Resistor when nodes.Length >= 2 => NetlistElement.Resistor(elementId, nodes[0], nodes[1], GetResistance(definition, component)),
                 ComponentKind.Capacitor when nodes.Length >= 2 => NetlistElement.Capacitor(elementId, nodes[0], nodes[1], GetCapacitance(definition, component)),
                 ComponentKind.Inductor when nodes.Length >= 2 => CreateInductor(elementId, nodes[0], nodes[1], GetInductance(definition, component)),
-                ComponentKind.VoltageSource when nodes.Length >= 2 => NetlistElement.VoltageSource(elementId, nodes[0], nodes[1], GetVoltage(definition, component)),
-                ComponentKind.CurrentSource when nodes.Length >= 2 => NetlistElement.CurrentSource(elementId, nodes[0], nodes[1], GetCurrent(definition, component)),
+                ComponentKind.VoltageSource when nodes.Length >= 2 => CreateVoltageSourceElement(component, elementId, nodes, GetVoltage(definition, component)),
+                ComponentKind.CurrentSource when nodes.Length >= 2 => CreateCurrentSourceElement(component, elementId, nodes, GetCurrent(definition, component)),
                 ComponentKind.Diode when nodes.Length >= 2 => NetlistElement.Diode(elementId, nodes[0], nodes[1],
                     GetDiodeModelName(definition),
                     definition.SaturationCurrent,
@@ -146,6 +146,86 @@ namespace CircuitCraft.Systems
                 Value = henrys,
                 Nodes = new() { nodeA, nodeB }
             };
+        }
+
+        private static NetlistElement CreateVoltageSourceElement(
+            PlacedComponent component,
+            string elementId,
+            string[] nodes,
+            double volts)
+        {
+            GetSourceNodeOrder(component, out int positiveIndex, out int negativeIndex);
+            return NetlistElement.VoltageSource(elementId, nodes[positiveIndex], nodes[negativeIndex], volts);
+        }
+
+        private static NetlistElement CreateCurrentSourceElement(
+            PlacedComponent component,
+            string elementId,
+            string[] nodes,
+            double amps)
+        {
+            GetSourceNodeOrder(component, out int positiveIndex, out int negativeIndex);
+            return NetlistElement.CurrentSource(elementId, nodes[positiveIndex], nodes[negativeIndex], amps);
+        }
+
+        private static void GetSourceNodeOrder(PlacedComponent component, out int positiveIndex, out int negativeIndex)
+        {
+            positiveIndex = 0;
+            negativeIndex = 1;
+
+            if (component?.Pins == null || component.Pins.Count < 2)
+            {
+                return;
+            }
+
+            string pin0 = component.Pins[0].PinName ?? string.Empty;
+            string pin1 = component.Pins[1].PinName ?? string.Empty;
+
+            bool pin0Positive = IsPositivePinName(pin0);
+            bool pin0Negative = IsNegativePinName(pin0);
+            bool pin1Positive = IsPositivePinName(pin1);
+            bool pin1Negative = IsNegativePinName(pin1);
+
+            if (pin0Negative && pin1Positive)
+            {
+                positiveIndex = 1;
+                negativeIndex = 0;
+                return;
+            }
+
+            if (pin0Positive && pin1Negative)
+            {
+                positiveIndex = 0;
+                negativeIndex = 1;
+                return;
+            }
+
+            if (pin0Negative && !pin1Negative)
+            {
+                positiveIndex = 1;
+                negativeIndex = 0;
+                return;
+            }
+
+            if (pin1Negative && !pin0Negative)
+            {
+                positiveIndex = 0;
+                negativeIndex = 1;
+            }
+        }
+
+        private static bool IsPositivePinName(string pinName)
+        {
+            return pinName.Contains("+", StringComparison.Ordinal)
+                   || pinName.Contains("pos", StringComparison.OrdinalIgnoreCase)
+                   || pinName.Contains("positive", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsNegativePinName(string pinName)
+        {
+            return pinName.Contains("-", StringComparison.Ordinal)
+                   || pinName.Contains("neg", StringComparison.OrdinalIgnoreCase)
+                   || pinName.Contains("negative", StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>

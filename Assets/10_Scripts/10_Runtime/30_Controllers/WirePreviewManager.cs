@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CircuitCraft.Core;
 using CircuitCraft.Utils;
 using UnityEngine;
@@ -71,23 +72,71 @@ namespace CircuitCraft.Controllers
         /// <param name="cellSize">Grid cell size in world units.</param>
         /// <param name="gridOrigin">Grid origin in world space.</param>
         public void UpdatePath(GridPosition startPinPos, GridPosition currentMouseGridPos, float cellSize, Vector3 gridOrigin)
+            => UpdatePath(null, startPinPos, currentMouseGridPos, cellSize, gridOrigin);
+
+        /// <summary>
+        /// Updates the preview path with locked segments plus a live segment from current anchor to mouse.
+        /// </summary>
+        /// <param name="lockedSegments">Segments already fixed by intermediate grid clicks.</param>
+        /// <param name="currentAnchorPos">Current route anchor position.</param>
+        /// <param name="currentMouseGridPos">Current mouse grid position.</param>
+        /// <param name="cellSize">Grid cell size in world units.</param>
+        /// <param name="gridOrigin">Grid origin in world space.</param>
+        public void UpdatePath(
+            IReadOnlyList<(GridPosition start, GridPosition end)> lockedSegments,
+            GridPosition currentAnchorPos,
+            GridPosition currentMouseGridPos,
+            float cellSize,
+            Vector3 gridOrigin)
         {
             if (_previewLine == null)
                 return;
 
-            if (startPinPos.X == currentMouseGridPos.X || startPinPos.Y == currentMouseGridPos.Y)
+            var points = new List<GridPosition>(8);
+            AppendSegmentsAsPoints(lockedSegments, points);
+
+            var liveSegments = WirePathCalculator.BuildManhattanSegments(currentAnchorPos, currentMouseGridPos);
+            AppendSegmentsAsPoints(liveSegments, points);
+
+            if (points.Count < 2)
             {
-                _previewLine.positionCount = 2;
-                SetPosition(0, startPinPos, cellSize, gridOrigin);
-                SetPosition(1, currentMouseGridPos, cellSize, gridOrigin);
+                _previewLine.positionCount = 0;
+                return;
             }
-            else
+
+            _previewLine.positionCount = points.Count;
+            for (int i = 0; i < points.Count; i++)
             {
-                var corner = new GridPosition(currentMouseGridPos.X, startPinPos.Y);
-                _previewLine.positionCount = 3;
-                SetPosition(0, startPinPos, cellSize, gridOrigin);
-                SetPosition(1, corner, cellSize, gridOrigin);
-                SetPosition(2, currentMouseGridPos, cellSize, gridOrigin);
+                SetPosition(i, points[i], cellSize, gridOrigin);
+            }
+        }
+
+        private static void AppendSegmentsAsPoints(
+            IReadOnlyList<(GridPosition start, GridPosition end)> segments,
+            List<GridPosition> points)
+        {
+            if (segments == null || points == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < segments.Count; i++)
+            {
+                var segment = segments[i];
+                if (segment.start == segment.end)
+                {
+                    continue;
+                }
+
+                if (points.Count == 0 || points[points.Count - 1] != segment.start)
+                {
+                    points.Add(segment.start);
+                }
+
+                if (points[points.Count - 1] != segment.end)
+                {
+                    points.Add(segment.end);
+                }
             }
         }
 

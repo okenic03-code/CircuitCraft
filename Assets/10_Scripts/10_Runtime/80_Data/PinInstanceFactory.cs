@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using CircuitCraft.Core;
-using UnityEngine;
 
 namespace CircuitCraft.Data
 {
@@ -22,7 +21,7 @@ namespace CircuitCraft.Data
             // Fallback to standard pin definitions for components without explicit pins.
             if (pins is null || pins.Length == 0)
             {
-                pins = GetStandardPins(definition.Kind);
+                pins = StandardPinDefinitions.GetForKind(definition.Kind);
             }
 
             if (pins is not null)
@@ -41,18 +40,6 @@ namespace CircuitCraft.Data
             }
 
             return pinInstances;
-        }
-
-        private static PinDefinition[] GetStandardPins(ComponentKind kind)
-        {
-            return kind switch
-            {
-                ComponentKind.BJT => StandardPinDefinitions.BJT,
-                ComponentKind.MOSFET => StandardPinDefinitions.MOSFET,
-                ComponentKind.Diode or ComponentKind.LED or ComponentKind.ZenerDiode => StandardPinDefinitions.Diode,
-                ComponentKind.VoltageSource or ComponentKind.CurrentSource => StandardPinDefinitions.VerticalTwoPin,
-                _ => StandardPinDefinitions.TwoPin
-            };
         }
     }
 }

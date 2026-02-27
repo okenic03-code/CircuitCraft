@@ -5,6 +5,7 @@ using CircuitCraft.Data;
 using CircuitCraft.Managers;
 using CircuitCraft.Commands;
 using CircuitCraft.Utils;
+using System.Collections.Generic;
 
 namespace CircuitCraft.Controllers
 {
@@ -31,6 +32,10 @@ namespace CircuitCraft.Controllers
         [SerializeField]
         [Tooltip("Grid settings for position snapping during drag.")]
         private GridSettings _gridSettings;
+
+        [SerializeField]
+        [Tooltip("Wire routing controller used to block component interaction while wiring.")]
+        private WireRoutingController _wireRoutingController;
         
         [Header("Raycast Settings")]
         [SerializeField]
@@ -47,6 +52,9 @@ namespace CircuitCraft.Controllers
         private Vector2Int _dragStartGridPos;
         private Vector3 _mouseDownPos;
         private const float DragThreshold = 5f;
+        private float _rotateClickArmUntil = float.NegativeInfinity;
+        private const float RotateClickArmDuration = 0.8f;
+        private int _escapeConsumedFrame = -1;
         
         private void Awake() => Init();
         
@@ -80,6 +88,11 @@ namespace CircuitCraft.Controllers
                 Debug.LogError("ComponentInteraction: GameManager reference is missing.", this);
             }
 
+            if (_wireRoutingController == null)
+            {
+                _wireRoutingController = FindObjectOfType<WireRoutingController>();
+            }
+
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
 
@@ -101,6 +114,20 @@ namespace CircuitCraft.Controllers
         
         private void Update()
         {
+            if (IsWireRoutingBlockingInteraction())
+            {
+                ResetPointerInteractionState();
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Escape) && TryConsumeEscape())
+                return;
+
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                _rotateClickArmUntil = Time.unscaledTime + RotateClickArmDuration;
+            }
+
             HandleSelection();
             HandleDeletion();
         }
@@ -119,10 +146,30 @@ namespace CircuitCraft.Controllers
                 _mouseDownPos = Input.mousePosition;
                 _isDragging = false;
 
-                if (TryRaycastComponent(out ComponentView view))
+                if (TryRaycastComponent(out ComponentView view, out bool hitPinDot))
                 {
+                    if (hitPinDot)
+                    {
+                        // Pin clicks are reserved for wiring interactions.
+                        _pressedComponent = null;
+                        return;
+                    }
+
+                    bool rotateArmed = Input.GetKey(KeyCode.R) || Time.unscaledTime <= _rotateClickArmUntil;
+                    if (rotateArmed)
+                    {
+#if UNITY_EDITOR
+                        Debug.Log($"ComponentInteraction: Rotate click on '{view.name}' (keyHeld={Input.GetKey(KeyCode.R)}, armedUntil={_rotateClickArmUntil:F2}, now={Time.unscaledTime:F2})", this);
+#endif
+                        RotateComponent(view);
+                        _rotateClickArmUntil = float.NegativeInfinity;
+                        _pressedComponent = null;
+                        return;
+                    }
+
                     _pressedComponent = view;
                     _dragStartGridPos = view.GridPosition;
+                    SelectComponent(view);
                     return;
                 }
 
@@ -160,13 +207,17 @@ namespace CircuitCraft.Controllers
             }
         }
 
-        private bool TryRaycastComponent(out ComponentView view)
+        private bool TryRaycastComponent(out ComponentView view, out bool hitPinDot)
         {
             view = null;
+            hitPinDot = false;
 
             Ray ray = _camera.ScreenPointToRay(Input.mousePosition);
             if (!Physics.Raycast(ray, out RaycastHit hit, _raycastDistance))
                 return false;
+
+            hitPinDot = hit.collider is SphereCollider
+                        && hit.collider.gameObject.name.StartsWith("PinDot_");
 
             view = hit.collider.GetComponent<ComponentView>();
             if (view == null)
@@ -210,6 +261,12 @@ namespace CircuitCraft.Controllers
             if (placedComponent is null)
                 return;
 
+            if (placedComponent.IsFixed)
+            {
+                SnapSelectedToGrid(_dragStartGridPos);
+                return;
+            }
+
             bool isSameCell = targetGridPos == _dragStartGridPos;
             if (isSameCell)
             {
@@ -224,22 +281,71 @@ namespace CircuitCraft.Controllers
                 return;
             }
 
-            if (placedComponent.IsFixed)
-            {
-                SnapSelectedToGrid(_dragStartGridPos);
-                return;
-            }
-
             DeselectAll();
 
-            _commandHistory.ExecuteCommand(new RemoveComponentCommand(_boardState, placedComponent.InstanceId));
+            _commandHistory.ExecuteCommand(new RemoveComponentCommand(_boardState, placedComponent.InstanceId, allowFixed: true));
             _commandHistory.ExecuteCommand(new PlaceComponentCommand(
                 _boardState,
                 placedComponent.ComponentDefinitionId,
                 targetPosition,
                 placedComponent.Rotation,
-                placedComponent.Pins,
-                placedComponent.CustomValue));
+                ClonePinsWithoutNet(placedComponent.Pins),
+                placedComponent.CustomValue,
+                placedComponent.IsFixed));
+        }
+
+        private void RotateComponent(ComponentView view)
+        {
+            if (view == null || _boardState is null || _commandHistory == null)
+                return;
+
+            GridPosition boardPosition = new(view.GridPosition.x, view.GridPosition.y);
+            PlacedComponent placedComponent = _boardState.GetComponentAt(boardPosition);
+            if (placedComponent is null)
+                return;
+
+            if (placedComponent.IsFixed)
+                return;
+
+            int rotated = (placedComponent.Rotation + RotationConstants.Quarter) % RotationConstants.Full;
+
+            DeselectAll();
+
+            _commandHistory.ExecuteCommand(new RemoveComponentCommand(_boardState, placedComponent.InstanceId, allowFixed: true));
+            _commandHistory.ExecuteCommand(new PlaceComponentCommand(
+                _boardState,
+                placedComponent.ComponentDefinitionId,
+                placedComponent.Position,
+                rotated,
+                ClonePinsWithoutNet(placedComponent.Pins),
+                placedComponent.CustomValue,
+                placedComponent.IsFixed));
+
+#if UNITY_EDITOR
+            Debug.Log($"ComponentInteraction: Rotated '{placedComponent.ComponentDefinitionId}' at {placedComponent.Position} from {placedComponent.Rotation} to {rotated} (fixed={placedComponent.IsFixed})", this);
+#endif
+        }
+
+        private static List<PinInstance> ClonePinsWithoutNet(IReadOnlyList<PinInstance> pins)
+        {
+            var clonedPins = new List<PinInstance>(pins?.Count ?? 0);
+            if (pins is null)
+            {
+                return clonedPins;
+            }
+
+            for (int i = 0; i < pins.Count; i++)
+            {
+                PinInstance source = pins[i];
+                if (source is null)
+                {
+                    continue;
+                }
+
+                clonedPins.Add(new PinInstance(source.PinIndex, source.PinName, source.LocalPosition));
+            }
+
+            return clonedPins;
         }
 
         private void SnapSelectedToGrid(Vector2Int gridPos)
@@ -261,6 +367,9 @@ namespace CircuitCraft.Controllers
         /// </summary>
         private void HandleDeletion()
         {
+            if (IsWireRoutingBlockingInteraction())
+                return;
+
             if (Input.GetKeyDown(KeyCode.Delete) && _selectedComponent != null)
             {
                 DeleteSelectedComponent();
@@ -299,8 +408,35 @@ namespace CircuitCraft.Controllers
             }
         }
 
+        /// <summary>
+        /// Gets whether this controller consumed ESC on the current frame.
+        /// </summary>
+        public bool ConsumedEscapeThisFrame => _escapeConsumedFrame == Time.frameCount;
+
+        /// <summary>
+        /// Tries to consume ESC by canceling current component interaction.
+        /// Returns true when ESC was consumed.
+        /// </summary>
+        public bool TryConsumeEscape()
+        {
+            bool hadPointerInteraction = _pressedComponent != null || _isDragging;
+            bool hadSelection = _selectedComponent != null;
+            if (!hadPointerInteraction && !hadSelection)
+                return false;
+
+            if (_isDragging)
+                SnapSelectedToGrid(_dragStartGridPos);
+
+            ResetPointerInteractionState();
+            DeselectAll();
+            _rotateClickArmUntil = float.NegativeInfinity;
+            _escapeConsumedFrame = Time.frameCount;
+            return true;
+        }
+
         private void HandleBoardReset()
         {
+            ResetPointerInteractionState();
             DeselectAll();
 
             if (_gameManager != null)
@@ -357,5 +493,17 @@ namespace CircuitCraft.Controllers
         /// <returns>Selected ComponentView, or null if none selected.</returns>
         public ComponentView GetSelectedComponent()
             => _selectedComponent;
+
+        private bool IsWireRoutingBlockingInteraction()
+        {
+            return _wireRoutingController != null
+                && (_wireRoutingController.IsWiringModeActive || _wireRoutingController.IsRoutingInProgress);
+        }
+
+        private void ResetPointerInteractionState()
+        {
+            _pressedComponent = null;
+            _isDragging = false;
+        }
     }
 }

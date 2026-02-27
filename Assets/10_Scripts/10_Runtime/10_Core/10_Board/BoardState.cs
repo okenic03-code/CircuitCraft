@@ -102,12 +102,12 @@ namespace CircuitCraft.Core
         /// </summary>
         /// <param name="instanceId">Component instance ID.</param>
         /// <returns>True if component was removed.</returns>
-        public bool RemoveComponent(int instanceId)
+        public bool RemoveComponent(int instanceId, bool allowFixed = false)
         {
             if (!_componentsById.TryGetValue(instanceId, out var component))
                 return false;
 
-            if (component.IsFixed) return false;
+            if (component.IsFixed && !allowFixed) return false;
 
             var removedPinPositions = new HashSet<GridPosition>();
             foreach (var pin in component.Pins)

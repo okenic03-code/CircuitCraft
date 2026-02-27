@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Reflection;
+using CircuitCraft.Components;
 using CircuitCraft.Core;
 using CircuitCraft.Data;
 using CircuitCraft.Managers;
@@ -47,6 +49,8 @@ namespace CircuitCraft.Views
         private readonly Dictionary<int, LineRenderer> _flowLines = new();
         private readonly Dictionary<int, float> _segmentCurrents = new();
         private readonly Dictionary<int, float> _segmentFlowOffsets = new();
+        private readonly Dictionary<GridPosition, GameObject> _junctionDots = new();
+        private Sprite _junctionDotSprite;
 
         private static readonly int MainTexProperty = Shader.PropertyToID("_MainTex");
         private const int FlowTextureWidth = 64;
@@ -84,6 +88,8 @@ namespace CircuitCraft.Views
                 CreateTraceLine(trace);
             }
 
+            RecalculateJunctions();
+
             if (_stageManager != null)
                 _stageManager.OnStageLoaded += HandleBoardReset;
 
@@ -93,6 +99,7 @@ namespace CircuitCraft.Views
 
         private void OnDestroy()
         {
+            ClearAllJunctionDots();
             StopCurrentFlow();
             Unsubscribe();
 
@@ -222,6 +229,7 @@ namespace CircuitCraft.Views
 
             _segmentCurrents.Clear();
             _segmentFlowOffsets.Clear();
+            ClearAllJunctionDots();
 
             if (_gameManager != null)
             {
@@ -231,6 +239,8 @@ namespace CircuitCraft.Views
                     Subscribe();
                     foreach (var trace in _boardState.Traces)
                         CreateTraceLine(trace);
+
+                    RecalculateJunctions();
                 }
             }
         }
@@ -275,6 +285,30 @@ namespace CircuitCraft.Views
 
                 pair.Value.startColor = color;
                 pair.Value.endColor = color;
+            }
+
+            foreach (var pair in _junctionDots)
+            {
+                if (pair.Value == null)
+                    continue;
+
+                var dotRenderer = pair.Value.GetComponent<SpriteRenderer>();
+                if (dotRenderer == null)
+                    continue;
+
+                Color dotColor = _wireColor;
+                for (int i = 0; i < _boardState.Traces.Count; i++)
+                {
+                    var trace = _boardState.Traces[i];
+                    if (trace.Start != pair.Key && trace.End != pair.Key)
+                        continue;
+
+                    if (traceColors.TryGetValue(trace.SegmentId, out var mappedColor))
+                        dotColor = mappedColor;
+                    break;
+                }
+
+                dotRenderer.color = dotColor;
             }
         }
 
@@ -345,11 +379,24 @@ namespace CircuitCraft.Views
                 line.startColor = _wireColor;
                 line.endColor = _wireColor;
             }
+
+            foreach (var pair in _junctionDots)
+            {
+                if (pair.Value == null)
+                    continue;
+
+                var dotRenderer = pair.Value.GetComponent<SpriteRenderer>();
+                if (dotRenderer == null)
+                    continue;
+
+                dotRenderer.color = _wireColor;
+            }
         }
 
         private void HandleTraceAdded(TraceSegment trace)
         {
             CreateTraceLine(trace);
+            RecalculateJunctions();
         }
 
         private void HandleTraceRemoved(int segmentId)
@@ -365,6 +412,145 @@ namespace CircuitCraft.Views
             }
 
             HideFlowLine(segmentId);
+            RecalculateJunctions();
+        }
+
+        private void RecalculateJunctions()
+        {
+            if (_boardState is null)
+            {
+                ClearAllJunctionDots();
+                return;
+            }
+
+            var endpointDegreeByNetAndPosition = new Dictionary<(int netId, GridPosition pos), int>();
+            foreach (var trace in _boardState.Traces)
+            {
+                var startKey = (trace.NetId, trace.Start);
+                if (!endpointDegreeByNetAndPosition.TryAdd(startKey, 1))
+                    endpointDegreeByNetAndPosition[startKey]++;
+
+                var endKey = (trace.NetId, trace.End);
+                if (!endpointDegreeByNetAndPosition.TryAdd(endKey, 1))
+                    endpointDegreeByNetAndPosition[endKey]++;
+            }
+
+            var junctionPositions = new HashSet<GridPosition>();
+            foreach (var pair in endpointDegreeByNetAndPosition)
+            {
+                int netId = pair.Key.netId;
+                GridPosition position = pair.Key.pos;
+                int totalDegree = pair.Value;
+
+                var netTraces = _boardState.GetTraces(netId);
+                for (int i = 0; i < netTraces.Count; i++)
+                {
+                    var trace = netTraces[i];
+                    if (trace.Start == position || trace.End == position)
+                        continue;
+
+                    if (IsPointOnTraceInterior(position, trace))
+                        totalDegree += 2;
+                }
+
+                if (totalDegree >= 3)
+                    junctionPositions.Add(position);
+            }
+
+            var existingJunctionPositions = new List<GridPosition>(_junctionDots.Keys);
+            for (int i = 0; i < existingJunctionPositions.Count; i++)
+            {
+                if (!junctionPositions.Contains(existingJunctionPositions[i]))
+                    RemoveJunctionDot(existingJunctionPositions[i]);
+            }
+
+            foreach (var position in junctionPositions)
+            {
+                if (!_junctionDots.ContainsKey(position))
+                    CreateJunctionDot(position);
+            }
+        }
+
+        private void ClearAllJunctionDots()
+        {
+            foreach (var pair in _junctionDots)
+            {
+                if (pair.Value != null)
+                    Destroy(pair.Value);
+            }
+
+            _junctionDots.Clear();
+        }
+
+        private void CreateJunctionDot(GridPosition pos)
+        {
+            if (_junctionDots.ContainsKey(pos))
+                return;
+
+            var junctionDot = new GameObject($"Junction_{pos.X}_{pos.Y}");
+            junctionDot.transform.SetParent(transform, false);
+
+            Vector3 worldPosition = GridToWireWorld(pos);
+            worldPosition.y += 0.001f;
+            junctionDot.transform.position = worldPosition;
+            junctionDot.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            junctionDot.transform.localScale = Vector3.one * (_wireWidth * 2.5f);
+
+            var dotRenderer = junctionDot.AddComponent<SpriteRenderer>();
+            dotRenderer.sprite = GetJunctionDotSprite();
+            dotRenderer.color = _wireColor;
+
+            _junctionDots[pos] = junctionDot;
+        }
+
+        private void RemoveJunctionDot(GridPosition pos)
+        {
+            if (!_junctionDots.TryGetValue(pos, out var junctionDot))
+                return;
+
+            if (junctionDot != null)
+                Destroy(junctionDot);
+
+            _junctionDots.Remove(pos);
+        }
+
+        private static bool IsPointOnTraceInterior(GridPosition point, TraceSegment trace)
+        {
+            if (trace.Start.Y == trace.End.Y)
+            {
+                if (point.Y != trace.Start.Y)
+                    return false;
+
+                int minX = Mathf.Min(trace.Start.X, trace.End.X);
+                int maxX = Mathf.Max(trace.Start.X, trace.End.X);
+                return point.X > minX && point.X < maxX;
+            }
+
+            if (trace.Start.X == trace.End.X)
+            {
+                if (point.X != trace.Start.X)
+                    return false;
+
+                int minY = Mathf.Min(trace.Start.Y, trace.End.Y);
+                int maxY = Mathf.Max(trace.Start.Y, trace.End.Y);
+                return point.Y > minY && point.Y < maxY;
+            }
+
+            return false;
+        }
+
+        private Sprite GetJunctionDotSprite()
+        {
+            if (_junctionDotSprite != null)
+                return _junctionDotSprite;
+
+            var symbolGeneratorType = typeof(ComponentView).Assembly.GetType("CircuitCraft.Components.ComponentSymbolGenerator");
+            var getPinDotSpriteMethod = symbolGeneratorType?.GetMethod(
+                "GetPinDotSprite",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+            _junctionDotSprite = getPinDotSpriteMethod?.Invoke(null, null) as Sprite;
+            return _junctionDotSprite;
         }
 
         private void CreateTraceLine(TraceSegment trace)

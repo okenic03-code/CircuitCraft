@@ -11,6 +11,7 @@ namespace CircuitCraft.Commands
     {
         private readonly BoardState _boardState;
         private readonly int _instanceId;
+        private readonly bool _allowFixed;
 
         private int _currentInstanceId;
         private string _componentDefId;
@@ -19,6 +20,7 @@ namespace CircuitCraft.Commands
         private List<PinInstance> _pins;
         private bool _hasCapturedState;
         private float? _capturedCustomValue;
+        private bool _capturedIsFixed;
         private readonly List<(int netId, string netName)> _capturedNets = new();
         private readonly List<(int netId, GridPosition start, GridPosition end)> _capturedTraces = new();
         private readonly List<(int netId, int pinIndex)> _capturedPinConnections = new();
@@ -33,11 +35,13 @@ namespace CircuitCraft.Commands
         /// </summary>
         /// <param name="boardState">The board state to mutate.</param>
         /// <param name="instanceId">The component instance identifier to remove.</param>
-        public RemoveComponentCommand(BoardState boardState, int instanceId)
+        /// <param name="allowFixed">When true, fixed components can be removed.</param>
+        public RemoveComponentCommand(BoardState boardState, int instanceId, bool allowFixed = false)
         {
             _boardState = boardState;
             _instanceId = instanceId;
             _currentInstanceId = instanceId;
+            _allowFixed = allowFixed;
         }
 
         /// <summary>
@@ -49,8 +53,8 @@ namespace CircuitCraft.Commands
             if (component is null)
                 return;
 
-            // Fixed components cannot be removed.
-            if (component.IsFixed)
+            // Fixed components cannot be removed unless explicitly allowed.
+            if (component.IsFixed && !_allowFixed)
                 return;
 
             _componentDefId = component.ComponentDefinitionId;
@@ -58,12 +62,13 @@ namespace CircuitCraft.Commands
             _rotation = component.Rotation;
             _pins = component.Pins.ToList();
             _capturedCustomValue = component.CustomValue;
+            _capturedIsFixed = component.IsFixed;
 
             CaptureConnectedTopology(component);
 
             _hasCapturedState = true;
 
-            _boardState.RemoveComponent(_currentInstanceId);
+            _boardState.RemoveComponent(_currentInstanceId, _allowFixed);
         }
 
         /// <summary>
@@ -74,7 +79,7 @@ namespace CircuitCraft.Commands
             if (!_hasCapturedState)
                 return;
 
-            var restored = _boardState.PlaceComponent(_componentDefId, _position, _rotation, _pins, _capturedCustomValue);
+            var restored = _boardState.PlaceComponent(_componentDefId, _position, _rotation, _pins, _capturedCustomValue, _capturedIsFixed);
             _currentInstanceId = restored.InstanceId;
 
             var netIdMap = new Dictionary<int, int>();

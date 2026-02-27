@@ -22,7 +22,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f6bb8507e14dd9c4d98804edfc204890, type: 2}
   _testCases:
   - _testName: Ohms Law Node Voltage
-    _expectedVoltage: 5
+    _expectedVoltage: 2.5
     _probeNode: NET1
     _tolerance: 0.1
   _budgetLimit: 0
@@ -37,4 +37,4 @@ MonoBehaviour:
     rotation: 0
     overrideCustomValue: 0
     customValue: 0
-  _circuitDiagramDescription: "V+(5V)\uc640 GND \uc0ac\uc774\uc5d0 1k\u03a9 \uc800\ud56d\uc744 \uc5f0\uacb0\ud558\uc138\uc694.\n\n\uc634\uc758 \ubc95\uce59: V = IR\n\uc804\ub958: I = 5V / 1k\u03a9 = 5mA\n\uce21\uc815\uc810(NET1)\uc5d0\uc11c 5.0V\uac00 \uce21\uc815\ub418\uc5b4\uc57c \ud569\ub2c8\ub2e4."
+  _circuitDiagramDescription: "V+(5V)와 GND 사이에 동일한 1k 저항 2개를 직렬로 연결하세요.\n\n분압 공식: Vout = Vin * (R2 / (R1 + R2))\nR1=R2=1k 이므로 Vout=2.5V\n측정점(NET1)에서 2.5V(±0.1V)가 측정되어야 합니다."

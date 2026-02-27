@@ -34,6 +34,10 @@ namespace CircuitCraft.UI
 
         private void OnEnable()
         {
+            if (_uiDocument == null)
+            {
+                _uiDocument = GetComponent<UIDocument>();
+            }
             if (_uiDocument == null) return;
 
             var root = _uiDocument.rootVisualElement;
@@ -76,7 +80,8 @@ namespace CircuitCraft.UI
         private void OnPlayClicked(ClickEvent evt)
         {
             OnPlayRequested?.Invoke();
-            SceneManager.LoadScene(1);
+            StageSelectionContext.Clear();
+            SceneManager.LoadScene(SceneNames.StageSelect);
         }
 
         private void OnSettingsClicked(ClickEvent evt)

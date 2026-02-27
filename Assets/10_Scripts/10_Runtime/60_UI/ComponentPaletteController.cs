@@ -80,9 +80,9 @@ namespace CircuitCraft.UI
 
         private void Init()
         {
+            EnsureRuntimeState();
             InitializeUIDocument();
             ValidatePlacementController();
-            InitializeCallbacksList();
         }
 
         private void InitializeUIDocument()
@@ -106,8 +106,22 @@ namespace CircuitCraft.UI
             _registeredCallbacks = new();
         }
 
+        private void EnsureRuntimeState()
+        {
+            if (_registeredCallbacks == null)
+            {
+                InitializeCallbacksList();
+            }
+
+            if (_uiDocument == null)
+            {
+                _uiDocument = GetComponent<UIDocument>();
+            }
+        }
+
         private void OnEnable()
         {
+            EnsureRuntimeState();
             if (_uiDocument == null) return;
 
             _root = _uiDocument.rootVisualElement;
@@ -138,6 +152,7 @@ namespace CircuitCraft.UI
         /// </summary>
         private void RegisterCallbacks()
         {
+            EnsureRuntimeState();
             UnregisterCallbacks();
 
             if (_paletteScroll is null && _root is not null)
@@ -206,6 +221,8 @@ namespace CircuitCraft.UI
 
         private void RegisterComponentButton(ComponentDefinition def)
         {
+            EnsureRuntimeState();
+
             var button = new Button
             {
                 name = $"btn-{def.Id}"
