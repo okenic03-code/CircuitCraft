@@ -50,15 +50,39 @@ namespace CircuitCraft.Controllers
             if (_frameRoutine != null)
             {
                 StopCoroutine(_frameRoutine);
+                _frameRoutine = null;
             }
 
-            if (_cameraController != null && _gridSettings != null && _stageManager != null && _stageManager.CurrentStage != null)
+            if (_cameraController == null || _gridSettings == null)
+                return;
+
+            // Try actual content bounds first (components are already placed before OnStageLoaded)
+            if (_gameManager == null)
+            {
+                _gameManager = FindObjectOfType<GameManager>();
+            }
+
+            if (_gameManager != null && _gameManager.BoardState != null)
+            {
+                BoardState boardState = _gameManager.BoardState;
+                if (boardState.Components.Count > 0 || boardState.Traces.Count > 0)
+                {
+                    BoardBounds bounds = boardState.ComputeContentBounds();
+                    float cellSize = _gridSettings.CellSize;
+                    Vector3 origin = _gridSettings.GridOrigin;
+                    Vector3 worldMin = origin + new Vector3(bounds.MinX * cellSize, 0f, bounds.MinY * cellSize);
+                    Vector3 worldMax = origin + new Vector3(bounds.MaxX * cellSize, 0f, bounds.MaxY * cellSize);
+                    _cameraController.FrameBounds(worldMin, worldMax, padding: 2.5f);
+                    return;
+                }
+            }
+
+            // Fallback: estimated area from stage definition
+            if (_stageManager != null && _stageManager.CurrentStage != null)
             {
                 int side = (int)Math.Ceiling(Math.Sqrt(_stageManager.CurrentStage.TargetArea));
                 _cameraController.FrameSuggestedArea(side, side, _gridSettings.CellSize, _gridSettings.GridOrigin);
             }
-
-            _frameRoutine = StartCoroutine(FrameCameraDeferred());
         }
 
         private IEnumerator FrameCameraDeferred()

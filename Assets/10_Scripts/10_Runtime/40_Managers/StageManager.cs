@@ -75,8 +75,8 @@ namespace CircuitCraft.Managers
             _gameManager.ResetBoard(side, side);
 
             Debug.Log($"StageManager: Loaded stage '{stage.DisplayName}' (suggested area {side}x{side})");
-            OnStageLoaded?.Invoke();
             PlaceFixedComponents(stage);
+            OnStageLoaded?.Invoke();
 
         }
 
