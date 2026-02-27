@@ -1,0 +1,21 @@
+{
+    "name": "CircuitCraft.Editor",
+    "rootNamespace": "CircuitCraft.Editor",
+    "references": [
+        "CircuitCraft.Core",
+        "CircuitCraft.Data",
+        "CircuitCraft.Managers",
+        "CircuitCraft.Commands",
+        "CircuitCraft.Controllers",
+        "MCPForUnity.Runtime",
+        "MCPForUnity.Editor",
+        "UniTask"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "autoReferenced": false,
+    "noEngineReferences": false
+}
