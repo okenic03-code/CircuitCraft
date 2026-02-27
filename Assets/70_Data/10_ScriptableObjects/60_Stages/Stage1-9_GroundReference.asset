@@ -26,4 +26,4 @@ MonoBehaviour:
   - _testName: V_mid
     _expectedVoltage: 6.0
     _tolerance: 0.1
-  _budgetLimit: 10
+  _budgetLimit: 22

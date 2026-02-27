@@ -27,4 +27,4 @@ MonoBehaviour:
   - _testName: V_total
     _expectedVoltage: 14.0
     _tolerance: 0.1
-  _budgetLimit: 10
+  _budgetLimit: 20
