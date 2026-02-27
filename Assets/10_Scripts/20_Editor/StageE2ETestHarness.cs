@@ -106,6 +106,60 @@ namespace CircuitCraft.Editor
         [MenuItem("Tools/CircuitCraft/E2E/Run Stage 1-10", true)]
         private static bool Validate_RunStage1_10() => EditorApplication.isPlaying;
 
+        [MenuItem("Tools/CircuitCraft/E2E/Test Junction Dots")]
+        private static void TestJunctionDots()
+        {
+            if (!EditorApplication.isPlaying)
+            {
+                Debug.LogError("E2E: Enter Play Mode first.");
+                return;
+            }
+
+            StageManager stageManager = UnityEngine.Object.FindFirstObjectByType<StageManager>();
+            GameManager gameManager = UnityEngine.Object.FindFirstObjectByType<GameManager>();
+            if (stageManager == null || gameManager == null)
+            {
+                Debug.LogError("E2E: StageManager/GameManager not found.");
+                return;
+            }
+
+            StageDefinition stage = FindStageDefinition("1-1");
+            if (stage == null)
+            {
+                Debug.LogError("E2E: StageDefinition not found for stageId=1-1");
+                return;
+            }
+
+            stageManager.LoadStage(stage);
+
+            BoardState boardState = gameManager.BoardState;
+            var resistor = PlaceComponentByGuid(boardState, GUID_R_1K, new GridPosition(3, 5));
+            if (resistor == null)
+            {
+                Debug.LogError("E2E_JUNCTION_TEST: FAIL, unable to place resistor at (3,5)");
+                return;
+            }
+
+            Net net = boardState.CreateNet("JUNCTION_TEST_NET");
+            var sourcePlus = new GridPosition(1, 9);
+            var resistorPinA = new GridPosition(3, 5);
+            var expectedJunction = new GridPosition(5, 9);
+
+            boardState.ConnectPinToNet(net.NetId, new PinReference(1, 1, sourcePlus));
+            boardState.ConnectPinToNet(net.NetId, new PinReference(resistor.InstanceId, 0, resistorPinA));
+
+            boardState.AddTrace(net.NetId, new GridPosition(1, 9), new GridPosition(5, 9));
+            boardState.AddTrace(net.NetId, new GridPosition(5, 9), new GridPosition(5, 5));
+            boardState.AddTrace(net.NetId, new GridPosition(5, 9), new GridPosition(8, 9));
+
+            Debug.Log($"E2E_JUNCTION_TEST: expectedPosition=({expectedJunction.X},{expectedJunction.Y})");
+
+            EditorApplication.delayCall += () => VerifyJunctionDots(expectedJunction);
+        }
+
+        [MenuItem("Tools/CircuitCraft/E2E/Test Junction Dots", true)]
+        private static bool Validate_TestJunctionDots() => EditorApplication.isPlaying;
+
         // ── Menu Item: Batch Runner ────────────────────────────────────────
 
         [MenuItem("Tools/CircuitCraft/E2E/Run All World 1 (1-1..1-10)")]
@@ -166,6 +220,31 @@ namespace CircuitCraft.Editor
             string path = AssetDatabase.GUIDToAssetPath(guid);
             var def = AssetDatabase.LoadAssetAtPath<ComponentDefinition>(path);
             return def != null ? def.Id : null;
+        }
+
+        private static void VerifyJunctionDots(GridPosition expectedJunction)
+        {
+            var allTransforms = UnityEngine.Object.FindObjectsOfType<Transform>();
+            int junctionCount = 0;
+            bool expectedFound = false;
+
+            for (int i = 0; i < allTransforms.Length; i++)
+            {
+                Transform transform = allTransforms[i];
+                if (transform == null || !transform.name.StartsWith("Junction_", StringComparison.Ordinal))
+                    continue;
+
+                junctionCount++;
+                if (transform.name == $"Junction_{expectedJunction.X}_{expectedJunction.Y}")
+                    expectedFound = true;
+            }
+
+            bool pass = junctionCount == 1 && expectedFound;
+            string result = pass ? "PASS" : "FAIL";
+            Debug.Log(
+                $"E2E_JUNCTION_TEST: {result}, junctionCount={junctionCount}, expectedPosition=({expectedJunction.X},{expectedJunction.Y})");
+
+            ScreenCapture.CaptureScreenshot("junction_dot_verification.png");
         }
 
         // ── Single Stage Orchestrator ──────────────────────────────────────
