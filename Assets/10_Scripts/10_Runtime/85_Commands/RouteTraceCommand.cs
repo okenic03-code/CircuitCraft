@@ -34,6 +34,8 @@ namespace CircuitCraft.Commands
         private readonly List<(GridPosition start, GridPosition end)> _mergedSourceTraces = new();
         private readonly List<PinReference> _mergedSourcePins = new();
         private readonly List<int> _mergedTargetTraceIds = new();
+        private bool _didRenameResolvedNet;
+        private string _resolvedNetOriginalName;
 
         /// <summary>
         /// Gets a user-facing description of this routing command.
@@ -71,10 +73,13 @@ namespace CircuitCraft.Commands
             _addedSegmentIds.Clear();
             _didMerge = false;
             _restoredRouteNetId = null;
+            _didRenameResolvedNet = false;
+            _resolvedNetOriginalName = null;
 
             // Resolve which net to use (may create a new one)
             _netId = ResolveNetId();
             _netName = _boardState.GetNet(_netId)?.NetName;
+            EnsureResolvedNetGroundName();
 
             // Connect pins to the net
             _boardState.ConnectPinToNet(_netId, _startPin);
@@ -124,6 +129,7 @@ namespace CircuitCraft.Commands
             RestorePreviousPinConnection(_endPin, _endPinPreviousNetId);
 
             UnmergeNets();
+            RestoreResolvedNetName();
         }
 
         private int ResolveNetId()
@@ -231,6 +237,32 @@ namespace CircuitCraft.Commands
                 _mergedTargetTraceIds.Add(newTrace.SegmentId);
                 _boardState.RemoveTrace(trace.SegmentId);
             }
+        }
+
+        private void EnsureResolvedNetGroundName()
+        {
+            if (!IsGroundPin(_startPin) && !IsGroundPin(_endPin))
+                return;
+
+            var net = _boardState.GetNet(_netId);
+            if (net is null || IsGroundNetName(net.NetName))
+                return;
+
+            _didRenameResolvedNet = true;
+            _resolvedNetOriginalName = net.NetName;
+            net.NetName = GroundNetName;
+        }
+
+        private void RestoreResolvedNetName()
+        {
+            if (!_didRenameResolvedNet || string.IsNullOrEmpty(_resolvedNetOriginalName))
+                return;
+
+            var net = _boardState.GetNet(_netId);
+            if (net is null)
+                return;
+
+            net.NetName = _resolvedNetOriginalName;
         }
 
         private void UnmergeNets()

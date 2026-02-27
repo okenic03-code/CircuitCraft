@@ -12,6 +12,7 @@ namespace CircuitCraft.Commands
     {
         private const string GroundNetName = "0";
         private const string GroundNetAlias = "GND";
+        private const string GroundComponentDefinitionId = "ground";
 
         private readonly BoardState _boardState;
         private readonly PinReference _startPin;
@@ -29,6 +30,8 @@ namespace CircuitCraft.Commands
         private readonly List<(GridPosition start, GridPosition end)> _mergedSourceTraces = new();
         private readonly List<PinReference> _mergedSourcePins = new();
         private readonly List<int> _mergedTargetTraceIds = new();
+        private bool _didRenameResolvedNet;
+        private string _resolvedNetOriginalName;
 
         /// <summary>
         /// Gets a user-facing description of this junction routing command.
@@ -60,8 +63,11 @@ namespace CircuitCraft.Commands
             _startPinPreviousNetId = GetPinConnectedNetId(_startPin);
             _addedSegmentIds.Clear();
             _didMerge = false;
+            _didRenameResolvedNet = false;
+            _resolvedNetOriginalName = null;
 
             _resolvedNetId = ResolveNetId();
+            EnsureResolvedNetGroundName();
             _boardState.ConnectPinToNet(_resolvedNetId, _startPin);
 
             foreach (var segment in _segments)
@@ -90,6 +96,7 @@ namespace CircuitCraft.Commands
             }
 
             UnmergeNets();
+            RestoreResolvedNetName();
             RestorePreviousPinConnection();
         }
 
@@ -127,6 +134,15 @@ namespace CircuitCraft.Commands
 
         private static bool IsGroundNet(Net net)
             => net is not null && IsGroundNetName(net.NetName);
+
+        private bool IsGroundPin(PinReference pinRef)
+        {
+            var component = _boardState.GetComponent(pinRef.ComponentInstanceId);
+            if (component is null)
+                return false;
+
+            return string.Equals(component.ComponentDefinitionId, GroundComponentDefinitionId, StringComparison.OrdinalIgnoreCase);
+        }
 
         private static bool IsGroundNetName(string netName)
         {
@@ -168,6 +184,32 @@ namespace CircuitCraft.Commands
                 _mergedTargetTraceIds.Add(newTrace.SegmentId);
                 _boardState.RemoveTrace(trace.SegmentId);
             }
+        }
+
+        private void EnsureResolvedNetGroundName()
+        {
+            if (!IsGroundPin(_startPin))
+                return;
+
+            var net = _boardState.GetNet(_resolvedNetId);
+            if (net is null || IsGroundNetName(net.NetName))
+                return;
+
+            _didRenameResolvedNet = true;
+            _resolvedNetOriginalName = net.NetName;
+            net.NetName = GroundNetName;
+        }
+
+        private void RestoreResolvedNetName()
+        {
+            if (!_didRenameResolvedNet || string.IsNullOrEmpty(_resolvedNetOriginalName))
+                return;
+
+            var net = _boardState.GetNet(_resolvedNetId);
+            if (net is null)
+                return;
+
+            net.NetName = _resolvedNetOriginalName;
         }
 
         private void UnmergeNets()

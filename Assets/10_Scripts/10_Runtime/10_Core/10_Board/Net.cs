@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("CircuitCraft.Commands")]
 
 namespace CircuitCraft.Core
 {
@@ -15,7 +18,7 @@ namespace CircuitCraft.Core
         public int NetId { get; }
 
         /// <summary>Gets the name of this net (e.g., "VIN", "GND", "VOUT").</summary>
-        public string NetName { get; }
+        public string NetName { get; internal set; }
 
         /// <summary>Gets the read-only list of pins connected to this net.</summary>
         public IReadOnlyList<PinReference> ConnectedPins => _connectedPins.AsReadOnly();
