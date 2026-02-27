@@ -238,7 +238,8 @@ private void HandleLeftClick()
                         return;
                     }
 
-                    LogDebug("WiringMode idle click had no resolvable start pin.");
+                    LogDebug("WiringMode idle click had no resolvable start pin; trying trace selection.");
+                    TrySelectTraceAtMouse();
                     return;
                 }
 
@@ -259,9 +260,15 @@ private void HandleLeftClick()
                 GridPosition waypointPosition = new(clickGrid.x, clickGrid.y);
                 if (TryGetTraceAtPosition(waypointPosition, out var clickedTrace))
                 {
-                    LogDebug($"WiringMode routing click hit trace segment {clickedTrace.SegmentId}; committing joint at {waypointPosition}.");
-                    CommitRoutingToTrace(clickedTrace.NetId, waypointPosition);
-                    return;
+                    int? startPinNetId = GetStartPinNetId();
+                    if (!startPinNetId.HasValue || clickedTrace.NetId == startPinNetId.Value)
+                    {
+                        LogDebug($"WiringMode routing click hit SAME-net trace segment {clickedTrace.SegmentId}; committing joint at {waypointPosition}.");
+                        CommitRoutingToTrace(clickedTrace.NetId, waypointPosition);
+                        return;
+                    }
+
+                    LogDebug($"WiringMode routing click crosses DIFFERENT-net trace segment {clickedTrace.SegmentId}; treating as waypoint.");
                 }
 
                 AddRoutingWaypoint(waypointPosition);
@@ -288,8 +295,17 @@ private void HandleLeftClick()
                     GridPosition waypointPosition = new(clickGrid.x, clickGrid.y);
                     if (TryGetTraceAtPosition(waypointPosition, out var clickedTrace))
                     {
-                        LogDebug($"Routing active click hit trace segment {clickedTrace.SegmentId}; committing joint at {waypointPosition}.");
-                        CommitRoutingToTrace(clickedTrace.NetId, waypointPosition);
+                        int? startPinNetId = GetStartPinNetId();
+                        if (!startPinNetId.HasValue || clickedTrace.NetId == startPinNetId.Value)
+                        {
+                            LogDebug($"Routing active click hit SAME-net trace segment {clickedTrace.SegmentId}; committing joint at {waypointPosition}.");
+                            CommitRoutingToTrace(clickedTrace.NetId, waypointPosition);
+                        }
+                        else
+                        {
+                            LogDebug($"Routing active click crosses DIFFERENT-net trace segment {clickedTrace.SegmentId}; treating as waypoint.");
+                            AddRoutingWaypoint(waypointPosition);
+                        }
                     }
                     else
                     {
@@ -673,6 +689,24 @@ private bool TryGetPinByDirectPinDotHit(out PinReference pinRef)
             }
 
             return false;
+        }
+
+        private int? GetStartPinNetId()
+        {
+            if (_startPin.ComponentInstanceId < 0)
+                return null;
+
+            var component = _boardState.GetComponent(_startPin.ComponentInstanceId);
+            if (component is null)
+                return null;
+
+            foreach (var pin in component.Pins)
+            {
+                if (pin.PinIndex == _startPin.PinIndex)
+                    return pin.ConnectedNetId;
+            }
+
+            return null;
         }
 
         private void CancelRouting()

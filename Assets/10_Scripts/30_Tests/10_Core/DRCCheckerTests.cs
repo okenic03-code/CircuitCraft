@@ -87,10 +87,10 @@ namespace CircuitCraft.Tests.Core
             Assert.IsTrue(result.Violations.All(v => v.ViolationType == DRCViolationType.UnconnectedPin));
         }
 
-        // ── Test 5: traces from different nets overlapping → short detected ───────
+        // ── Test 5: traces from different nets crossing geometrically → no short (schematic-style) ───
 
         [Test]
-        public void Check_OverlappingTracesFromDifferentNets_DetectsShort()
+        public void Check_OverlappingTracesFromDifferentNets_NoShort()
         {
             var board = new BoardState(20, 20);
             var net1 = board.CreateNet("NET1");
@@ -98,19 +98,13 @@ namespace CircuitCraft.Tests.Core
 
             // net1 trace: horizontal from (0,0) to (5,0)
             board.AddTrace(net1.NetId, new GridPosition(0, 0), new GridPosition(5, 0));
-            // net2 trace: vertical from (3,0) to (3,5) — overlaps at (3,0)
+            // net2 trace: vertical from (3,0) to (3,5) — geometrically crosses at (3,0)
             board.AddTrace(net2.NetId, new GridPosition(3, 0), new GridPosition(3, 5));
 
             var result = _checker.Check(board);
 
-            Assert.IsTrue(result.HasViolations);
-            Assert.GreaterOrEqual(result.ShortCount, 1);
-
-            var shortViolations = result.Violations
-                .Where(v => v.ViolationType == DRCViolationType.Short)
-                .ToList();
-            Assert.IsTrue(shortViolations.Any(v => v.Location.Equals(new GridPosition(3, 0))),
-                "Expected a Short violation at (3,0)");
+            // Schematic-style: geometric crossing is NOT a short
+            Assert.AreEqual(0, result.ShortCount);
         }
 
         // ── Test 6: traces from same net overlapping → no short ──────────────────
@@ -149,16 +143,16 @@ namespace CircuitCraft.Tests.Core
             Assert.AreEqual(0, result.ShortCount);
         }
 
-        // ── Test 8: mixed shorts AND unconnected pins ─────────────────────────────
+        // ── Test 8: crossing traces AND unconnected pins → only unconnected detected ──
 
         [Test]
-        public void Check_MixedShortsAndUnconnectedPins_DetectsBoth()
+        public void Check_CrossingTracesAndUnconnectedPins_DetectsOnlyUnconnected()
         {
             var board = new BoardState(20, 20);
             var net1 = board.CreateNet("NET1");
             var net2 = board.CreateNet("NET2");
 
-            // Short: two crossing nets
+            // Crossing traces (schematic-style: NOT a short)
             board.AddTrace(net1.NetId, new GridPosition(0, 3), new GridPosition(5, 3));
             board.AddTrace(net2.NetId, new GridPosition(2, 0), new GridPosition(2, 5));
 
@@ -169,7 +163,7 @@ namespace CircuitCraft.Tests.Core
             var result = _checker.Check(board);
 
             Assert.IsTrue(result.HasViolations);
-            Assert.GreaterOrEqual(result.ShortCount, 1);
+            Assert.AreEqual(0, result.ShortCount);
             Assert.AreEqual(2, result.UnconnectedCount);
         }
 

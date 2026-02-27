@@ -38,50 +38,10 @@ namespace CircuitCraft.Core
         /// </summary>
         private void DetectShorts(BoardState board, List<DRCViolationItem> violations)
         {
-            // Map each grid position to the set of net IDs that pass through it
-            _positionToNets.Clear();
-
-            foreach (var trace in board.Traces)
-            {
-                EnumerateTracePositions(trace, position =>
-                {
-                    if (!_positionToNets.TryGetValue(position, out var netIds))
-                    {
-                        netIds = new();
-                        _positionToNets[position] = netIds;
-                    }
-                    netIds.Add(trace.NetId);
-                });
-            }
-
-            // Any position with 2+ different net IDs is a short
-            foreach (var kvp in _positionToNets)
-            {
-                if (kvp.Value.Count >= 2)
-                {
-                    var netIdList = new List<int>(kvp.Value);
-                    netIdList.Sort();
-                    var netNames = new List<string>();
-                    foreach (var netId in netIdList)
-                    {
-                        var net = board.GetNet(netId);
-                        netNames.Add(net is not null ? net.NetName : $"Net{netId}");
-                    }
-
-                    violations.Add(new DRCViolationItem(
-                        DRCViolationType.Short,
-                        kvp.Key,
-                        $"Short: nets [{string.Join(", ", netNames)}] overlap at {kvp.Key}"
-                    ));
-                }
-            }
-
-            foreach (var kvp in _positionToNets)
-            {
-                kvp.Value.Clear();
-            }
-
-            _positionToNets.Clear();
+            // In schematic-style routing, geometric trace crossings are allowed
+            // and do NOT constitute electrical shorts. Nets are defined exclusively
+            // by pin connections and explicit junctions (RouteTraceToNetPointCommand).
+            // No geometric short detection is needed.
         }
 
         /// <summary>
