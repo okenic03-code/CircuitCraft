@@ -52,6 +52,12 @@ namespace CircuitCraft.Controllers
                 StopCoroutine(_frameRoutine);
             }
 
+            if (_cameraController != null && _gridSettings != null && _stageManager != null && _stageManager.CurrentStage != null)
+            {
+                int side = (int)Math.Ceiling(Math.Sqrt(_stageManager.CurrentStage.TargetArea));
+                _cameraController.FrameSuggestedArea(side, side, _gridSettings.CellSize, _gridSettings.GridOrigin);
+            }
+
             _frameRoutine = StartCoroutine(FrameCameraDeferred());
         }
 
