@@ -141,6 +141,10 @@ namespace CircuitCraft.Managers
             if (hasFixedProbe)
                 return;
 
+            // Skip auto output terminal when every test case already specifies a ProbeNode.
+            if (AllTestCasesHaveExplicitProbeNode(stage))
+                return;
+
             var probeDefinition = GetOrCreateRuntimeOutputProbeDefinition();
             if (probeDefinition == null)
                 return;
@@ -170,6 +174,22 @@ namespace CircuitCraft.Managers
             var pinRef = new PinReference(placed.InstanceId, 0, placed.GetPinWorldPosition(0));
             boardState.ConnectPinToNet(outNet.NetId, pinRef);
             Debug.Log($"StageManager: Auto output terminal placed at {position}, created net 'OUT' and connected pin 0.");
+        }
+
+        private static bool AllTestCasesHaveExplicitProbeNode(StageDefinition stage)
+        {
+            if (stage?.TestCases is not { Length: > 0 })
+                return false;
+
+            foreach (var tc in stage.TestCases)
+            {
+                if (tc is null)
+                    continue;
+                if (!tc.HasProbeNode)
+                    return false;
+            }
+
+            return true;
         }
 
         private ComponentDefinition GetOrCreateRuntimeOutputProbeDefinition()
@@ -389,7 +409,9 @@ namespace CircuitCraft.Managers
                         if (tc is null)
                             continue;
 
-                        string testName = tc.TestName;
+                        string testName = !string.IsNullOrWhiteSpace(tc.TestName)
+                            ? tc.TestName
+                            : (tc.HasProbeNode ? tc.ProbeNode : null);
                         if (string.IsNullOrWhiteSpace(testName))
                             continue;
 

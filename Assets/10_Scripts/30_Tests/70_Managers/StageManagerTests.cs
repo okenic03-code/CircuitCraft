@@ -393,7 +393,7 @@ namespace CircuitCraft.Tests.Managers
             SetPrivateField(stage, "_fixedPlacements", Array.Empty<FixedPlacement>());
             SetPrivateField(stage, "_testCases", new[]
             {
-                CreateStageTestCase("Vout", 3.3f, 0.1f, probeNode: "VOUT")
+                CreateStageTestCase("Vout", 3.3f, 0.1f, probeNode: null)
             });
 
             _stageManager.LoadStage(stage);
